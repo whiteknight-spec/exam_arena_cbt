@@ -21,6 +21,25 @@ class GeminiAiService {
       );
     }
 
+    // Defensive Security: Clamp count and sanitize subject to prevent quota exhaustion and prompt injection
+    final sanitizedCount = count.clamp(1, 20);
+    final cleanSubject = subject
+        .replaceAll(RegExp(r'[\r\n\t]'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    final sanitizedSubject = cleanSubject.length > 100 ? cleanSubject.substring(0, 100) : cleanSubject;
+
+    final cleanExamType = examType
+        .replaceAll(RegExp(r'[\r\n\t]'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    final sanitizedExamType = cleanExamType.length > 50 ? cleanExamType.substring(0, 50) : cleanExamType;
+
+    final cleanDifficulty = difficulty.trim().toLowerCase();
+    final sanitizedDifficulty = ['easy', 'medium', 'hard'].contains(cleanDifficulty)
+        ? cleanDifficulty
+        : 'medium';
+
     final model = GenerativeModel(
       model: AppConstants.geminiModel,
       apiKey: key.trim(),
@@ -30,11 +49,11 @@ class GeminiAiService {
       ),
     );
 
-    final isTnpsc = examType.toLowerCase().contains('tnpsc');
+    final isTnpsc = sanitizedExamType.toLowerCase().contains('tnpsc');
 
     final prompt = '''
-You are an expert exam question generator for Indian Competitive Exams ($examType).
-Generate $count high-yield multiple-choice questions for subject/topic "$subject" with difficulty level "$difficulty".
+You are an expert exam question generator for Indian Competitive Exams ($sanitizedExamType).
+Generate $sanitizedCount high-yield multiple-choice questions for subject/topic "$sanitizedSubject" with difficulty level "$sanitizedDifficulty".
 Every question MUST be completely bilingual (both English and Tamil) with detailed explanations in BOTH languages.
 
 Requirements:
@@ -46,16 +65,16 @@ Requirements:
 - explanation_en: Step-by-step reasoning and rationale in English.
 - explanation_ta: Step-by-step reasoning and rationale in Tamil.
 - has_option_e: ${isTnpsc ? true : false}.
-- category: "$subject".
-- difficulty: "${difficulty.toLowerCase()}".
+- category: "$sanitizedSubject".
+- difficulty: "$sanitizedDifficulty".
 
 Return ONLY a valid JSON array matching this structure:
 [
   {
     "id": "gemini_${DateTime.now().millisecondsSinceEpoch}_1",
-    "subject": "$subject",
-    "exam_type": "$examType",
-    "category": "$subject",
+    "subject": "$sanitizedSubject",
+    "exam_type": "$sanitizedExamType",
+    "category": "$sanitizedSubject",
     "question_en": "Question text in English",
     "question_ta": "தமிழில் வினா",
     "options_en": ["Opt A", "Opt B", "Opt C", "Opt D"${isTnpsc ? ', "Option E: Answer Not Known (விடை தெரியவில்லை)"' : ''}],
@@ -64,7 +83,7 @@ Return ONLY a valid JSON array matching this structure:
     "explanation_en": "Detailed rationale in English",
     "explanation_ta": "தமிழில் விரிவான விளக்கம்",
     "has_option_e": ${isTnpsc ? true : false},
-    "difficulty": "${difficulty.toLowerCase()}"
+    "difficulty": "$sanitizedDifficulty"
   }
 ]
 ''';

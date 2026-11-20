@@ -36,7 +36,10 @@ class UserProgress {
     if (hearts >= maxHearts) return maxHearts;
     final refillTime = lastHeartRefillTime;
     if (refillTime == null) return hearts;
-    final elapsedMinutes = DateTime.now().difference(refillTime).inMinutes;
+    final now = DateTime.now();
+    // Anti-Clock-Tampering: If refill time is set in the future, treat elapsed time as 0
+    if (refillTime.isAfter(now)) return hearts;
+    final elapsedMinutes = now.difference(refillTime).inMinutes;
     if (elapsedMinutes <= 0) return hearts;
     final regenerated = elapsedMinutes ~/ heartRegenMinutes;
     return (hearts + regenerated).clamp(0, maxHearts);
@@ -44,8 +47,16 @@ class UserProgress {
 
   Duration get timeUntilNextHeart {
     if (currentHearts >= maxHearts) return Duration.zero;
-    final refillTime = lastHeartRefillTime ?? DateTime.now();
-    final elapsedSeconds = DateTime.now().difference(refillTime).inSeconds;
+    final now = DateTime.now();
+    final refillTime = lastHeartRefillTime ?? now;
+    // Anti-Clock-Tampering: If refill time is in the future, count from standard cycle
+    if (refillTime.isAfter(now)) {
+      return const Duration(seconds: heartRegenMinutes * 60);
+    }
+    final elapsedSeconds = now.difference(refillTime).inSeconds;
+    if (elapsedSeconds < 0) {
+      return const Duration(seconds: heartRegenMinutes * 60);
+    }
     final totalCycleSeconds = heartRegenMinutes * 60; // 7200 seconds (2 hours)
     final secondsIntoCycle = elapsedSeconds % totalCycleSeconds;
     final secondsRemaining = totalCycleSeconds - secondsIntoCycle;
@@ -61,7 +72,9 @@ class UserProgress {
     if (currentHearts >= maxHearts) return 1.0;
     final refillTime = lastHeartRefillTime;
     if (refillTime == null) return 0.0;
-    final elapsedSeconds = DateTime.now().difference(refillTime).inSeconds;
+    final now = DateTime.now();
+    if (refillTime.isAfter(now)) return 0.0;
+    final elapsedSeconds = now.difference(refillTime).inSeconds;
     if (elapsedSeconds <= 0) return 0.0;
     final totalCycleSeconds = heartRegenMinutes * 60; // 7200 seconds (2 hours)
     final secondsIntoCycle = elapsedSeconds % totalCycleSeconds;
@@ -243,7 +256,12 @@ class UserProgress {
 
     DateTime? lastRefill;
     if (map['last_heart_refill'] != null) {
-      lastRefill = DateTime.tryParse(map['last_heart_refill'].toString());
+      final parsed = DateTime.tryParse(map['last_heart_refill'].toString());
+      // Anti-Tampering: If timestamp is set unrealistically in the future (>1 minute), clamp to now
+      if (parsed != null) {
+        final now = DateTime.now();
+        lastRefill = parsed.isAfter(now.add(const Duration(minutes: 1))) ? now : parsed;
+      }
     }
 
     final examId = map['selected_exam']?.toString() ?? 'rrb_ntpc';
@@ -257,20 +275,30 @@ class UserProgress {
       try {
         final decoded = jsonDecode(map['unlocked_levels'].toString());
         if (decoded is List) {
-          levels = decoded.map((e) => int.tryParse(e.toString()) ?? 1).toList();
+          levels = decoded
+              .map((e) => int.tryParse(e.toString()) ?? 1)
+              .where((lvl) => lvl >= 1 && lvl <= 100)
+              .toList();
         }
       } catch (_) {}
     }
 
+    // Defensive Security: Clamp all numeric variables to safe ranges against local SQLite tampering
+    final parsedXp = ((map['xp'] as num?)?.toInt() ?? 350).clamp(0, 9999999);
+    final parsedStreak = ((map['streak_days'] as num?)?.toInt() ?? 7).clamp(0, 36500);
+    final parsedTests = ((map['tests_completed'] as num?)?.toInt() ?? 12).clamp(0, 1000000);
+    final parsedAccuracy = ((map['average_accuracy'] as num?)?.toDouble() ?? 82.5).clamp(0.0, 100.0);
+    final parsedHearts = ((map['hearts'] as num?)?.toInt() ?? 5).clamp(0, maxHearts);
+
     return UserProgress(
-      xp: (map['xp'] as num?)?.toInt() ?? 350,
-      streakDays: (map['streak_days'] as num?)?.toInt() ?? 7,
+      xp: parsedXp,
+      streakDays: parsedStreak,
       lastActiveDate: lastActive,
       selectedExam: exam,
-      testsCompleted: (map['tests_completed'] as num?)?.toInt() ?? 12,
-      averageAccuracy: (map['average_accuracy'] as num?)?.toDouble() ?? 82.5,
+      testsCompleted: parsedTests,
+      averageAccuracy: parsedAccuracy,
       customUnlockedLevels: levels,
-      hearts: (map['hearts'] as num?)?.toInt() ?? 5,
+      hearts: parsedHearts,
       lastHeartRefillTime: lastRefill,
     );
   }
