@@ -1,0 +1,163 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:exam_arena_cbt/core/database/app_database.dart';
+import 'package:exam_arena_cbt/features/exam_engine/presentation/widgets/exit_guard_dialog.dart';
+import 'package:exam_arena_cbt/features/progression/domain/models/user_progress.dart';
+import 'package:exam_arena_cbt/features/progression/presentation/providers/progression_provider.dart';
+import 'package:exam_arena_cbt/features/progression/presentation/widgets/hearts_badge.dart';
+import 'package:exam_arena_cbt/features/progression/presentation/widgets/hearts_refill_modal.dart';
+
+void main() {
+  setUpAll(() {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  });
+
+  setUp(() async {
+    await AppDatabase.createInMemoryDatabase();
+  });
+
+  group('UserProgress Hearts & Life Mechanics', () {
+    test('starts with full 5 hearts by default', () {
+      const progress = UserProgress();
+      expect(progress.hearts, 5);
+      expect(progress.currentHearts, 5);
+      expect(progress.timeUntilNextHeart, Duration.zero);
+    });
+
+    test('deductHeart decrements hearts and records refill timer', () {
+      const progress = UserProgress(hearts: 5);
+      final lostOne = progress.deductHeart();
+
+      expect(lostOne.hearts, 4);
+      expect(lostOne.currentHearts, 4);
+      expect(lostOne.lastHeartRefillTime, isNotNull);
+      expect(lostOne.timeUntilNextHeart.inMinutes, inInclusiveRange(1, 30));
+    });
+
+    test('hearts cannot drop below 0', () {
+      var progress = const UserProgress(hearts: 1);
+      progress = progress.deductHeart();
+      expect(progress.currentHearts, 0);
+
+      progress = progress.deductHeart();
+      expect(progress.currentHearts, 0);
+    });
+
+    test('auto-refill restores hearts after 30-minute intervals', () {
+      // User lost a heart 65 minutes ago (2 full 30-minute cycles have passed)
+      final pastTime = DateTime.now().subtract(const Duration(minutes: 65));
+      final progress = UserProgress(
+        hearts: 2,
+        lastHeartRefillTime: pastTime,
+      );
+
+      // 2 + 2 = 4 hearts restored
+      expect(progress.currentHearts, 4);
+    });
+
+    test('refillHeartsWithXp restores all 5 hearts and deducts 50 XP', () {
+      const progress = UserProgress(xp: 350, hearts: 1);
+      final refilled = progress.refillHeartsWithXp(costXp: 50);
+
+      expect(refilled.currentHearts, 5);
+      expect(refilled.xp, 300);
+      expect(refilled.lastHeartRefillTime, isNull);
+    });
+
+    test('refillHeartsWithXp does nothing if XP balance is insufficient', () {
+      const progress = UserProgress(xp: 30, hearts: 1);
+      final failed = progress.refillHeartsWithXp(costXp: 50);
+
+      expect(failed.currentHearts, 1);
+      expect(failed.xp, 30);
+    });
+
+    test('healOneHeart increments hearts up to max 5', () {
+      const progress = UserProgress(hearts: 4);
+      final healed = progress.healOneHeart();
+      expect(healed.currentHearts, 5);
+
+      final overHealed = healed.healOneHeart();
+      expect(overHealed.currentHearts, 5);
+    });
+  });
+
+  group('HeartsBadge and HeartsRefillModal UI Tests', () {
+    testWidgets('HeartsBadge displays current hearts count and opens modal on tap', (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              appBar: PreferredSize(
+                preferredSize: Size.fromHeight(60),
+                child: HeartsBadge(),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('5/5'), findsOneWidget);
+      expect(find.byIcon(Icons.favorite_rounded), findsOneWidget);
+
+      // Tap badge to open modal
+      await tester.tap(find.byType(HeartsBadge));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Exam Lives & Stamina'), findsOneWidget);
+      expect(find.textContaining('5-Life Discipline System'), findsOneWidget);
+      expect(find.textContaining('Mistake Revision Drill'), findsOneWidget);
+    });
+
+    testWidgets('HeartsRefillModal allows healing +1 heart via practice revision drill', (tester) async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      // Set user to 3 hearts
+      await tester.runAsync(() async {
+        await container.read(progressionProvider.notifier).deductHeart();
+        await container.read(progressionProvider.notifier).deductHeart();
+      });
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const MaterialApp(
+            home: Scaffold(
+              body: HeartsRefillModal(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Next Life (+1 ❤️) in'), findsOneWidget);
+
+      // Tap Mistake Revision Drill (+1 Heart Heal) button
+      expect(find.textContaining('Mistake Revision Drill (+1 Heart Heal)'), findsOneWidget);
+      await tester.tap(find.textContaining('Mistake Revision Drill (+1 Heart Heal)'));
+      await tester.pump(const Duration(seconds: 15));
+      await tester.pumpAndSettle();
+
+      // Verify heart was healed
+      expect(container.read(progressionProvider).currentHearts, 4);
+    });
+
+    testWidgets('ExitGuardDialog displays Discipline Penalty warning about losing 1 Life', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: ExitGuardDialog(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Discipline Rule: Exiting midway deducts 1 Life (-1 ❤️)!'), findsOneWidget);
+    });
+  });
+}

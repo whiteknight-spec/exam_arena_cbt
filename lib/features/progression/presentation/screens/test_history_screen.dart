@@ -1,0 +1,456 @@
+import 'package:flutter/material.dart';
+import '../../../../core/database/app_database.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/timer_formatter.dart';
+import '../../../exam_engine/domain/models/test_attempt_analytics.dart';
+
+class TestHistoryScreen extends StatefulWidget {
+  final List<TestAttemptAnalytics>? initialAttempts;
+
+  const TestHistoryScreen({super.key, this.initialAttempts});
+
+  @override
+  State<TestHistoryScreen> createState() => _TestHistoryScreenState();
+}
+
+class _TestHistoryScreenState extends State<TestHistoryScreen> {
+  late Future<List<TestAttemptAnalytics>> _attemptsFuture;
+  String _selectedFilter = 'All';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHistory();
+  }
+
+  void _loadHistory() {
+    _attemptsFuture = widget.initialAttempts != null
+        ? Future.value(widget.initialAttempts)
+        : AppDatabase.instance.getTestAttempts();
+  }
+
+  String _formatExamTitle(String examId) {
+    if (examId.contains('rrb')) return 'RRB NTPC CBT 1';
+    if (examId.contains('ssc')) return 'SSC CGL Tier 1';
+    if (examId.contains('tnpsc')) return 'TNPSC Group 2 & 4';
+    if (examId.contains('ibps')) return 'IBPS / SBI Clerk';
+    return examId.replaceAll('_', ' ').toUpperCase();
+  }
+
+  Color _getExamColor(String examId) {
+    if (examId.contains('rrb')) return const Color(0xFF2563EB);
+    if (examId.contains('ssc')) return const Color(0xFFD97706);
+    if (examId.contains('tnpsc')) return const Color(0xFF059669);
+    if (examId.contains('ibps')) return const Color(0xFF7C3AED);
+    return AppColors.primary;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
+      appBar: AppBar(
+        title: const Text(
+          'Test History & Analytics',
+          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
+      body: FutureBuilder<List<TestAttemptAnalytics>>(
+        future: _attemptsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final allAttempts = snapshot.data ?? [];
+
+          if (allAttempts.isEmpty) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.history_toggle_off_rounded,
+                        size: 48,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'No Test Attempts Yet',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Complete your first mock test or speed sprint in the Arena to track your analytics and score progress here.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      ),
+                      icon: const Icon(Icons.play_arrow_rounded),
+                      label: const Text('Start Practicing Now', style: TextStyle(fontWeight: FontWeight.w700)),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          // Calculate Aggregated Metrics
+          final totalAttempts = allAttempts.length;
+          final totalXp = allAttempts.fold<int>(0, (sum, a) => sum + a.earnedXp);
+          final avgAccuracy = allAttempts.fold<double>(0.0, (sum, a) => sum + a.accuracy) / totalAttempts;
+          final bestScore = allAttempts.map((a) => a.netScore).reduce((a, b) => a > b ? a : b);
+
+          final filteredAttempts = _selectedFilter == 'All'
+              ? allAttempts
+              : allAttempts.where((a) => a.examType.toLowerCase().contains(_selectedFilter.toLowerCase())).toList();
+
+          return RefreshIndicator(
+            onRefresh: () async => _loadHistory(),
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                // Top Summary Dashboard Card
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.15),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Row(
+                        children: [
+                          Icon(Icons.query_stats_rounded, color: Color(0xFF38BDF8), size: 20),
+                          SizedBox(width: 8),
+                          Text(
+                            'Cumulative Mock Test Analytics',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _buildSummaryMetric('Tests', '$totalAttempts', const Color(0xFF38BDF8)),
+                          _buildSummaryMetric('Avg Accuracy', '${avgAccuracy.toStringAsFixed(1)}%', const Color(0xFF34D399)),
+                          _buildSummaryMetric('Best Score', '+${bestScore.toStringAsFixed(1)}', const Color(0xFFFBBF24)),
+                          _buildSummaryMetric('Total XP', '+$totalXp', const Color(0xFFA78BFA)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Filter Chips
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _buildFilterChip('All', 'All Exams ($totalAttempts)'),
+                      const SizedBox(width: 8),
+                      _buildFilterChip('rrb', 'RRB NTPC'),
+                      const SizedBox(width: 8),
+                      _buildFilterChip('ssc', 'SSC CGL'),
+                      const SizedBox(width: 8),
+                      _buildFilterChip('tnpsc', 'TNPSC'),
+                      const SizedBox(width: 8),
+                      _buildFilterChip('ibps', 'IBPS Clerk'),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Section Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Past Sessions (${filteredAttempts.length})',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      'Stored Offline in SQLite',
+                      style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // Attempt Cards List
+                ...filteredAttempts.map((attempt) => _buildAttemptCard(attempt)),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildSummaryMetric(String label, String value, Color color) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          value,
+          style: TextStyle(
+            color: color,
+            fontSize: 18,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Color(0xFF94A3B8),
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFilterChip(String key, String label) {
+    final isSelected = _selectedFilter == key;
+    return ChoiceChip(
+      label: Text(label),
+      selected: isSelected,
+      labelStyle: TextStyle(
+        fontSize: 12,
+        fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+        color: isSelected ? Colors.white : AppColors.textPrimary,
+      ),
+      selectedColor: AppColors.primary,
+      backgroundColor: Colors.white,
+      side: BorderSide(color: isSelected ? AppColors.primary : AppColors.border),
+      onSelected: (_) => setState(() => _selectedFilter = key),
+    );
+  }
+
+  Widget _buildAttemptCard(TestAttemptAnalytics attempt) {
+    final examColor = _getExamColor(attempt.examType);
+    final formattedDate =
+        '${attempt.timestamp.day.toString().padLeft(2, '0')}/${attempt.timestamp.month.toString().padLeft(2, '0')}/${attempt.timestamp.year} • ${attempt.timestamp.hour.toString().padLeft(2, '0')}:${attempt.timestamp.minute.toString().padLeft(2, '0')}';
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header Row: Exam Badge + Date + Earned XP
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: examColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  _formatExamTitle(attempt.examType),
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: examColor,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEF3C7),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  '+${attempt.earnedXp} XP',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFFB45309),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+
+          // Core Stats Row: Net Score, Accuracy, Time
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Net Score', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${attempt.netScore >= 0 ? '+' : ''}${attempt.netScore.toStringAsFixed(1)} / ${attempt.maxMarks.toStringAsFixed(0)}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Accuracy', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${attempt.accuracy.toStringAsFixed(1)}%',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                      color: attempt.accuracy >= 75
+                          ? const Color(0xFF059669)
+                          : attempt.accuracy >= 50
+                              ? const Color(0xFFD97706)
+                              : const Color(0xFFDC2626),
+                    ),
+                  ),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Time Spent', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                  const SizedBox(height: 2),
+                  Text(
+                    TimerFormatter.formatSeconds(attempt.timeSpentSeconds),
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Question Counts Pill Bar
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildCountTag('Correct: ${attempt.correct}', const Color(0xFF059669)),
+                _buildCountTag('Wrong: ${attempt.incorrect}', const Color(0xFFDC2626)),
+                if (attempt.optionESelected > 0)
+                  _buildCountTag('Opt-E: ${attempt.optionESelected}', const Color(0xFF64748B)),
+                _buildCountTag('Skipped: ${attempt.unattempted}', const Color(0xFF94A3B8)),
+              ],
+            ),
+          ),
+          const SizedBox(height: 6),
+
+          // Date timestamp
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              formattedDate,
+              style: TextStyle(fontSize: 10, color: Colors.grey.shade500),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCountTag(String text, Color color) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 6,
+          height: 6,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          text,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: color,
+          ),
+        ),
+      ],
+    );
+  }
+}
