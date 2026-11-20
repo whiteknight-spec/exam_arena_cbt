@@ -52,19 +52,21 @@ class UserProgress {
     return Duration(seconds: secondsRemaining);
   }
 
-  /// Progressive recovery fill factor (0.08 to 1.0) for the recovering heart
-  /// during the 2-hour recovery cycle.
-  /// When all 5 lives are full, returns 1.0.
+  /// Progressive recovery fill factor (0.0 to 1.0) strictly parallel to the 2-hour recovery time.
+  /// When stamina is full (5/5), returns 1.0.
+  /// If 30 mins elapsed out of 120 mins: returns 0.25 (25%).
+  /// If 60 mins elapsed out of 120 mins: returns 0.50 (50%).
+  /// If 90 mins elapsed out of 120 mins: returns 0.75 (75%).
   double get recoveringHeartProgress {
     if (currentHearts >= maxHearts) return 1.0;
     final refillTime = lastHeartRefillTime;
-    if (refillTime == null) return 0.08;
+    if (refillTime == null) return 0.0;
     final elapsedSeconds = DateTime.now().difference(refillTime).inSeconds;
-    if (elapsedSeconds <= 0) return 0.08;
-    final totalCycleSeconds = heartRegenMinutes * 60;
+    if (elapsedSeconds <= 0) return 0.0;
+    final totalCycleSeconds = heartRegenMinutes * 60; // 7200 seconds (2 hours)
     final secondsIntoCycle = elapsedSeconds % totalCycleSeconds;
     final progress = secondsIntoCycle / totalCycleSeconds;
-    return progress.clamp(0.08, 1.0);
+    return progress.clamp(0.0, 1.0);
   }
 
   UserProgress deductHeart() {

@@ -36,7 +36,30 @@ void main() {
       expect(lostOne.currentHearts, 4);
       expect(lostOne.lastHeartRefillTime, isNotNull);
       expect(lostOne.timeUntilNextHeart.inMinutes, inInclusiveRange(1, 120));
-      expect(lostOne.recoveringHeartProgress, inInclusiveRange(0.08, 1.0));
+      expect(lostOne.recoveringHeartProgress, inInclusiveRange(0.0, 1.0));
+    });
+
+    test('recoveringHeartProgress loads strictly parallel to elapsed recovery time', () {
+      final now = DateTime.now();
+      // 0 minutes elapsed -> 0.0 fill
+      final p0 = UserProgress(hearts: 4, lastHeartRefillTime: now);
+      expect(p0.recoveringHeartProgress, closeTo(0.0, 0.01));
+
+      // 30 minutes elapsed out of 120 minutes -> 25% fill (0.25)
+      final p30 = UserProgress(hearts: 4, lastHeartRefillTime: now.subtract(const Duration(minutes: 30)));
+      expect(p30.recoveringHeartProgress, closeTo(0.25, 0.01));
+
+      // 60 minutes elapsed out of 120 minutes -> 50% fill (0.50)
+      final p60 = UserProgress(hearts: 4, lastHeartRefillTime: now.subtract(const Duration(minutes: 60)));
+      expect(p60.recoveringHeartProgress, closeTo(0.50, 0.01));
+
+      // 90 minutes elapsed out of 120 minutes -> 75% fill (0.75)
+      final p90 = UserProgress(hearts: 4, lastHeartRefillTime: now.subtract(const Duration(minutes: 90)));
+      expect(p90.recoveringHeartProgress, closeTo(0.75, 0.01));
+
+      // When full 5 hearts -> 100% (1.0)
+      const pFull = UserProgress(hearts: 5);
+      expect(pFull.recoveringHeartProgress, 1.0);
     });
 
     test('hearts cannot drop below 0', () {
@@ -141,9 +164,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // 3 full hearts + 1 recovering heart red fill = 4 Icons.favorite_rounded
-      expect(find.byIcon(Icons.favorite_rounded), findsNWidgets(4));
-      // 1 recovering heart outline + 1 empty heart outline = 2 Icons.favorite_border_rounded
+      // When 0s elapsed: exactly 3 solid full hearts + 2 outline hearts (1 recovering at 0% + 1 empty)
+      expect(find.byIcon(Icons.favorite_rounded), findsNWidgets(3));
       expect(find.byIcon(Icons.favorite_border_rounded), findsNWidgets(2));
     });
 

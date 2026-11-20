@@ -23,12 +23,18 @@ class _HeartsBadgeState extends ConsumerState<HeartsBadge> {
   @override
   void initState() {
     super.initState();
-    // Live ticker periodically updates progress for the recovering heart
+    // Live ticker periodically updates progress for the recovering heart strictly in parallel with time
     // Checked against test harness to guarantee zero timeout on pumpAndSettle
     final isTesting = WidgetsBinding.instance.runtimeType.toString().contains('Test');
     if (!isTesting) {
-      _ticker = Timer.periodic(const Duration(seconds: 2), (_) {
-        if (mounted) setState(() {});
+      _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
+        if (mounted) {
+          final progress = ref.read(progressionProvider);
+          if (progress.currentHearts != progress.hearts) {
+            ref.read(progressionProvider.notifier).syncHearts();
+          }
+          setState(() {});
+        }
       });
     }
   }
@@ -45,9 +51,10 @@ class _HeartsBadgeState extends ConsumerState<HeartsBadge> {
     final hearts = progress.currentHearts;
     final isCritical = hearts <= 1;
 
+    final recoveryPercent = (progress.recoveringHeartProgress * 100).toStringAsFixed(1);
     final tooltipText = hearts >= UserProgress.maxHearts
         ? 'Full Stamina: 5/5 Hearts'
-        : 'Stamina: $hearts/5 Lives • Next Heart recovering (${progress.timeUntilNextHeart.inMinutes}m left)';
+        : 'Stamina: $hearts/5 Lives • Next Heart: $recoveryPercent% (${progress.timeUntilNextHeart.inMinutes}m left)';
 
     return Tooltip(
       message: tooltipText,
@@ -140,7 +147,7 @@ class SingleHeartWidget extends StatelessWidget {
         );
 
       case HeartFillState.recovering:
-        final factor = recoveryProgress.clamp(0.08, 1.0);
+        final factor = recoveryProgress.clamp(0.0, 1.0);
         return SizedBox(
           width: size,
           height: size,
@@ -153,18 +160,19 @@ class SingleHeartWidget extends StatelessWidget {
                 color: emptyColor,
                 size: size,
               ),
-              // Liquid red fill progressively loading from bottom to top
-              ClipRect(
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  heightFactor: factor,
-                  child: Icon(
-                    Icons.favorite_rounded,
-                    color: redColor,
-                    size: size,
+              // Liquid red fill strictly parallel to the 2-hour recovery time
+              if (factor > 0)
+                ClipRect(
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    heightFactor: factor,
+                    child: Icon(
+                      Icons.favorite_rounded,
+                      color: redColor,
+                      size: size,
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
         );
