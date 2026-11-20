@@ -44,6 +44,7 @@ class XpBar extends StatelessWidget {
                   children: [
                     PubgTierBadge(
                       tier: progress.pubgTier,
+                      subLevel: progress.pubgSubTier.level,
                       size: PubgBadgeSize.small,
                       showGlow: true,
                     ),
@@ -74,7 +75,7 @@ class XpBar extends StatelessWidget {
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              '${progress.pubgTier.title} ${progress.pubgTier.tierRoman}',
+                              progress.pubgSubTier.title,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w900,
@@ -88,7 +89,7 @@ class XpBar extends StatelessWidget {
                         Row(
                           children: [
                             Text(
-                              '${progress.pubgTier.tamilTitle} • ${progress.pubgTier.badgeSubtitle}',
+                              '${progress.pubgTier.tamilTitle} • ${progress.pubgSubTier.badgeSubtitle}',
                               style: TextStyle(
                                 color: Colors.white.withValues(alpha: 0.75),
                                 fontSize: 11,

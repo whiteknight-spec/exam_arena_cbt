@@ -70,6 +70,95 @@ class ProgressionHubScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Candidate Dashboard Header with Current Battle Badge on the Right
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'CANDIDATE DASHBOARD',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textSecondary.withValues(alpha: 0.8),
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    const Text(
+                      'Good afternoon, Aspirant',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                  ],
+                ),
+                // Clickable Rank Badge on the right
+                InkWell(
+                  onTap: () => PubgTierModal.show(context, progress: progress),
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: progress.pubgTier.secondaryColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: progress.pubgTier.primaryColor.withValues(alpha: 0.35),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        PubgTierBadge(
+                          tier: progress.pubgTier,
+                          subLevel: progress.pubgSubTier.level,
+                          size: PubgBadgeSize.small,
+                          showGlow: false,
+                        ),
+                        const SizedBox(width: 8),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              progress.pubgSubTier.title.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w900,
+                                color: progress.pubgTier.secondaryColor,
+                                letterSpacing: 0.4,
+                              ),
+                            ),
+                            Text(
+                              '${progress.xp} XP • Badges',
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(
+                          Icons.chevron_right_rounded,
+                          size: 16,
+                          color: AppColors.textSecondary,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
             // Target Exam Switcher Card
             InkWell(
               onTap: () {
@@ -174,87 +263,6 @@ class ProgressionHubScreen extends ConsumerWidget {
 
             // User Animated XP Progress Bar
             XpBar(progress: progress),
-            const SizedBox(height: 12),
-
-            // PUBG Tier Showcase Quick Tile
-            InkWell(
-              onTap: () => PubgTierModal.show(context, progress: progress),
-              borderRadius: BorderRadius.circular(14),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      progress.pubgTier.secondaryColor.withValues(alpha: 0.25),
-                      const Color(0xFF0F172A),
-                    ],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  ),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: progress.pubgTier.primaryColor.withValues(alpha: 0.5),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    PubgTierBadge(
-                      tier: progress.pubgTier,
-                      size: PubgBadgeSize.small,
-                      showGlow: false,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                '${progress.pubgTier.title.toUpperCase()} ${progress.pubgTier.tierRoman}',
-                                style: TextStyle(
-                                  color: progress.pubgTier.accentColor,
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 13,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                                decoration: BoxDecoration(
-                                  color: progress.pubgTier.primaryColor.withValues(alpha: 0.3),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Text(
-                                  'TIER ${progress.pubgTier.tierRoman}',
-                                  style: TextStyle(
-                                    color: progress.pubgTier.accentColor,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            progress.pubgTier.nextTier != null
-                                ? 'Tap to view 8 PUBG Tier Badges • Next: ${progress.pubgTier.nextTier!.title}'
-                                : 'Apex Rank Achieved! View Trophy Room',
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 11,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Icon(Icons.military_tech_rounded, size: 20, color: Color(0xFFFBBF24)),
-                  ],
-                ),
-              ),
-            ),
             const SizedBox(height: 16),
 
             // Quick Stats Row
