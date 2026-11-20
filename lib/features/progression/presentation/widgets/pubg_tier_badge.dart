@@ -21,7 +21,6 @@ enum PubgBadgeSize {
 
 class PubgTierBadge extends StatelessWidget {
   final PubgTier tier;
-  final int? subLevel;
   final PubgBadgeSize size;
   final bool isLocked;
   final bool showGlow;
@@ -30,7 +29,6 @@ class PubgTierBadge extends StatelessWidget {
   const PubgTierBadge({
     super.key,
     required this.tier,
-    this.subLevel,
     this.size = PubgBadgeSize.medium,
     this.isLocked = false,
     this.showGlow = true,
@@ -101,16 +99,12 @@ class PubgTierBadge extends StatelessWidget {
                 ],
               ),
               child: Text(
-                isLocked
-                    ? 'LOCKED'
-                    : (subLevel != null
-                        ? '${tier.title.toUpperCase()} $subLevel'
-                        : tier.title.toUpperCase()),
+                isLocked ? 'LOCKED' : tier.title.toUpperCase(),
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w900,
-                  fontSize: size == PubgBadgeSize.small && subLevel != null ? 7 : size.fontSize,
-                  letterSpacing: size == PubgBadgeSize.large ? 1.2 : 0.4,
+                  fontSize: size.fontSize,
+                  letterSpacing: size == PubgBadgeSize.large ? 1.2 : 0.6,
                 ),
               ),
             ),

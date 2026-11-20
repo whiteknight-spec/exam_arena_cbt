@@ -30,8 +30,7 @@ class UserProgress {
   static const int maxHearts = 5;
   static const int heartRegenMinutes = 120; // 2 hours recovery per heart
 
-  PubgSubTier get pubgSubTier => PubgSubTier.fromXp(xp);
-  PubgTier get pubgTier => pubgSubTier.tier;
+  PubgTier get pubgTier => PubgTier.fromXp(xp);
 
   int get currentHearts {
     if (hearts >= maxHearts) return maxHearts;
