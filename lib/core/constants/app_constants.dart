@@ -33,7 +33,7 @@ class AppConstants {
   static const String colHearts = 'hearts';
   static const String colLastHeartRefill = 'last_heart_refill';
   static const int maxHearts = 5;
-  static const int heartRegenMinutes = 30;
+  static const int heartRegenMinutes = 120; // 2 hours per heart recovery
 
   // Streak History Table
   static const String tableStreakHistory = 'streak_history';

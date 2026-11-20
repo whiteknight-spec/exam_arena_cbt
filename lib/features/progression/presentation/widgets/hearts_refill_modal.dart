@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/models/user_progress.dart';
 import '../providers/progression_provider.dart';
+import 'hearts_badge.dart';
 
 class HeartsRefillModal extends ConsumerWidget {
   const HeartsRefillModal({super.key});
@@ -68,31 +69,46 @@ class HeartsRefillModal extends ConsumerWidget {
               ),
               const SizedBox(height: 6),
               const Text(
-                'ExamArena CBT uses a 5-Life Discipline System to keep candidates serious and prevent casual guesswork.',
+                'ExamArena CBT uses a 5-Life Discipline System. 1 Heart recovers automatically every 2 hours (120 mins).',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.3),
               ),
               const SizedBox(height: 20),
 
-              // 5 Hearts Visual Display
+              // 5 Hearts Visual Display with live recovering heart fill
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(UserProgress.maxHearts, (index) {
-                  final isFilled = index < hearts;
+                  HeartFillState state;
+                  if (index < hearts) {
+                    state = HeartFillState.full;
+                  } else if (index == hearts) {
+                    state = HeartFillState.recovering;
+                  } else {
+                    state = HeartFillState.empty;
+                  }
+
+                  final isFilled = state == HeartFillState.full;
+                  final isRecovering = state == HeartFillState.recovering;
+
                   return Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 6),
+                    margin: const EdgeInsets.symmetric(horizontal: 5),
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: isFilled ? const Color(0xFFFFF1F2) : const Color(0xFFF1F5F9),
+                      color: isFilled
+                          ? const Color(0xFFFFF1F2)
+                          : (isRecovering ? const Color(0xFFFFF5F5) : const Color(0xFFF1F5F9)),
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: isFilled ? const Color(0xFFFDA4AF) : const Color(0xFFCBD5E1),
-                        width: 1.5,
+                        color: isFilled
+                            ? const Color(0xFFFDA4AF)
+                            : (isRecovering ? const Color(0xFFF43F5E) : const Color(0xFFCBD5E1)),
+                        width: isRecovering ? 2.0 : 1.5,
                       ),
                     ),
-                    child: Icon(
-                      isFilled ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                      color: isFilled ? const Color(0xFFE11D48) : const Color(0xFF94A3B8),
+                    child: SingleHeartWidget(
+                      state: state,
+                      recoveryProgress: progress.recoveringHeartProgress,
                       size: 26,
                     ),
                   );
@@ -115,7 +131,15 @@ class HeartsRefillModal extends ConsumerWidget {
                       const SizedBox(width: 6),
                       Flexible(
                         child: Text(
-                          'Next Life (+1 ❤️) in ${timeRemaining.inMinutes}m ${(timeRemaining.inSeconds % 60).toString().padLeft(2, '0')}s',
+                          () {
+                            final hours = timeRemaining.inHours;
+                            final mins = timeRemaining.inMinutes % 60;
+                            final secs = timeRemaining.inSeconds % 60;
+                            final timeStr = hours > 0
+                                ? '${hours}h ${mins}m ${secs.toString().padLeft(2, '0')}s'
+                                : '${mins}m ${secs.toString().padLeft(2, '0')}s';
+                            return 'Next Life (+1 ❤️) in $timeStr';
+                          }(),
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w800,

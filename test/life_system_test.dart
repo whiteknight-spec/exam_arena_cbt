@@ -19,22 +19,24 @@ void main() {
     await AppDatabase.createInMemoryDatabase();
   });
 
-  group('UserProgress Hearts & Life Mechanics', () {
+  group('UserProgress Hearts & Life Mechanics (2-Hour Recovery)', () {
     test('starts with full 5 hearts by default', () {
       const progress = UserProgress();
       expect(progress.hearts, 5);
       expect(progress.currentHearts, 5);
       expect(progress.timeUntilNextHeart, Duration.zero);
+      expect(progress.recoveringHeartProgress, 1.0);
     });
 
-    test('deductHeart decrements hearts and records refill timer', () {
+    test('deductHeart decrements hearts and records refill timer for 2 hours', () {
       const progress = UserProgress(hearts: 5);
       final lostOne = progress.deductHeart();
 
       expect(lostOne.hearts, 4);
       expect(lostOne.currentHearts, 4);
       expect(lostOne.lastHeartRefillTime, isNotNull);
-      expect(lostOne.timeUntilNextHeart.inMinutes, inInclusiveRange(1, 30));
+      expect(lostOne.timeUntilNextHeart.inMinutes, inInclusiveRange(1, 120));
+      expect(lostOne.recoveringHeartProgress, inInclusiveRange(0.08, 1.0));
     });
 
     test('hearts cannot drop below 0', () {
@@ -46,9 +48,9 @@ void main() {
       expect(progress.currentHearts, 0);
     });
 
-    test('auto-refill restores hearts after 30-minute intervals', () {
-      // User lost a heart 65 minutes ago (2 full 30-minute cycles have passed)
-      final pastTime = DateTime.now().subtract(const Duration(minutes: 65));
+    test('auto-refill restores hearts after 2-hour intervals', () {
+      // User lost a heart 245 minutes ago (2 full 120-minute cycles have passed)
+      final pastTime = DateTime.now().subtract(const Duration(minutes: 245));
       final progress = UserProgress(
         hearts: 2,
         lastHeartRefillTime: pastTime,
@@ -86,7 +88,7 @@ void main() {
   });
 
   group('HeartsBadge and HeartsRefillModal UI Tests', () {
-    testWidgets('HeartsBadge displays current hearts count and opens modal on tap', (tester) async {
+    testWidgets('HeartsBadge displays 5 hearts and opens modal on tap', (tester) async {
       await tester.pumpWidget(
         const ProviderScope(
           child: MaterialApp(
@@ -101,8 +103,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('5/5'), findsOneWidget);
-      expect(find.byIcon(Icons.favorite_rounded), findsOneWidget);
+      // Full stamina: all 5 hearts are solid red
+      expect(find.byIcon(Icons.favorite_rounded), findsNWidgets(5));
+      expect(find.byType(SingleHeartWidget), findsNWidgets(5));
 
       // Tap badge to open modal
       await tester.tap(find.byType(HeartsBadge));
@@ -111,6 +114,37 @@ void main() {
       expect(find.textContaining('Exam Lives & Stamina'), findsOneWidget);
       expect(find.textContaining('5-Life Discipline System'), findsOneWidget);
       expect(find.textContaining('Mistake Revision Drill'), findsOneWidget);
+    });
+
+    testWidgets('HeartsBadge renders empty outlines and recovering heart when hearts are lost', (tester) async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      // Deduct 2 hearts -> 3 full hearts, 1 recovering heart, 1 empty outline
+      await tester.runAsync(() async {
+        await container.read(progressionProvider.notifier).deductHeart();
+        await container.read(progressionProvider.notifier).deductHeart();
+      });
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const MaterialApp(
+            home: Scaffold(
+              appBar: PreferredSize(
+                preferredSize: Size.fromHeight(60),
+                child: HeartsBadge(),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // 3 full hearts + 1 recovering heart red fill = 4 Icons.favorite_rounded
+      expect(find.byIcon(Icons.favorite_rounded), findsNWidgets(4));
+      // 1 recovering heart outline + 1 empty heart outline = 2 Icons.favorite_border_rounded
+      expect(find.byIcon(Icons.favorite_border_rounded), findsNWidgets(2));
     });
 
     testWidgets('HeartsRefillModal allows healing +1 heart via practice revision drill', (tester) async {
@@ -122,6 +156,8 @@ void main() {
         await container.read(progressionProvider.notifier).deductHeart();
         await container.read(progressionProvider.notifier).deductHeart();
       });
+
+      expect(container.read(progressionProvider).currentHearts, 3);
 
       await tester.pumpWidget(
         UncontrolledProviderScope(
@@ -138,9 +174,14 @@ void main() {
       expect(find.textContaining('Next Life (+1 ❤️) in'), findsOneWidget);
 
       // Tap Mistake Revision Drill (+1 Heart Heal) button
-      expect(find.textContaining('Mistake Revision Drill (+1 Heart Heal)'), findsOneWidget);
-      await tester.tap(find.textContaining('Mistake Revision Drill (+1 Heart Heal)'));
-      await tester.pump(const Duration(seconds: 15));
+      final drillButton = find.textContaining('Mistake Revision Drill (+1 Heart Heal)');
+      expect(drillButton, findsOneWidget);
+      await tester.ensureVisible(drillButton);
+      await tester.pumpAndSettle();
+      await tester.runAsync(() async {
+        await tester.tap(drillButton);
+        await Future.delayed(const Duration(milliseconds: 500));
+      });
       await tester.pumpAndSettle();
 
       // Verify heart was healed

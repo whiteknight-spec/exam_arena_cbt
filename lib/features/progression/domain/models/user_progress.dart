@@ -28,7 +28,7 @@ class UserProgress {
   // 500-XP per level unlock progression rule
   static const int xpPerLevel = 500;
   static const int maxHearts = 5;
-  static const int heartRegenMinutes = 30;
+  static const int heartRegenMinutes = 120; // 2 hours recovery per heart
 
   PubgTier get pubgTier => PubgTier.fromXp(xp);
 
@@ -45,10 +45,26 @@ class UserProgress {
   Duration get timeUntilNextHeart {
     if (currentHearts >= maxHearts) return Duration.zero;
     final refillTime = lastHeartRefillTime ?? DateTime.now();
-    final elapsedMinutes = DateTime.now().difference(refillTime).inMinutes;
-    final minutesIntoCycle = elapsedMinutes % heartRegenMinutes;
-    final minutesRemaining = heartRegenMinutes - minutesIntoCycle;
-    return Duration(minutes: minutesRemaining);
+    final elapsedSeconds = DateTime.now().difference(refillTime).inSeconds;
+    final totalCycleSeconds = heartRegenMinutes * 60; // 7200 seconds (2 hours)
+    final secondsIntoCycle = elapsedSeconds % totalCycleSeconds;
+    final secondsRemaining = totalCycleSeconds - secondsIntoCycle;
+    return Duration(seconds: secondsRemaining);
+  }
+
+  /// Progressive recovery fill factor (0.08 to 1.0) for the recovering heart
+  /// during the 2-hour recovery cycle.
+  /// When all 5 lives are full, returns 1.0.
+  double get recoveringHeartProgress {
+    if (currentHearts >= maxHearts) return 1.0;
+    final refillTime = lastHeartRefillTime;
+    if (refillTime == null) return 0.08;
+    final elapsedSeconds = DateTime.now().difference(refillTime).inSeconds;
+    if (elapsedSeconds <= 0) return 0.08;
+    final totalCycleSeconds = heartRegenMinutes * 60;
+    final secondsIntoCycle = elapsedSeconds % totalCycleSeconds;
+    final progress = secondsIntoCycle / totalCycleSeconds;
+    return progress.clamp(0.08, 1.0);
   }
 
   UserProgress deductHeart() {
