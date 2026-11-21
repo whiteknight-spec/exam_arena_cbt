@@ -49,9 +49,9 @@ class ProgressionHubScreen extends ConsumerWidget {
             ),
             const Spacer(),
             StreakBadge(streakDays: progress.streakDays),
-            const SizedBox(width: 4),
+            const SizedBox(width: 6),
             const HeartsBadge(),
-            const SizedBox(width: 4),
+            const SizedBox(width: 2),
             IconButton(
               icon: const Icon(Icons.history_rounded, color: AppColors.primary),
               tooltip: 'Test History & Analytics',

@@ -6,6 +6,7 @@ import 'package:exam_arena_cbt/core/theme/app_theme.dart';
 import 'package:exam_arena_cbt/features/progression/domain/models/exam_type.dart';
 import 'package:exam_arena_cbt/features/progression/domain/models/arena_level.dart';
 import 'package:exam_arena_cbt/features/progression/presentation/screens/progression_hub_screen.dart';
+import 'package:exam_arena_cbt/features/progression/presentation/widgets/streak_badge.dart';
 import 'package:exam_arena_cbt/features/exam_engine/domain/models/question.dart';
 import 'package:exam_arena_cbt/features/exam_engine/presentation/screens/cbt_exam_screen.dart';
 import 'package:exam_arena_cbt/features/exam_engine/presentation/widgets/cbt_option_tile.dart';
@@ -92,7 +93,8 @@ void main() {
 
       // Header and Streak Counter
       expect(find.text('Exam Arena CBT'), findsOneWidget);
-      expect(find.textContaining('Days Streak'), findsOneWidget);
+      expect(find.byType(StreakBadge), findsOneWidget);
+      expect(find.text('7'), findsWidgets);
 
       // Level Badge & XP Bar
       expect(find.textContaining('LVL'), findsWidgets);
