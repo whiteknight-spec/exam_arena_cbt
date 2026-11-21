@@ -1,0 +1,1862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ExamArena CBT — Apple UI/UX Redesign</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    /* Apple typography and smooth styling */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background-color: #F5F5F7;
+      color: #1D1D1F;
+    }
+
+    /* Apple glass & card shadows */
+    .apple-glass {
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    .apple-card {
+      background: #FFFFFF;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.04);
+      border-radius: 24px;
+    }
+    .apple-card-subtle {
+      background: #FFFFFF;
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      border-radius: 20px;
+    }
+    .apple-segmented-item.active {
+      background: #FFFFFF;
+      color: #000000;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      font-weight: 600;
+    }
+
+    /* Apple Watch Trophy Medallion Badges */
+    .apple-medal {
+      position: relative;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+    .medal-bronze { background: linear-gradient(145deg, #DF9B6E, #8C552D); border: 2px solid #F5C6A5; }
+    .medal-silver { background: linear-gradient(145deg, #F1F5F9, #94A3B8); border: 2px solid #FFFFFF; }
+    .medal-gold { background: linear-gradient(145deg, #FDE68A, #D97706); border: 2px solid #FEF3C7; }
+    .medal-platinum { background: linear-gradient(145deg, #A5F3FC, #0284C7); border: 2px solid #E0F2FE; }
+    .medal-diamond { background: linear-gradient(145deg, #C7D2FE, #4F46E5); border: 2px solid #EEF2FF; }
+    .medal-crown { background: linear-gradient(145deg, #DDD6FE, #7C3AED); border: 2px solid #F5F3FF; }
+    .medal-ace { background: linear-gradient(145deg, #FECDD3, #E11D48); border: 2px solid #FFF1F2; }
+    .medal-conqueror { background: linear-gradient(145deg, #FBBF24, #EF4444); border: 2px solid #FEF3C7; }
+
+    /* Minimalist CBT Palette Dots */
+    .palette-pill {
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    .palette-pill:hover {
+      transform: scale(1.08);
+    }
+
+    /* Heart Red Liquid Fill strictly parallel to the 2-Hour Recovery Timer */
+    .heart-parallel-fill {
+      transition: clip-path 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col p-0 m-0">
+
+  <!-- ============================================================== -->
+  <!-- APPLE TOP NAVIGATION BAR                                       -->
+  <!-- ============================================================== -->
+  <header class="apple-glass sticky top-0 z-40 px-6 py-3.5 flex items-center justify-between transition-all">
+    
+    <!-- Left: Minimalist Brand -->
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-full bg-[#1D1D1F] text-white flex items-center justify-center font-semibold text-sm shadow-sm">
+        
+      </div>
+      <div>
+        <h1 class="text-sm font-semibold tracking-tight text-[#1D1D1F]">ExamArena</h1>
+        <p class="text-[11px] text-[#86868B] font-normal">CBT Mock Suite</p>
+      </div>
+    </div>
+
+    <!-- Center: iOS Style Segmented Control -->
+    <nav class="hidden md:flex items-center bg-[#E5E5EA]/70 p-1 rounded-full border border-black/[0.03] text-xs font-medium text-[#6E6E73]">
+      <button onclick="switchScreen('hub')" id="tab-hub" class="apple-segmented-item active px-4 py-1.5 rounded-full transition-all">
+        Activity & Lives
+      </button>
+      <button onclick="switchScreen('exam')" id="tab-exam" class="apple-segmented-item px-4 py-1.5 rounded-full transition-all">
+        Exam Hall
+      </button>
+      <button onclick="switchScreen('summary')" id="tab-summary" class="apple-segmented-item px-4 py-1.5 rounded-full transition-all">
+        Insights & Summary
+      </button>
+      <button onclick="switchScreen('history')" id="tab-history" class="apple-segmented-item px-4 py-1.5 rounded-full transition-all">
+        History
+      </button>
+    </nav>
+
+    <!-- Right: Candidate Quick Status (Simple Streak & 5 Hearts) -->
+    <div class="flex items-center gap-2">
+      <!-- Simple Streak Indicator (No separate bulky block) -->
+      <div title="Daily Consistency Streak: 4 Days Active (Practice daily to maintain your streak!)" class="flex items-center gap-1 px-2.5 py-1.5 bg-white/90 hover:bg-[#FFF7ED] rounded-full text-xs font-bold text-[#EA580C] border border-black/[0.06] hover:border-[#FED7AA] shadow-xs cursor-pointer transition-all">
+        <span class="text-sm select-none leading-none">🔥</span>
+        <span class="text-xs font-black">4</span>
+      </div>
+
+      <!-- 5 Hearts Life Indicator (Tap to open refill sheet) -->
+      <button onclick="openHeartsModal()" title="Stamina: 4/5 Lives (Heart 5 Recovering • 2-Hour Recovery)" class="flex items-center gap-1.5 px-3 py-1.5 bg-white/90 hover:bg-[#FFF0F2] rounded-full text-xs font-medium transition-all border border-black/[0.06] hover:border-[#FDA4AF] shadow-xs cursor-pointer group">
+        <!-- 4 Solid Red Hearts -->
+        <span class="text-sm select-none leading-none">❤️</span>
+        <span class="text-sm select-none leading-none">❤️</span>
+        <span class="text-sm select-none leading-none">❤️</span>
+        <span class="text-sm select-none leading-none">❤️</span>
+        <!-- 5th Recovering Heart: Gray outline with live red liquid fill loading strictly parallel to 2-hour recovery -->
+        <div id="header-heart-5-container" class="relative w-4 h-4 flex items-center justify-center select-none" title="Recovering Heart: Loading in parallel with 2-Hour Recovery Time">
+          <!-- Empty Base Outline Heart -->
+          <svg class="w-3.5 h-3.5 text-[#CBD5E1] stroke-current fill-none stroke-[2]" viewBox="0 0 24 24">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+          </svg>
+          <!-- Dynamic Liquid Loading Red Fill strictly parallel to countdown -->
+          <div id="header-recovering-fill" class="absolute inset-0 overflow-hidden heart-parallel-fill flex items-center justify-center" style="clip-path: inset(62.5% 0 0 0);">
+            <svg class="w-3.5 h-3.5 text-[#FF2D55] fill-current" viewBox="0 0 24 24">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+          </div>
+        </div>
+      </button>
+
+      <!-- Profile Avatar -->
+      <div class="w-8 h-8 rounded-full bg-[#E5E5EA] text-[#1D1D1F] flex items-center justify-center text-xs font-bold border border-black/[0.06]">
+        SV
+      </div>
+    </div>
+
+  </header>
+
+  <!-- Mobile Segmented Bar -->
+  <div class="md:hidden px-4 pt-3 pb-1 flex justify-center">
+    <nav class="flex items-center bg-[#E5E5EA]/80 p-1 rounded-full text-[11px] font-medium text-[#6E6E73] w-full justify-between">
+      <button onclick="switchScreen('hub')" id="mob-tab-hub" class="apple-segmented-item active px-3 py-1 rounded-full transition-all">Activity</button>
+      <button onclick="switchScreen('exam')" id="mob-tab-exam" class="apple-segmented-item px-3 py-1 rounded-full transition-all">Exam</button>
+      <button onclick="switchScreen('summary')" id="mob-tab-summary" class="apple-segmented-item px-3 py-1 rounded-full transition-all">Insights</button>
+      <button onclick="switchScreen('history')" id="mob-tab-history" class="apple-segmented-item px-3 py-1 rounded-full transition-all">History</button>
+    </nav>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MAIN CONTENT CONTAINER                                         -->
+  <!-- ============================================================== -->
+  <main class="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 py-6 md:py-8 space-y-8">
+
+    <!-- ============================================================== -->
+    <!-- VIEW 1: ACTIVITY & LIVES (APPLE HEALTH / FITNESS STYLE)        -->
+    <!-- ============================================================== -->
+    <div id="screen-hub" class="space-y-6">
+      
+      <!-- Greeting Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <span class="text-xs uppercase tracking-wider text-[#86868B] font-medium">Candidate Dashboard</span>
+          <h2 class="text-3xl font-semibold tracking-tight text-[#1D1D1F] mt-0.5">Good afternoon, Vetrivel</h2>
+        </div>
+        <div class="flex items-center gap-2.5 flex-wrap">
+          <button onclick="openExamSelectorModal()" class="px-3.5 py-1.5 rounded-full bg-[#E5E5EA]/80 hover:bg-[#E5E5EA] text-[#1D1D1F] text-xs font-medium transition-all flex items-center gap-2 cursor-pointer shadow-sm">
+            <span>🎯 Target: <strong id="current-exam-title">RRB NTPC</strong></span>
+            <span class="text-[10px] text-[#0071E3] font-bold bg-white px-2 py-0.5 rounded-full shadow-xs">Change</span>
+          </button>
+
+          <!-- Candidate Dashboard Right-side Badge Button (Click opens All 29 Badges Trophy Room) -->
+          <button onclick="openPubgModal()" class="px-3 py-1.5 rounded-full bg-[#FFFBEB] hover:bg-[#FEF3C7] border border-[#FDE68A] text-[#92400E] text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-sm group">
+            <div class="apple-medal medal-bronze w-6 h-6 text-[10px] font-bold text-white flex items-center justify-center">3</div>
+            <div class="text-left">
+              <div class="text-[11px] leading-tight font-extrabold text-[#78350F]">BRONZE 3</div>
+              <div class="text-[9px] font-normal text-[#92400E] leading-none">350 XP • 29 Badges</div>
+            </div>
+            <span class="text-[10px] text-[#D97706] group-hover:translate-x-0.5 transition-transform">›</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Hero Metric: CBT Speed & Accuracy Readiness (No separate streak block) -->
+      <div class="apple-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-[#EFF6FF] border border-[#BFDBFE] flex items-center justify-center text-3xl shrink-0">
+            ⚡
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold text-[#86868B] uppercase tracking-wider">CBT Readiness Benchmark</span>
+              <span class="text-[10px] font-bold text-[#34C759] bg-[#E8F8EE] px-2 py-0.5 rounded-full">Ready for CBT</span>
+            </div>
+            <div class="text-2xl font-bold text-[#1D1D1F] mt-0.5">84% Accuracy • 42s avg response</div>
+            <div class="text-xs text-[#86868B]">Based on your past mock test attempts and AI gauntlet sessions</div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-6 sm:border-l sm:border-black/[0.06] sm:pl-6 w-full sm:w-auto justify-between sm:justify-start">
+          <div>
+            <div class="text-[11px] text-[#86868B] font-medium">Negative Marks Avoided</div>
+            <div class="text-base font-extrabold text-[#34C759]">92%</div>
+          </div>
+          <div>
+            <div class="text-[11px] text-[#86868B] font-medium">Topic Mastery</div>
+            <div class="text-base font-extrabold text-[#0071E3]">Stage 2 / 4</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Clean Practice Gauntlet (Apple Workout / Inset Grouped List) -->
+      <div class="apple-card p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-lg font-semibold text-[#1D1D1F]">CBT Exam Gauntlet</h3>
+            <p class="text-xs text-[#86868B]">Progressive mock modules designed for RRB NTPC</p>
+          </div>
+          <span class="text-xs px-3 py-1 rounded-full bg-[#F5F5F7] text-[#6E6E73] font-medium">Stage 2 of 4</span>
+        </div>
+
+        <!-- Clean Inset List Items -->
+        <div class="divide-y divide-black/[0.04] pt-2">
+          
+          <!-- Stage 1 (Done) -->
+          <div class="py-3.5 flex items-center justify-between hover:bg-[#FAFAFA] rounded-xl px-2 transition-colors">
+            <div class="flex items-center gap-3.5">
+              <div class="w-9 h-9 rounded-full bg-[#E8F8EE] text-[#34C759] flex items-center justify-center text-sm font-semibold">
+                ✓
+              </div>
+              <div>
+                <h4 class="text-sm font-medium text-[#1D1D1F]">Stage 01 • Quantitative Aptitude</h4>
+                <p class="text-xs text-[#86868B]">Percentages, Ratios, Simplification</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-xs font-medium text-[#34C759]">92% Accuracy</span>
+              <button onclick="switchScreen('exam')" class="text-xs text-[#0071E3] font-medium hover:underline">Review</button>
+            </div>
+          </div>
+
+          <!-- Stage 2 (Current Active) -->
+          <div class="py-3.5 flex items-center justify-between bg-[#F8F9FF] rounded-xl px-3 border border-[#E0E7FF]/60 my-1">
+            <div class="flex items-center gap-3.5">
+              <div class="w-9 h-9 rounded-full bg-[#0071E3] text-white flex items-center justify-center text-xs font-bold shadow-sm">
+                02
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h4 class="text-sm font-semibold text-[#1D1D1F]">Stage 02 • Logical Reasoning</h4>
+                  <span class="text-[10px] px-2 py-0.2 rounded-full bg-[#E0E7FF] text-[#0071E3] font-semibold">Ready</span>
+                </div>
+                <p class="text-xs text-[#86868B]">Coding-Decoding, Series, Syllogisms</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-xs text-[#86868B]">25 Questions • 25 Mins</span>
+              <button onclick="switchScreen('exam')" class="px-4 py-1.5 rounded-full bg-[#0071E3] hover:bg-[#0077ED] text-white text-xs font-semibold shadow-sm transition-all">
+                Start Test
+              </button>
+            </div>
+          </div>
+
+          <!-- Stage 3 (Locked) -->
+          <div class="py-3.5 flex items-center justify-between opacity-50 px-2">
+            <div class="flex items-center gap-3.5">
+              <div class="w-9 h-9 rounded-full bg-[#F5F5F7] text-[#86868B] flex items-center justify-center text-xs">
+                🔒
+              </div>
+              <div>
+                <h4 class="text-sm font-medium text-[#1D1D1F]">Stage 03 • General Awareness & Science</h4>
+                <p class="text-xs text-[#86868B]">Polity, Freedom Struggle, Physics & Chemistry</p>
+              </div>
+            </div>
+            <span class="text-xs text-[#86868B]">Unlocks at Level 4</span>
+          </div>
+
+          <!-- Stage 4 (Locked Apex) -->
+          <div class="py-3.5 flex items-center justify-between opacity-50 px-2">
+            <div class="flex items-center gap-3.5">
+              <div class="w-9 h-9 rounded-full bg-[#F5F5F7] text-[#86868B] flex items-center justify-center text-xs">
+                🔒
+              </div>
+              <div>
+                <h4 class="text-sm font-medium text-[#1D1D1F]">Stage 04 • Grand CBT Simulation</h4>
+                <p class="text-xs text-[#86868B]">Full length 100 Qs mock with exact negative marking</p>
+              </div>
+            </div>
+            <span class="text-xs text-[#86868B]">Unlocks at Level 5</span>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- VIEW 2: DISTRACTION-FREE APPLE CBT EXAM HALL                   -->
+    <!-- ============================================================== -->
+    <div id="screen-exam" class="hidden space-y-6">
+      
+      <!-- Minimalist Top Navigation for Exam -->
+      <div class="apple-card p-4 flex flex-wrap items-center justify-between gap-4">
+        
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 class="text-base font-semibold text-[#1D1D1F]">RRB NTPC CBT-1 Mock Examination</h2>
+            <span class="text-[11px] px-2.5 py-0.5 rounded-full bg-[#F5F5F7] text-[#6E6E73] font-medium">Sec. 01: Quant</span>
+          </div>
+          <p class="text-xs text-[#86868B] mt-0.5">Question 1 of 25 • Single Choice with Negative Marking (-0.33)</p>
+        </div>
+
+        <!-- Clean Countdown Pill -->
+        <div class="flex items-center gap-3">
+          <div class="px-4 py-1.5 rounded-full bg-[#F5F5F7] border border-black/[0.04] flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-[#34C759] animate-pulse"></span>
+            <span class="text-xs text-[#86868B] font-medium">Time Remaining:</span>
+            <span class="font-mono text-sm font-semibold text-[#1D1D1F]">59:42</span>
+          </div>
+
+          <button onclick="triggerExitGuard()" class="text-xs text-[#E11D48] hover:text-[#BE123C] font-medium px-3 py-1.5 rounded-full hover:bg-[#FFF0F2] transition-colors">
+            Exit (-1 ❤️)
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Exam Workspace (Question Area + Minimalist Floating Palette) -->
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        
+        <!-- Left: Focused Question Card (3 cols) -->
+        <div class="lg:col-span-3 apple-card p-6 sm:p-8 flex flex-col justify-between min-h-[520px] space-y-6">
+          
+          <div>
+            <!-- Question Toolbar (Zoom & Rough Sheet & Language) -->
+            <div class="flex flex-wrap items-center justify-between pb-4 border-b border-black/[0.04] text-xs">
+              
+              <!-- Font Size Segmented Control -->
+              <div class="flex items-center gap-2">
+                <span class="text-[#86868B]">Size:</span>
+                <div class="inline-flex rounded-lg bg-[#E5E5EA]/70 p-0.5 text-xs text-[#6E6E73]">
+                  <button onclick="setFontZoom('sm')" id="zoom-sm" class="px-2.5 py-1 rounded-md text-xs font-medium">A-</button>
+                  <button onclick="setFontZoom('md')" id="zoom-md" class="px-2.5 py-1 rounded-md text-xs font-medium bg-white text-black shadow-sm">1x</button>
+                  <button onclick="setFontZoom('lg')" id="zoom-lg" class="px-2.5 py-1 rounded-md text-xs font-medium">A+</button>
+                </div>
+              </div>
+
+              <!-- Action Pills -->
+              <div class="flex items-center gap-2">
+                <button onclick="openRoughSheet()" class="px-3 py-1.5 rounded-full bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] font-medium flex items-center gap-1.5 transition-colors">
+                  <span>📝 Rough Sheet</span>
+                </button>
+
+                <!-- Language Toggle -->
+                <div class="inline-flex rounded-lg bg-[#E5E5EA]/70 p-0.5 text-xs text-[#6E6E73]">
+                  <button onclick="setExamLang('en')" id="lang-en" class="px-2.5 py-1 rounded-md font-medium bg-white text-black shadow-sm">EN</button>
+                  <button onclick="setExamLang('ta')" id="lang-ta" class="px-2.5 py-1 rounded-md font-medium">தமிழ்</button>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Question Statement -->
+            <div id="question-text-container" class="py-6 space-y-3">
+              <div class="text-xs uppercase font-semibold tracking-wider text-[#0071E3]">Question 01</div>
+              <h3 id="q-en" class="text-lg font-medium text-[#1D1D1F] leading-relaxed">
+                If the price of sugar is increased by 20%, by how much percentage must a household reduce its consumption so that the total expenditure remains constant?
+              </h3>
+              <p id="q-ta" class="text-sm text-[#86868B] leading-relaxed border-t border-black/[0.04] pt-3">
+                சர்க்கரையின் விலை 20% உயர்த்தப்பட்டால், குடும்பத்தின் மொத்த செலவு மாறாமல் இருக்க சர்க்கரை நுகர்வை எத்தனை சதவீதம் குறைக்க வேண்டும்?
+              </p>
+            </div>
+
+            <!-- Apple-Style Clean Radio Options -->
+            <div class="space-y-3 pt-2" id="options-container">
+              
+              <label class="flex items-center gap-4 p-4 rounded-2xl border border-black/[0.08] hover:border-[#0071E3] hover:bg-[#F8F9FF] cursor-pointer transition-all group">
+                <input type="radio" name="apple-opt" value="A" class="w-4 h-4 text-[#0071E3] accent-[#0071E3]">
+                <div class="flex items-center justify-between w-full">
+                  <span class="text-sm font-medium text-[#1D1D1F]">16.66% (16 ⅔%)</span>
+                  <span class="text-xs text-[#86868B] font-mono group-hover:text-[#0071E3]">Option A</span>
+                </div>
+              </label>
+
+              <label class="flex items-center gap-4 p-4 rounded-2xl border border-black/[0.08] hover:border-[#0071E3] hover:bg-[#F8F9FF] cursor-pointer transition-all group">
+                <input type="radio" name="apple-opt" value="B" class="w-4 h-4 text-[#0071E3] accent-[#0071E3]">
+                <div class="flex items-center justify-between w-full">
+                  <span class="text-sm font-medium text-[#1D1D1F]">20.00%</span>
+                  <span class="text-xs text-[#86868B] font-mono group-hover:text-[#0071E3]">Option B</span>
+                </div>
+              </label>
+
+              <label class="flex items-center gap-4 p-4 rounded-2xl border border-black/[0.08] hover:border-[#0071E3] hover:bg-[#F8F9FF] cursor-pointer transition-all group">
+                <input type="radio" name="apple-opt" value="C" class="w-4 h-4 text-[#0071E3] accent-[#0071E3]">
+                <div class="flex items-center justify-between w-full">
+                  <span class="text-sm font-medium text-[#1D1D1F]">25.00%</span>
+                  <span class="text-xs text-[#86868B] font-mono group-hover:text-[#0071E3]">Option C</span>
+                </div>
+              </label>
+
+              <label class="flex items-center gap-4 p-4 rounded-2xl border border-black/[0.08] hover:border-[#0071E3] hover:bg-[#F8F9FF] cursor-pointer transition-all group">
+                <input type="radio" name="apple-opt" value="D" class="w-4 h-4 text-[#0071E3] accent-[#0071E3]">
+                <div class="flex items-center justify-between w-full">
+                  <span class="text-sm font-medium text-[#1D1D1F]">15.00%</span>
+                  <span class="text-xs text-[#86868B] font-mono group-hover:text-[#0071E3]">Option D</span>
+                </div>
+              </label>
+
+              <!-- Option E (TNPSC Spec - Subtle, non-obtrusive) -->
+              <label class="flex items-center gap-4 p-3.5 rounded-2xl border border-dashed border-[#D1D1D6] hover:border-[#8E8E93] cursor-pointer transition-all">
+                <input type="radio" name="apple-opt" value="E" class="w-4 h-4 text-[#8E8E93] accent-[#8E8E93]">
+                <div class="flex items-center justify-between w-full text-xs text-[#6E6E73]">
+                  <span>Answer Not Known (விடை தெரியவில்லை)</span>
+                  <span class="font-mono">Option E</span>
+                </div>
+              </label>
+
+            </div>
+
+          </div>
+
+          <!-- Bottom Action Bar (Apple Frosted Look) -->
+          <div class="pt-6 border-t border-black/[0.04] flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <button onclick="clearResponse()" class="px-4 py-2 rounded-full text-xs font-medium text-[#6E6E73] hover:bg-[#F5F5F7] transition-colors">
+                Clear
+              </button>
+              <button onclick="markReview()" class="px-4 py-2 rounded-full bg-[#F5F3FF] text-[#7C3AED] hover:bg-[#EDE9FE] text-xs font-semibold transition-colors">
+                Mark for Review
+              </button>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <button onclick="saveAndNext()" class="px-6 py-2.5 rounded-full bg-[#0071E3] hover:bg-[#0077ED] text-white text-xs font-semibold shadow-sm transition-all">
+                Save & Next
+              </button>
+              <button onclick="switchScreen('summary')" class="px-5 py-2.5 rounded-full bg-[#1D1D1F] hover:bg-[#000000] text-white text-xs font-semibold shadow-sm transition-all">
+                Submit Test
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right: Apple Minimalist Question Palette (1 col) -->
+        <div class="apple-card p-5 space-y-5">
+          <div class="flex items-center justify-between pb-3 border-b border-black/[0.04]">
+            <span class="text-xs font-semibold text-[#1D1D1F]">Questions</span>
+            <span class="text-[11px] text-[#86868B]">1 of 25</span>
+          </div>
+
+          <!-- Minimalist Status Indicators -->
+          <div class="grid grid-cols-2 gap-2 text-[11px] text-[#6E6E73]">
+            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#34C759]"></span> Answered (2)</div>
+            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#FF3B30]"></span> Unanswered (1)</div>
+            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#AF52DE]"></span> Review (1)</div>
+            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#E5E5EA]"></span> Unvisited (21)</div>
+          </div>
+
+          <!-- Question Dots Grid (Apple Calendar / Activity dots style) -->
+          <div class="grid grid-cols-5 gap-2 pt-2">
+            <button class="palette-pill w-8 h-8 rounded-full bg-[#34C759] text-white text-xs font-semibold flex items-center justify-center">1</button>
+            <button class="palette-pill w-8 h-8 rounded-full bg-[#34C759] text-white text-xs font-semibold flex items-center justify-center">2</button>
+            <button class="palette-pill w-8 h-8 rounded-full bg-[#FF3B30] text-white text-xs font-semibold flex items-center justify-center">3</button>
+            <button class="palette-pill w-8 h-8 rounded-full bg-[#AF52DE] text-white text-xs font-semibold flex items-center justify-center">4</button>
+            <button class="palette-pill w-8 h-8 rounded-full bg-[#F5F5F7] text-[#6E6E73] text-xs font-medium flex items-center justify-center">5</button>
+            <button class="palette-pill w-8 h-8 rounded-full bg-[#F5F5F7] text-[#6E6E73] text-xs font-medium flex items-center justify-center">6</button>
+            <button class="palette-pill w-8 h-8 rounded-full bg-[#F5F5F7] text-[#6E6E73] text-xs font-medium flex items-center justify-center">7</button>
+            <button class="palette-pill w-8 h-8 rounded-full bg-[#F5F5F7] text-[#6E6E73] text-xs font-medium flex items-center justify-center">8</button>
+            <button class="palette-pill w-8 h-8 rounded-full bg-[#F5F5F7] text-[#6E6E73] text-xs font-medium flex items-center justify-center">9</button>
+            <button class="palette-pill w-8 h-8 rounded-full bg-[#F5F5F7] text-[#6E6E73] text-xs font-medium flex items-center justify-center">10</button>
+            <button class="palette-pill w-8 h-8 rounded-full bg-[#F5F5F7] text-[#6E6E73] text-xs font-medium flex items-center justify-center">11</button>
+            <button class="palette-pill w-8 h-8 rounded-full bg-[#F5F5F7] text-[#6E6E73] text-xs font-medium flex items-center justify-center">12</button>
+            <button class="palette-pill w-8 h-8 rounded-full bg-[#F5F5F7] text-[#6E6E73] text-xs font-medium flex items-center justify-center">13</button>
+            <button class="palette-pill w-8 h-8 rounded-full bg-[#F5F5F7] text-[#6E6E73] text-xs font-medium flex items-center justify-center">14</button>
+            <button class="palette-pill w-8 h-8 rounded-full bg-[#F5F5F7] text-[#6E6E73] text-xs font-medium flex items-center justify-center">15</button>
+            <button class="palette-pill w-8 h-8 rounded-full bg-[#F5F5F7] text-[#6E6E73] text-xs font-medium flex items-center justify-center">16</button>
+            <button class="palette-pill w-8 h-8 rounded-full bg-[#F5F5F7] text-[#6E6E73] text-xs font-medium flex items-center justify-center">17</button>
+            <button class="palette-pill w-8 h-8 rounded-full bg-[#F5F5F7] text-[#6E6E73] text-xs font-medium flex items-center justify-center">18</button>
+            <button class="palette-pill w-8 h-8 rounded-full bg-[#F5F5F7] text-[#6E6E73] text-xs font-medium flex items-center justify-center">19</button>
+            <button class="palette-pill w-8 h-8 rounded-full bg-[#F5F5F7] text-[#6E6E73] text-xs font-medium flex items-center justify-center">20</button>
+          </div>
+
+          <div class="pt-3 border-t border-black/[0.04]">
+            <p class="text-[11px] text-[#86868B] leading-normal">
+              Click any number to jump directly to that question.
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- VIEW 3: INSIGHTS & SUMMARY (APPLE HEALTH INSIGHTS STYLE)       -->
+    <!-- ============================================================== -->
+    <div id="screen-summary" class="hidden space-y-6">
+      
+      <!-- Top Score Hero (Clean Apple Typography) -->
+      <div class="apple-card p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div>
+          <span class="text-xs uppercase tracking-wider text-[#86868B] font-medium">Session Complete</span>
+          <h2 class="text-4xl font-semibold tracking-tight text-[#1D1D1F] mt-1">18.67 <span class="text-xl font-normal text-[#86868B]">/ 25.00</span></h2>
+          <p class="text-xs text-[#86868B] mt-1">Right: 20 • Wrong: 4 (-1.33) • Unattempted: 1</p>
+        </div>
+
+        <div class="flex items-center gap-6 sm:gap-10">
+          <div>
+            <div class="text-2xl font-semibold text-[#34C759]">83.3%</div>
+            <div class="text-[11px] text-[#86868B] uppercase font-medium mt-0.5">Accuracy</div>
+          </div>
+          <div class="w-px h-10 bg-black/[0.06]"></div>
+          <div>
+            <div class="text-2xl font-semibold text-[#FF9500]">14m 20s</div>
+            <div class="text-[11px] text-[#86868B] uppercase font-medium mt-0.5">Pace (34s/Q)</div>
+          </div>
+          <div class="w-px h-10 bg-black/[0.06]"></div>
+          <div>
+            <div class="text-2xl font-semibold text-[#0071E3]">+75 XP</div>
+            <div class="text-[11px] text-[#86868B] uppercase font-medium mt-0.5">Gained</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Life Stamina Protected Card (Apple Health Style) -->
+      <div class="apple-card p-5 flex items-center justify-between border-l-4 border-l-[#34C759]">
+        <div class="flex items-center gap-3.5">
+          <div class="w-10 h-10 rounded-full bg-[#E8F8EE] text-[#34C759] flex items-center justify-center text-lg">
+            🛡️
+          </div>
+          <div>
+            <h4 class="text-sm font-semibold text-[#1D1D1F]">Exam Stamina Preserved</h4>
+            <p class="text-xs text-[#86868B]">Accuracy &ge; 40% threshold achieved. 0 Lives lost. Current Stamina: 4/5 ❤️</p>
+          </div>
+        </div>
+        <button onclick="openHeartsModal()" class="text-xs text-[#0071E3] font-medium hover:underline">
+          View Details
+        </button>
+      </div>
+
+      <!-- AI Memory Shortcuts (Apple Intelligence Siri Style) -->
+      <div class="apple-card p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-[#FF2D55] via-[#AF52DE] to-[#0071E3] p-0.5 flex items-center justify-center">
+              <div class="w-full h-full bg-white rounded-full flex items-center justify-center text-[10px]">
+                ✦
+              </div>
+            </div>
+            <div>
+              <h3 class="text-sm font-semibold text-[#1D1D1F]">AI Memory Shortcuts & Mnemonics</h3>
+              <p class="text-xs text-[#86868B]">Bilingual revision tricks generated for questions you missed</p>
+            </div>
+          </div>
+          <span class="text-[10px] px-2.5 py-1 rounded-full bg-[#F5F5F7] text-[#6E6E73] font-medium">Smart Review</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+          
+          <div class="p-4 rounded-2xl bg-[#FBFBFD] border border-black/[0.04] space-y-2">
+            <span class="text-[10px] font-semibold text-[#0071E3] uppercase tracking-wider">Quant Aptitude Trick</span>
+            <div class="text-xs font-semibold text-[#1D1D1F]">Price vs Consumption: Reduction = [ r / (100 + r) ] × 100%</div>
+            <p class="text-xs text-[#6E6E73] leading-relaxed">
+              If price increases by 20%, reduction is 20/120 = 1/6 = 16.66% instantly without using complex equation variables.
+            </p>
+            <p class="text-[11px] text-[#86868B] italic">
+              விளக்கம்: விலை கூடினால் [ r / (100 + r) ] × 100% சூத்திரம் மூலம் உடனே விடை காணலாம்.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-[#FBFBFD] border border-black/[0.04] space-y-2">
+            <span class="text-[10px] font-semibold text-[#AF52DE] uppercase tracking-wider">Reasoning Mnemonic</span>
+            <div class="text-xs font-semibold text-[#1D1D1F]">Syllogism: Affirmative + Affirmative = Affirmative</div>
+            <p class="text-xs text-[#6E6E73] leading-relaxed">
+              Two positive statements can NEVER yield a negative conclusion. Discard negative options immediately.
+            </p>
+            <p class="text-[11px] text-[#86868B] italic">
+              விளக்கம்: நேர்மறை கூற்றுகள் எப்போதும் எதிர்மறை முடிவை தராது. எதிர்மறை விடைகளை தவிர்க்கலாம்.
+            </p>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- VIEW 4: TEST HISTORY (APPLE WALLET / HEALTH TRENDS STYLE)      -->
+    <!-- ============================================================== -->
+    <div id="screen-history" class="hidden space-y-6">
+      
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-2xl font-semibold tracking-tight text-[#1D1D1F]">Mock Test History</h2>
+          <p class="text-xs text-[#86868B]">14 Completed Attempts • SQLite Offline Database</p>
+        </div>
+      </div>
+
+      <!-- Clean Summary Metrics -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="apple-card p-5">
+          <span class="text-xs text-[#86868B]">Average Score</span>
+          <div class="text-2xl font-semibold text-[#1D1D1F] mt-1">19.2 <span class="text-xs font-normal text-[#86868B]">/ 25</span></div>
+          <span class="text-[11px] text-[#34C759] font-medium">↑ +14% this week</span>
+        </div>
+        <div class="apple-card p-5">
+          <span class="text-xs text-[#86868B]">Average Accuracy</span>
+          <div class="text-2xl font-semibold text-[#1D1D1F] mt-1">84.2%</div>
+          <span class="text-[11px] text-[#34C759] font-medium">Top quartile accuracy</span>
+        </div>
+        <div class="apple-card p-5">
+          <span class="text-xs text-[#86868B]">Average Speed</span>
+          <div class="text-2xl font-semibold text-[#1D1D1F] mt-1">38s <span class="text-xs font-normal text-[#86868B]">/ question</span></div>
+          <span class="text-[11px] text-[#86868B]">Well within 54s limit</span>
+        </div>
+      </div>
+
+      <!-- Inset Grouped History List -->
+      <div class="apple-card p-6 space-y-3">
+        <h3 class="text-sm font-semibold text-[#1D1D1F] pb-2 border-b border-black/[0.04]">Recent Tests</h3>
+        
+        <div class="divide-y divide-black/[0.04]">
+          
+          <div class="py-3.5 flex items-center justify-between hover:bg-[#FAFAFA] rounded-xl px-2 transition-colors">
+            <div>
+              <div class="text-sm font-medium text-[#1D1D1F]">RRB NTPC Stage 1 Mock #04</div>
+              <div class="text-xs text-[#86868B]">Today at 11:45 AM • 25 Questions • 14m 20s</div>
+            </div>
+            <div class="text-right">
+              <div class="text-sm font-semibold text-[#1D1D1F]">18.67 / 25</div>
+              <div class="text-xs text-[#34C759] font-medium">83.3% Accuracy • +75 XP</div>
+            </div>
+          </div>
+
+          <div class="py-3.5 flex items-center justify-between hover:bg-[#FAFAFA] rounded-xl px-2 transition-colors">
+            <div>
+              <div class="text-sm font-medium text-[#1D1D1F]">TNPSC Group 4 General Studies & Tamil</div>
+              <div class="text-xs text-[#86868B]">Yesterday at 04:10 PM • 25 Questions • 16m 05s</div>
+            </div>
+            <div class="text-right">
+              <div class="text-sm font-semibold text-[#1D1D1F]">21.00 / 25</div>
+              <div class="text-xs text-[#34C759] font-medium">88.0% Accuracy • +90 XP</div>
+            </div>
+          </div>
+
+          <div class="py-3.5 flex items-center justify-between hover:bg-[#FAFAFA] rounded-xl px-2 transition-colors">
+            <div>
+              <div class="text-sm font-medium text-[#1D1D1F]">SSC CGL Tier 1 Sectional Drill</div>
+              <div class="text-xs text-[#86868B]">18 Nov 2026 • 25 Questions • 12m 45s</div>
+            </div>
+            <div class="text-right">
+              <div class="text-sm font-semibold text-[#1D1D1F]">16.33 / 25</div>
+              <div class="text-xs text-[#FF9500] font-medium">72.0% Accuracy • +50 XP</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- MODAL 1: APPLE-STYLE LIVES & STAMINA SHEET                     -->
+  <!-- ============================================================== -->
+  <div id="modal-hearts" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-[32px] sm:rounded-[32px] max-w-md w-full p-6 sm:p-8 shadow-2xl border border-black/[0.06] space-y-5 animate-in fade-in">
+      
+      <!-- Apple Drag Notch -->
+      <div class="w-10 h-1 bg-[#D1D1D6] rounded-full mx-auto sm:hidden mb-2"></div>
+
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="text-xs uppercase text-[#86868B] font-medium">Exam Discipline</span>
+          <h3 class="text-lg font-semibold text-[#1D1D1F]">Stamina & Lives</h3>
+        </div>
+        <button onclick="closeHeartsModal()" class="w-8 h-8 rounded-full bg-[#F5F5F7] hover:bg-[#E5E5EA] flex items-center justify-center text-[#86868B] text-xs font-bold transition-colors">✕</button>
+      </div>
+
+      <!-- 5 Clean Hearts Display with Live Liquid Loading Recovering Heart Strictly Parallel to Timer -->
+      <div class="py-4 bg-[#FFF5F6] rounded-2xl border border-[#FECDD3] flex items-center justify-center gap-4">
+        <span class="text-3xl select-none leading-none">❤️</span>
+        <span class="text-3xl select-none leading-none">❤️</span>
+        <span class="text-3xl select-none leading-none">❤️</span>
+        <span class="text-3xl select-none leading-none">❤️</span>
+        <!-- 5th Recovering Heart: Gray outline with live red liquid fill strictly parallel to 2-hour recovery -->
+        <div id="modal-heart-5-container" class="relative w-8 h-8 flex items-center justify-center select-none" title="Recovering Heart: Parallel loading with 2-hour recovery countdown">
+          <!-- Empty Slate Outline Heart -->
+          <svg class="w-7 h-7 text-[#CBD5E1] stroke-current fill-none stroke-[2]" viewBox="0 0 24 24">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+          </svg>
+          <!-- Dynamic Liquid Loading Red Fill strictly parallel to countdown -->
+          <div id="modal-recovering-fill" class="absolute inset-0 overflow-hidden heart-parallel-fill flex items-center justify-center" style="clip-path: inset(62.5% 0 0 0);">
+            <svg class="w-7 h-7 text-[#FF2D55] fill-current" viewBox="0 0 24 24">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Parallel Countdown & Recovery Fill Level -->
+      <div class="text-center space-y-1.5">
+        <div class="text-xs font-semibold text-[#BE123C] flex items-center justify-center gap-1.5">
+          <span>⏳</span>
+          <span id="modal-countdown-label">Next Life in 1h 15m 00s (37.5% loaded)</span>
+        </div>
+        <!-- Live Parallel Progress Track -->
+        <div class="w-52 h-1.5 bg-[#F1F5F9] rounded-full mx-auto overflow-hidden">
+          <div id="modal-progress-bar" class="h-full bg-[#E11D48] rounded-full transition-all duration-500" style="width: 37.5%;"></div>
+        </div>
+        <div class="text-[11px] text-[#86868B]">1 Heart recovers every 2 hours (120 mins). Red color loads in exact parallel with recovery time.</div>
+      </div>
+
+      <!-- Interactive Scrubbers to test exact parallel fill at 25%, 50%, 75%, 100% -->
+      <div class="bg-[#F8FAFC] p-3 rounded-2xl border border-black/[0.04] text-xs">
+        <div class="text-[10px] font-bold text-[#64748B] mb-2 text-center uppercase tracking-wider">Test Parallel Recovery Loading At Time:</div>
+        <div class="grid grid-cols-4 gap-2">
+          <button onclick="setSimulationProgress(0.25, 5400)" class="py-1.5 px-1 bg-white hover:bg-[#FFF0F2] text-[#E11D48] rounded-lg border border-black/[0.06] font-semibold text-[11px] transition-all cursor-pointer">
+            30m (25%)
+          </button>
+          <button onclick="setSimulationProgress(0.50, 3600)" class="py-1.5 px-1 bg-white hover:bg-[#FFF0F2] text-[#E11D48] rounded-lg border border-black/[0.06] font-semibold text-[11px] transition-all cursor-pointer">
+            60m (50%)
+          </button>
+          <button onclick="setSimulationProgress(0.75, 1800)" class="py-1.5 px-1 bg-white hover:bg-[#FFF0F2] text-[#E11D48] rounded-lg border border-black/[0.06] font-semibold text-[11px] transition-all cursor-pointer">
+            90m (75%)
+          </button>
+          <button onclick="setSimulationProgress(1.0, 0)" class="py-1.5 px-1 bg-[#E11D48] hover:bg-[#BE123C] text-white rounded-lg font-semibold text-[11px] transition-all cursor-pointer">
+            120m (Full)
+          </button>
+        </div>
+      </div>
+
+      <!-- Clean Rules Inset Box -->
+      <div class="bg-[#F5F5F7] p-4 rounded-2xl text-xs space-y-2.5 text-[#6E6E73]">
+        <div class="flex items-center justify-between">
+          <span>Quitting exam midway</span>
+          <span class="font-semibold text-[#FF2D55]">-1 Life</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span>Accuracy below 40%</span>
+          <span class="font-semibold text-[#FF2D55]">-1 Life</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span>Accuracy 70% or higher</span>
+          <span class="font-semibold text-[#34C759]">Zero Loss</span>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="space-y-2 pt-2">
+        <button onclick="refillWithXp()" class="w-full py-3 rounded-full bg-[#0071E3] hover:bg-[#0077ED] text-white text-xs font-semibold shadow-sm transition-all">
+          Instant Full Refill (50 XP)
+        </button>
+        <button onclick="healOneDrill()" class="w-full py-2.5 rounded-full bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] text-xs font-medium transition-colors">
+          Practice Revision Drill (+1 Life)
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL 2: APPLE WATCH STYLE PUBG TROPHY SHOWCASE                -->
+  <!-- ============================================================== -->
+  <div id="modal-pubg" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-white rounded-[32px] max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-black/[0.06] space-y-6 max-h-[85vh] overflow-y-auto">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-black/[0.04]">
+        <div>
+          <span class="text-xs uppercase text-[#86868B] font-medium">PUBG Battle Ranking</span>
+          <h3 class="text-lg font-semibold text-[#1D1D1F]">All 29 Battle Badges</h3>
+          <p class="text-[11px] text-[#86868B]">Sequential 1-by-1 unlock: Bronze/Silver/Gold (3 lvls) • Others (4 lvls)</p>
+        </div>
+        <button onclick="closePubgModal()" class="w-8 h-8 rounded-full bg-[#F5F5F7] hover:bg-[#E5E5EA] flex items-center justify-center text-[#86868B] text-xs font-bold transition-colors">✕</button>
+      </div>
+
+      <!-- Current Rank Summary Banner -->
+      <div class="p-4 rounded-2xl bg-gradient-to-r from-[#FFFBEB] to-[#FEF3C7] border border-[#FDE68A] flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="apple-medal medal-bronze w-12 h-12 text-white font-bold text-sm">3</div>
+          <div>
+            <span class="text-[10px] font-bold tracking-wider uppercase text-[#D97706]">Current Battle Rank</span>
+            <div class="text-base font-extrabold text-[#78350F]">Bronze 3 (350 XP)</div>
+            <div class="text-[11px] text-[#92400E]">150 XP needed to unlock Silver 1</div>
+          </div>
+        </div>
+        <span class="px-2.5 py-1 rounded-full bg-[#D97706] text-white text-[10px] font-bold">Active Rank</span>
+      </div>
+
+      <!-- All 29 Badges (Sequential One-by-One Unlock) -->
+      <div class="space-y-2 text-xs">
+
+        <!-- Section: Bronze (3 Levels) -->
+        <div class="pt-2 pb-1 text-[11px] font-bold uppercase tracking-wider text-[#92400E] flex items-center justify-between">
+          <span>Bronze Tier (3 Levels)</span>
+          <span class="text-[10px] text-[#34C759] font-semibold">Tier In-Progress</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-[#FAFAFA] border border-black/[0.04] flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="apple-medal medal-bronze w-8 h-8 text-white font-bold text-[11px]">1</div>
+            <div>
+              <div class="font-semibold text-[#1D1D1F]">Bronze 1</div>
+              <div class="text-[10px] text-[#86868B]">0 – 149 XP • Aspirant Novice</div>
+            </div>
+          </div>
+          <span class="text-xs font-medium text-[#34C759]">✓ Unlocked</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-[#FAFAFA] border border-black/[0.04] flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="apple-medal medal-bronze w-8 h-8 text-white font-bold text-[11px]">2</div>
+            <div>
+              <div class="font-semibold text-[#1D1D1F]">Bronze 2</div>
+              <div class="text-[10px] text-[#86868B]">150 – 299 XP • Topic Explorer</div>
+            </div>
+          </div>
+          <span class="text-xs font-medium text-[#34C759]">✓ Unlocked</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-[#FFFBEB] border-2 border-[#F59E0B] flex items-center justify-between shadow-xs">
+          <div class="flex items-center gap-3">
+            <div class="apple-medal medal-bronze w-8 h-8 text-white font-bold text-[11px]">3</div>
+            <div>
+              <div class="font-extrabold text-[#78350F]">Bronze 3 (Current)</div>
+              <div class="text-[10px] text-[#B45309]">300 – 499 XP • 350 XP Active</div>
+            </div>
+          </div>
+          <span class="px-2 py-0.5 rounded-full bg-[#F59E0B] text-white text-[10px] font-bold">Active</span>
+        </div>
+
+        <!-- Section: Silver (3 Levels) -->
+        <div class="pt-3 pb-1 text-[11px] font-bold uppercase tracking-wider text-[#475569] flex items-center justify-between">
+          <span>Silver Tier (3 Levels)</span>
+          <span class="text-[10px] text-[#0071E3] font-semibold">Next Promotion</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-[#F8FAFC] border border-[#CBD5E1] flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="apple-medal medal-silver w-8 h-8 text-slate-800 font-bold text-[11px]">1</div>
+            <div>
+              <div class="font-semibold text-[#1D1D1F]">Silver 1</div>
+              <div class="text-[10px] text-[#0071E3] font-medium">500 – 649 XP • Timed Runner</div>
+            </div>
+          </div>
+          <span class="text-[11px] text-[#0071E3] font-bold">150 XP to Unlock</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-[#FAFAFA] border border-black/[0.04] flex items-center justify-between opacity-60">
+          <div class="flex items-center gap-3">
+            <div class="apple-medal medal-silver w-8 h-8 text-slate-800 font-bold text-[11px]">2</div>
+            <div>
+              <div class="font-medium text-[#1D1D1F]">Silver 2</div>
+              <div class="text-[10px] text-[#86868B]">650 – 799 XP • Accuracy Tactician</div>
+            </div>
+          </div>
+          <span class="text-[11px] text-[#86868B]">🔒 650 XP</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-[#FAFAFA] border border-black/[0.04] flex items-center justify-between opacity-60">
+          <div class="flex items-center gap-3">
+            <div class="apple-medal medal-silver w-8 h-8 text-slate-800 font-bold text-[11px]">3</div>
+            <div>
+              <div class="font-medium text-[#1D1D1F]">Silver 3</div>
+              <div class="text-[10px] text-[#86868B]">800 – 999 XP • Elite Driller</div>
+            </div>
+          </div>
+          <span class="text-[11px] text-[#86868B]">🔒 800 XP</span>
+        </div>
+
+        <!-- Section: Gold (3 Levels) -->
+        <div class="pt-3 pb-1 text-[11px] font-bold uppercase tracking-wider text-[#D97706] flex items-center justify-between">
+          <span>Gold Tier (3 Levels)</span>
+          <span class="text-[10px] text-[#86868B]">1,000+ XP</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-[#FAFAFA] border border-black/[0.04] flex items-center justify-between opacity-50">
+          <div class="flex items-center gap-3">
+            <div class="apple-medal medal-gold w-8 h-8 text-white font-bold text-[11px]">1</div>
+            <div>
+              <div class="font-medium text-[#1D1D1F]">Gold 1</div>
+              <div class="text-[10px] text-[#86868B]">1,000 – 1,299 XP • Mock Battler</div>
+            </div>
+          </div>
+          <span class="text-[11px] text-[#86868B]">🔒 1,000 XP</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-[#FAFAFA] border border-black/[0.04] flex items-center justify-between opacity-50">
+          <div class="flex items-center gap-3">
+            <div class="apple-medal medal-gold w-8 h-8 text-white font-bold text-[11px]">2</div>
+            <div>
+              <div class="font-medium text-[#1D1D1F]">Gold 2</div>
+              <div class="text-[10px] text-[#86868B]">1,300 – 1,599 XP • Speed Striker</div>
+            </div>
+          </div>
+          <span class="text-[11px] text-[#86868B]">🔒 1,300 XP</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-[#FAFAFA] border border-black/[0.04] flex items-center justify-between opacity-50">
+          <div class="flex items-center gap-3">
+            <div class="apple-medal medal-gold w-8 h-8 text-white font-bold text-[11px]">3</div>
+            <div>
+              <div class="font-medium text-[#1D1D1F]">Gold 3</div>
+              <div class="text-[10px] text-[#86868B]">1,600 – 1,999 XP • Veteran Candidate</div>
+            </div>
+          </div>
+          <span class="text-[11px] text-[#86868B]">🔒 1,600 XP</span>
+        </div>
+
+        <!-- Section: Platinum (4 Levels) -->
+        <div class="pt-3 pb-1 text-[11px] font-bold uppercase tracking-wider text-[#0284C7] flex items-center justify-between">
+          <span>Platinum Tier (4 Levels)</span>
+          <span class="text-[10px] text-[#86868B]">2,000+ XP</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-[#FAFAFA] border border-black/[0.04] flex items-center justify-between opacity-45">
+          <div class="flex items-center gap-3">
+            <div class="apple-medal medal-platinum w-8 h-8 text-white font-bold text-[11px]">1</div>
+            <div>
+              <div class="font-medium text-[#1D1D1F]">Platinum 1</div>
+              <div class="text-[10px] text-[#86868B]">2,000 – 2,349 XP • Sharp Strategist</div>
+            </div>
+          </div>
+          <span class="text-[11px] text-[#86868B]">🔒 2,000 XP</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-[#FAFAFA] border border-black/[0.04] flex items-center justify-between opacity-45">
+          <div class="flex items-center gap-3">
+            <div class="apple-medal medal-platinum w-8 h-8 text-white font-bold text-[11px]">2</div>
+            <div>
+              <div class="font-medium text-[#1D1D1F]">Platinum 2</div>
+              <div class="text-[10px] text-[#86868B]">2,350 – 2,699 XP • High Performer</div>
+            </div>
+          </div>
+          <span class="text-[11px] text-[#86868B]">🔒 2,350 XP</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-[#FAFAFA] border border-black/[0.04] flex items-center justify-between opacity-45">
+          <div class="flex items-center gap-3">
+            <div class="apple-medal medal-platinum w-8 h-8 text-white font-bold text-[11px]">3</div>
+            <div>
+              <div class="font-medium text-[#1D1D1F]">Platinum 3</div>
+              <div class="text-[10px] text-[#86868B]">2,700 – 3,099 XP • Mock Vanguard</div>
+            </div>
+          </div>
+          <span class="text-[11px] text-[#86868B]">🔒 2,700 XP</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-[#FAFAFA] border border-black/[0.04] flex items-center justify-between opacity-45">
+          <div class="flex items-center gap-3">
+            <div class="apple-medal medal-platinum w-8 h-8 text-white font-bold text-[11px]">4</div>
+            <div>
+              <div class="font-medium text-[#1D1D1F]">Platinum 4</div>
+              <div class="text-[10px] text-[#86868B]">3,100 – 3,499 XP • Cutoff Shatterer</div>
+            </div>
+          </div>
+          <span class="text-[11px] text-[#86868B]">🔒 3,100 XP</span>
+        </div>
+
+        <!-- Section: Diamond (4 Levels) -->
+        <div class="pt-3 pb-1 text-[11px] font-bold uppercase tracking-wider text-[#2563EB] flex items-center justify-between">
+          <span>Diamond Tier (4 Levels)</span>
+          <span class="text-[10px] text-[#86868B]">3,500+ XP</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-[#FAFAFA] border border-black/[0.04] flex items-center justify-between opacity-40">
+          <div class="flex items-center gap-3">
+            <div class="apple-medal medal-diamond w-8 h-8 text-white font-bold text-[11px]">1</div>
+            <div>
+              <div class="font-medium text-[#1D1D1F]">Diamond 1</div>
+              <div class="text-[10px] text-[#86868B]">3,500 – 3,849 XP • State Top 1000</div>
+            </div>
+          </div>
+          <span class="text-[11px] text-[#86868B]">🔒 3,500 XP</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-[#FAFAFA] border border-black/[0.04] flex items-center justify-between opacity-40">
+          <div class="flex items-center gap-3">
+            <div class="apple-medal medal-diamond w-8 h-8 text-white font-bold text-[11px]">2</div>
+            <div>
+              <div class="font-medium text-[#1D1D1F]">Diamond 2</div>
+              <div class="text-[10px] text-[#86868B]">3,850 – 4,199 XP • Precision Champion</div>
+            </div>
+          </div>
+          <span class="text-[11px] text-[#86868B]">🔒 3,850 XP</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-[#FAFAFA] border border-black/[0.04] flex items-center justify-between opacity-40">
+          <div class="flex items-center gap-3">
+            <div class="apple-medal medal-diamond w-8 h-8 text-white font-bold text-[11px]">3</div>
+            <div>
+              <div class="font-medium text-[#1D1D1F]">Diamond 3</div>
+              <div class="text-[10px] text-[#86868B]">4,200 – 4,599 XP • CBT Mastermind</div>
+            </div>
+          </div>
+          <span class="text-[11px] text-[#86868B]">🔒 4,200 XP</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-[#FAFAFA] border border-black/[0.04] flex items-center justify-between opacity-40">
+          <div class="flex items-center gap-3">
+            <div class="apple-medal medal-diamond w-8 h-8 text-white font-bold text-[11px]">4</div>
+            <div>
+              <div class="font-medium text-[#1D1D1F]">Diamond 4</div>
+              <div class="text-[10px] text-[#86868B]">4,600 – 4,999 XP • Cutoff Crusher</div>
+            </div>
+          </div>
+          <span class="text-[11px] text-[#86868B]">🔒 4,600 XP</span>
+        </div>
+
+        <!-- Section: Crown (4 Levels) -->
+        <div class="pt-3 pb-1 text-[11px] font-bold uppercase tracking-wider text-[#9333EA] flex items-center justify-between">
+          <span>Crown Tier (4 Levels)</span>
+          <span class="text-[10px] text-[#86868B]">5,000+ XP</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-[#FAFAFA] border border-black/[0.04] flex items-center justify-between opacity-35">
+          <div class="flex items-center gap-3">
+            <div class="apple-medal medal-crown w-8 h-8 text-white font-bold text-[11px]">1</div>
+            <div>
+              <div class="font-medium text-[#1D1D1F]">Crown 1</div>
+              <div class="text-[10px] text-[#86868B]">5,000 – 5,599 XP • Top 500 Aspirant</div>
+            </div>
+          </div>
+          <span class="text-[11px] text-[#86868B]">🔒 5,000 XP</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-[#FAFAFA] border border-black/[0.04] flex items-center justify-between opacity-35">
+          <div class="flex items-center gap-3">
+            <div class="apple-medal medal-crown w-8 h-8 text-white font-bold text-[11px]">2</div>
+            <div>
+              <div class="font-medium text-[#1D1D1F]">Crown 2</div>
+              <div class="text-[10px] text-[#86868B]">5,600 – 6,199 XP • Speed Maestro</div>
+            </div>
+          </div>
+          <span class="text-[11px] text-[#86868B]">🔒 5,600 XP</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-[#FAFAFA] border border-black/[0.04] flex items-center justify-between opacity-35">
+          <div class="flex items-center gap-3">
+            <div class="apple-medal medal-crown w-8 h-8 text-white font-bold text-[11px]">3</div>
+            <div>
+              <div class="font-medium text-[#1D1D1F]">Crown 3</div>
+              <div class="text-[10px] text-[#86868B]">6,200 – 6,799 XP • Domain Dominator</div>
+            </div>
+          </div>
+          <span class="text-[11px] text-[#86868B]">🔒 6,200 XP</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-[#FAFAFA] border border-black/[0.04] flex items-center justify-between opacity-35">
+          <div class="flex items-center gap-3">
+            <div class="apple-medal medal-crown w-8 h-8 text-white font-bold text-[11px]">4</div>
+            <div>
+              <div class="font-medium text-[#1D1D1F]">Crown 4</div>
+              <div class="text-[10px] text-[#86868B]">6,800 – 7,499 XP • State Top 200</div>
+            </div>
+          </div>
+          <span class="text-[11px] text-[#86868B]">🔒 6,800 XP</span>
+        </div>
+
+        <!-- Section: Ace (4 Levels) -->
+        <div class="pt-3 pb-1 text-[11px] font-bold uppercase tracking-wider text-[#DC2626] flex items-center justify-between">
+          <span>Ace Tier (4 Levels)</span>
+          <span class="text-[10px] text-[#86868B]">7,500+ XP</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-[#FAFAFA] border border-black/[0.04] flex items-center justify-between opacity-30">
+          <div class="flex items-center gap-3">
+            <div class="apple-medal medal-ace w-8 h-8 text-white font-bold text-[11px]">1</div>
+            <div>
+              <div class="font-medium text-[#1D1D1F]">Ace 1</div>
+              <div class="text-[10px] text-[#86868B]">7,500 – 8,099 XP • State Top 100</div>
+            </div>
+          </div>
+          <span class="text-[11px] text-[#86868B]">🔒 7,500 XP</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-[#FAFAFA] border border-black/[0.04] flex items-center justify-between opacity-30">
+          <div class="flex items-center gap-3">
+            <div class="apple-medal medal-ace w-8 h-8 text-white font-bold text-[11px]">2</div>
+            <div>
+              <div class="font-medium text-[#1D1D1F]">Ace 2</div>
+              <div class="text-[10px] text-[#86868B]">8,100 – 8,699 XP • Flawless Finisher</div>
+            </div>
+          </div>
+          <span class="text-[11px] text-[#86868B]">🔒 8,100 XP</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-[#FAFAFA] border border-black/[0.04] flex items-center justify-between opacity-30">
+          <div class="flex items-center gap-3">
+            <div class="apple-medal medal-ace w-8 h-8 text-white font-bold text-[11px]">3</div>
+            <div>
+              <div class="font-medium text-[#1D1D1F]">Ace 3</div>
+              <div class="text-[10px] text-[#86868B]">8,700 – 9,299 XP • State Top 50</div>
+            </div>
+          </div>
+          <span class="text-[11px] text-[#86868B]">🔒 8,700 XP</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-[#FAFAFA] border border-black/[0.04] flex items-center justify-between opacity-30">
+          <div class="flex items-center gap-3">
+            <div class="apple-medal medal-ace w-8 h-8 text-white font-bold text-[11px]">4</div>
+            <div>
+              <div class="font-medium text-[#1D1D1F]">Ace 4</div>
+              <div class="text-[10px] text-[#86868B]">9,300 – 9,999 XP • State Top 10</div>
+            </div>
+          </div>
+          <span class="text-[11px] text-[#86868B]">🔒 9,300 XP</span>
+        </div>
+
+        <!-- Section: Conqueror (4 Levels) -->
+        <div class="pt-3 pb-1 text-[11px] font-bold uppercase tracking-wider text-[#B45309] flex items-center justify-between">
+          <span>Conqueror Tier (4 Levels)</span>
+          <span class="text-[10px] text-[#B45309] font-extrabold">Apex Hall of Fame</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-[#FAFAFA] border border-black/[0.04] flex items-center justify-between opacity-25">
+          <div class="flex items-center gap-3">
+            <div class="apple-medal medal-conqueror w-8 h-8 text-white font-bold text-[11px]">1</div>
+            <div>
+              <div class="font-medium text-[#1D1D1F]">Conqueror 1</div>
+              <div class="text-[10px] text-[#86868B]">10,000 – 12,499 XP • State Rank 1 Apex</div>
+            </div>
+          </div>
+          <span class="text-[11px] text-[#86868B]">🔒 10,000 XP</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-[#FAFAFA] border border-black/[0.04] flex items-center justify-between opacity-25">
+          <div class="flex items-center gap-3">
+            <div class="apple-medal medal-conqueror w-8 h-8 text-white font-bold text-[11px]">2</div>
+            <div>
+              <div class="font-medium text-[#1D1D1F]">Conqueror 2</div>
+              <div class="text-[10px] text-[#86868B]">12,500 – 14,999 XP • Legend Aspirant</div>
+            </div>
+          </div>
+          <span class="text-[11px] text-[#86868B]">🔒 12,500 XP</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-[#FAFAFA] border border-black/[0.04] flex items-center justify-between opacity-25">
+          <div class="flex items-center gap-3">
+            <div class="apple-medal medal-conqueror w-8 h-8 text-white font-bold text-[11px]">3</div>
+            <div>
+              <div class="font-medium text-[#1D1D1F]">Conqueror 3</div>
+              <div class="text-[10px] text-[#86868B]">15,000 – 19,999 XP • Immortal CBT Titan</div>
+            </div>
+          </div>
+          <span class="text-[11px] text-[#86868B]">🔒 15,000 XP</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-[#FAFAFA] border border-black/[0.04] flex items-center justify-between opacity-25">
+          <div class="flex items-center gap-3">
+            <div class="apple-medal medal-conqueror w-8 h-8 text-white font-bold text-[11px]">4</div>
+            <div>
+              <div class="font-medium text-[#1D1D1F]">Conqueror 4</div>
+              <div class="text-[10px] text-[#86868B]">20,000+ XP • Appointment Guaranteed</div>
+            </div>
+          </div>
+          <span class="text-[11px] text-[#86868B]">🔒 20,000 XP</span>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL 3: APPLE NOTES STYLE VIRTUAL ROUGH SHEET                -->
+  <!-- ============================================================== -->
+  <div id="modal-rough" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-white rounded-[32px] max-w-lg w-full p-6 shadow-2xl border border-black/[0.06] space-y-4">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-black/[0.04]">
+        <div>
+          <span class="text-xs uppercase text-[#86868B] font-medium">Apple Notes Scratchpad</span>
+          <h3 class="text-base font-semibold text-[#1D1D1F]">Virtual Rough Sheet</h3>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="clearRoughCanvas()" class="text-xs text-[#0071E3] font-medium px-2.5 py-1 hover:bg-[#F5F5F7] rounded-lg">
+            Clear
+          </button>
+          <button onclick="closeRoughSheet()" class="w-8 h-8 rounded-full bg-[#F5F5F7] hover:bg-[#E5E5EA] flex items-center justify-center text-[#86868B] text-xs font-bold transition-colors">✕</button>
+        </div>
+      </div>
+
+      <!-- Canvas Area -->
+      <div class="border border-black/[0.08] rounded-2xl p-1 bg-[#FAFAFC]">
+        <canvas id="rough-canvas" width="480" height="240" class="w-full bg-white rounded-xl cursor-crosshair"></canvas>
+      </div>
+
+      <div class="flex items-center justify-between text-xs text-[#86868B]">
+        <span>Drag to sketch rough math formulas</span>
+        <button onclick="insertSampleCalc()" class="text-[#0071E3] font-medium hover:underline">Sample Calculation</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL 4: APPLE ALERT DIALOG (EXIT DISCIPLINE GUARD)           -->
+  <!-- ============================================================== -->
+  <div id="modal-exit" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-white rounded-[28px] max-w-xs w-full p-6 shadow-2xl border border-black/[0.06] text-center space-y-3">
+      <div class="w-12 h-12 bg-[#FFF0F2] text-[#FF2D55] rounded-full mx-auto flex items-center justify-center text-xl">
+        💔
+      </div>
+      <h3 class="text-base font-semibold text-[#1D1D1F]">Quit Mock Exam?</h3>
+      <p class="text-xs text-[#86868B] leading-relaxed">
+        Exiting before submitting deducts <strong class="text-[#FF2D55]">1 Life (-1 ❤️)</strong> from your exam stamina.
+      </p>
+      <div class="pt-2 flex flex-col gap-2">
+        <button onclick="closeExitGuard()" class="w-full py-2.5 rounded-full bg-[#0071E3] text-white text-xs font-semibold shadow-sm">
+          Keep Practicing
+        </button>
+        <button onclick="confirmExit()" class="w-full py-2 rounded-full text-xs font-medium text-[#FF2D55] hover:bg-[#FFF0F2]">
+          Quit (-1 ❤️)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL 5: APPLE TARGET EXAM CHOOSER MODAL                       -->
+  <!-- ============================================================== -->
+  <div id="modal-exam-selector" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-[32px] sm:rounded-[32px] max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-black/[0.06] space-y-5 max-h-[88vh] flex flex-col">
+      
+      <!-- Apple Drag Notch -->
+      <div class="w-10 h-1 bg-[#D1D1D6] rounded-full mx-auto sm:hidden mb-1"></div>
+
+      <div class="flex items-center justify-between pb-2 border-b border-black/[0.04]">
+        <div>
+          <span class="text-xs uppercase text-[#86868B] font-medium">Preparation Goal</span>
+          <h3 class="text-lg font-semibold text-[#1D1D1F]">Choose Target Exam</h3>
+        </div>
+        <button onclick="closeExamSelectorModal()" class="w-8 h-8 rounded-full bg-[#F5F5F7] hover:bg-[#E5E5EA] flex items-center justify-center text-[#86868B] text-xs font-bold transition-colors">✕</button>
+      </div>
+
+      <!-- Category Filter Pills (Apple Segmented Bar) -->
+      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
+        <button onclick="filterExamCategory('all')" id="cat-all" class="exam-cat-pill px-3.5 py-1.5 rounded-full font-semibold bg-[#0071E3] text-white transition-all shadow-xs shrink-0">
+          All (17)
+        </button>
+        <button onclick="filterExamCategory('upsc')" id="cat-upsc" class="exam-cat-pill px-3.5 py-1.5 rounded-full font-medium bg-[#EEF2FF] text-[#3730A3] hover:bg-[#E0E7FF] font-bold transition-all shrink-0 border border-[#C7D2FE]">
+          🏛️ UPSC Civil Services (4)
+        </button>
+        <button onclick="filterExamCategory('tnpsc')" id="cat-tnpsc" class="exam-cat-pill px-3.5 py-1.5 rounded-full font-medium bg-[#F5F5F7] text-[#6E6E73] hover:text-[#1D1D1F] transition-all shrink-0">
+          TNPSC & State (3)
+        </button>
+        <button onclick="filterExamCategory('railways')" id="cat-railways" class="exam-cat-pill px-3.5 py-1.5 rounded-full font-medium bg-[#F5F5F7] text-[#6E6E73] hover:text-[#1D1D1F] transition-all shrink-0">
+          Railways (3)
+        </button>
+        <button onclick="filterExamCategory('ssc')" id="cat-ssc" class="exam-cat-pill px-3.5 py-1.5 rounded-full font-medium bg-[#F5F5F7] text-[#6E6E73] hover:text-[#1D1D1F] transition-all shrink-0">
+          SSC (4)
+        </button>
+        <button onclick="filterExamCategory('banking')" id="cat-banking" class="exam-cat-pill px-3.5 py-1.5 rounded-full font-medium bg-[#F5F5F7] text-[#6E6E73] hover:text-[#1D1D1F] transition-all shrink-0">
+          Banking (3)
+        </button>
+      </div>
+
+      <!-- Exam Cards List -->
+      <div class="space-y-3 overflow-y-auto flex-1 pr-1" id="exam-list-container">
+
+        <!-- UPSC Civil Services & Defence Exams -->
+        <div onclick="selectTargetExam('upsc_cse_prelims_gs', 'UPSC CSE Prelims (GS-1)')" class="exam-item exam-cat-upsc p-4 rounded-2xl border-2 border-[#1E3A8A]/30 bg-[#F0F4FF] hover:border-[#1E3A8A] cursor-pointer transition-all shadow-xs">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-sm font-extrabold text-[#1E3A8A]">UPSC CSE Prelims (GS-1)</h4>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#1E3A8A] text-white font-bold">UPSC • IAS/IPS/IFS</span>
+                <span class="text-[9px] px-2 py-0.5 rounded-full bg-[#10B981]/20 text-[#047857] font-bold">NEW</span>
+              </div>
+              <p class="text-xs text-[#334155] mt-1 font-medium">Civil Services IAS/IPS/IFS Prelims Paper 1 (Polity, History, Geo, Env, Economy, Sci-Tech)</p>
+            </div>
+            <span class="text-xs text-[#1E3A8A] font-bold shrink-0">Select ➔</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5 mt-2.5 text-[10px]">
+            <span class="px-2 py-0.5 rounded-md bg-white border border-[#CBD5E1] text-[#1E293B] font-bold">100 Questions</span>
+            <span class="px-2 py-0.5 rounded-md bg-white border border-[#CBD5E1] text-[#1E293B] font-bold">120 Mins (2 Hours)</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#EFF6FF] text-[#1D4ED8] font-bold">+2.0 Marks</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#FEE2E2] text-[#DC2626] font-bold">-0.67 Penalty (1/3rd)</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#ECFDF5] text-[#059669] font-bold">100% Bilingual</span>
+          </div>
+        </div>
+
+        <div onclick="selectTargetExam('upsc_cse_csat', 'UPSC CSAT Prelims (GS-2)')" class="exam-item exam-cat-upsc p-4 rounded-2xl border border-[#CBD5E1] hover:border-[#1D4ED8] hover:bg-[#F8F9FF] cursor-pointer transition-all">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-sm font-bold text-[#1E293B]">UPSC CSAT Prelims (GS-2)</h4>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#E0E7FF] text-[#3730A3] font-bold">UPSC • CSAT</span>
+              </div>
+              <p class="text-xs text-[#64748B] mt-0.5">Civil Services Aptitude Test: Reading Comprehension, Logical Reasoning & Numeracy</p>
+            </div>
+            <span class="text-xs text-[#0071E3] font-bold shrink-0">Select ➔</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5 mt-2.5 text-[10px]">
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">80 Questions</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">120 Mins</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#EFF6FF] text-[#1D4ED8] font-semibold">+2.5 Marks</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#FEE2E2] text-[#DC2626] font-semibold">-0.83 Penalty (1/3rd)</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#FEF3C7] text-[#B45309] font-semibold">Qualifying 33%</span>
+          </div>
+        </div>
+
+        <div onclick="selectTargetExam('upsc_cds', 'UPSC CDS (Defence Services)')" class="exam-item exam-cat-upsc p-4 rounded-2xl border border-[#CBD5E1] hover:border-[#1E40AF] hover:bg-[#F8F9FF] cursor-pointer transition-all">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-sm font-bold text-[#1E293B]">UPSC CDS (Combined Defence Services)</h4>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#E0E7FF] text-[#1E40AF] font-bold">UPSC • Defence</span>
+              </div>
+              <p class="text-xs text-[#64748B] mt-0.5">Indian Military Academy (IMA), Naval Academy (INA) & Air Force Academy (AFA)</p>
+            </div>
+            <span class="text-xs text-[#0071E3] font-bold shrink-0">Select ➔</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5 mt-2.5 text-[10px]">
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">100 Questions</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">120 Mins</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#EFF6FF] text-[#1D4ED8] font-semibold">+1.0 Mark</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#FEE2E2] text-[#DC2626] font-semibold">-0.33 Penalty</span>
+          </div>
+        </div>
+
+        <div onclick="selectTargetExam('upsc_nda', 'UPSC NDA & NA Exam')" class="exam-item exam-cat-upsc p-4 rounded-2xl border border-[#CBD5E1] hover:border-[#0F172A] hover:bg-[#F8F9FF] cursor-pointer transition-all">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-sm font-bold text-[#1E293B]">UPSC NDA & NA Exam</h4>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#F1F5F9] text-[#0F172A] font-bold">UPSC • NDA</span>
+              </div>
+              <p class="text-xs text-[#64748B] mt-0.5">National Defence Academy General Ability Test & Higher Secondary Mathematics</p>
+            </div>
+            <span class="text-xs text-[#0071E3] font-bold shrink-0">Select ➔</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5 mt-2.5 text-[10px]">
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">150 Questions</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">150 Mins</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#EFF6FF] text-[#1D4ED8] font-semibold">+2.5 Marks</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#FEE2E2] text-[#DC2626] font-semibold">-0.83 Penalty</span>
+          </div>
+        </div>
+        
+        <!-- TNPSC Exams -->
+        <div onclick="selectTargetExam('tnpsc_group_2_4', 'TNPSC Group 2 & Group 4')" class="exam-item exam-cat-tnpsc p-4 rounded-2xl border border-black/[0.06] hover:border-[#0071E3] hover:bg-[#F8F9FF] cursor-pointer transition-all">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-sm font-semibold text-[#1D1D1F]">TNPSC Group 2 & Group 4</h4>
+                <span class="text-[10px] px-2 py-0.2 rounded-full bg-[#E8F8EE] text-[#059669] font-semibold">TNPSC</span>
+              </div>
+              <p class="text-xs text-[#86868B] mt-0.5">Tamil Nadu Combined Civil Services Exam (VAO, Typist, Assistant)</p>
+            </div>
+            <span class="text-xs text-[#0071E3] font-bold">Select ➔</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5 mt-2.5 text-[10px]">
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">200 Questions</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">180 Mins</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#E8F8EE] text-[#059669] font-semibold">Zero Negative</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#FEF3C7] text-[#D97706] font-semibold">5 Options (A–E)</span>
+          </div>
+        </div>
+
+        <div onclick="selectTargetExam('tnpsc_group_1', 'TNPSC Group 1 Preliminary')" class="exam-item exam-cat-tnpsc p-4 rounded-2xl border border-black/[0.06] hover:border-[#0071E3] hover:bg-[#F8F9FF] cursor-pointer transition-all">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-sm font-semibold text-[#1D1D1F]">TNPSC Group 1 Preliminary</h4>
+                <span class="text-[10px] px-2 py-0.2 rounded-full bg-[#E8F8EE] text-[#059669] font-semibold">TNPSC</span>
+              </div>
+              <p class="text-xs text-[#86868B] mt-0.5">Deputy Collector, DSP, Commercial Tax Officer Preliminary Exam</p>
+            </div>
+            <span class="text-xs text-[#0071E3] font-bold">Select ➔</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5 mt-2.5 text-[10px]">
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">200 Questions</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">180 Mins</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#E8F8EE] text-[#059669] font-semibold">Zero Negative</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#FEF3C7] text-[#D97706] font-semibold">5 Options (A–E)</span>
+          </div>
+        </div>
+
+        <div onclick="selectTargetExam('tnusrb_police', 'TNUSRB Police SI & Constable')" class="exam-item exam-cat-tnpsc p-4 rounded-2xl border border-black/[0.06] hover:border-[#0071E3] hover:bg-[#F8F9FF] cursor-pointer transition-all">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-sm font-semibold text-[#1D1D1F]">TNUSRB Police SI & Constable</h4>
+                <span class="text-[10px] px-2 py-0.2 rounded-full bg-[#E8F8EE] text-[#059669] font-semibold">TN Police</span>
+              </div>
+              <p class="text-xs text-[#86868B] mt-0.5">Tamil Nadu Uniformed Services Recruitment Board SI / PC</p>
+            </div>
+            <span class="text-xs text-[#0071E3] font-bold">Select ➔</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5 mt-2.5 text-[10px]">
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">140 Questions</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">150 Mins</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#E8F8EE] text-[#059669] font-semibold">Zero Negative</span>
+          </div>
+        </div>
+
+        <!-- Railways Exams -->
+        <div onclick="selectTargetExam('rrb_ntpc', 'RRB NTPC')" class="exam-item exam-cat-railways p-4 rounded-2xl border-2 border-[#0071E3] bg-[#F8F9FF] cursor-pointer transition-all">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-sm font-semibold text-[#1D1D1F]">RRB NTPC (CBT 1 & 2)</h4>
+                <span class="text-[10px] px-2 py-0.2 rounded-full bg-[#E0F2FE] text-[#0284C7] font-semibold">Railways</span>
+                <span class="text-[9px] px-2 py-0.2 rounded-full bg-[#0071E3] text-white font-bold">CURRENT</span>
+              </div>
+              <p class="text-xs text-[#86868B] mt-0.5">Non-Technical Popular Categories (Station Master, Clerk, Goods Guard)</p>
+            </div>
+            <span class="text-xs text-[#0071E3] font-bold">✓ Active</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5 mt-2.5 text-[10px]">
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">100 Questions</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">90 Mins</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#FEE2E2] text-[#DC2626] font-semibold">-0.33 Negative</span>
+          </div>
+        </div>
+
+        <div onclick="selectTargetExam('rrb_group_d', 'RRB Group D (Level 1)')" class="exam-item exam-cat-railways p-4 rounded-2xl border border-black/[0.06] hover:border-[#0071E3] hover:bg-[#F8F9FF] cursor-pointer transition-all">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-sm font-semibold text-[#1D1D1F]">RRB Group D (Level 1)</h4>
+                <span class="text-[10px] px-2 py-0.2 rounded-full bg-[#E0F2FE] text-[#0284C7] font-semibold">Railways</span>
+              </div>
+              <p class="text-xs text-[#86868B] mt-0.5">Railway Recruitment Cell Trackman & Pointsman CBT</p>
+            </div>
+            <span class="text-xs text-[#0071E3] font-bold">Select ➔</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5 mt-2.5 text-[10px]">
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">100 Questions</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">90 Mins</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#FEE2E2] text-[#DC2626] font-semibold">-0.33 Negative</span>
+          </div>
+        </div>
+
+        <div onclick="selectTargetExam('rrb_alp', 'RRB ALP & Technician')" class="exam-item exam-cat-railways p-4 rounded-2xl border border-black/[0.06] hover:border-[#0071E3] hover:bg-[#F8F9FF] cursor-pointer transition-all">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-sm font-semibold text-[#1D1D1F]">RRB ALP & Technician</h4>
+                <span class="text-[10px] px-2 py-0.2 rounded-full bg-[#E0F2FE] text-[#0284C7] font-semibold">Railways</span>
+              </div>
+              <p class="text-xs text-[#86868B] mt-0.5">Assistant Loco Pilot & Technician First Stage CBT</p>
+            </div>
+            <span class="text-xs text-[#0071E3] font-bold">Select ➔</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5 mt-2.5 text-[10px]">
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">75 Questions</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">60 Mins</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#FEE2E2] text-[#DC2626] font-semibold">-0.33 Negative</span>
+          </div>
+        </div>
+
+        <!-- SSC Exams -->
+        <div onclick="selectTargetExam('ssc_cgl', 'SSC CGL Tier 1')" class="exam-item exam-cat-ssc p-4 rounded-2xl border border-black/[0.06] hover:border-[#0071E3] hover:bg-[#F8F9FF] cursor-pointer transition-all">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-sm font-semibold text-[#1D1D1F]">SSC CGL Tier 1</h4>
+                <span class="text-[10px] px-2 py-0.2 rounded-full bg-[#F5F3FF] text-[#7C3AED] font-semibold">SSC</span>
+              </div>
+              <p class="text-xs text-[#86868B] mt-0.5">Combined Graduate Level (Inspector, Auditor, Assistant Officer)</p>
+            </div>
+            <span class="text-xs text-[#0071E3] font-bold">Select ➔</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5 mt-2.5 text-[10px]">
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">100 Questions</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">60 Mins</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#FEE2E2] text-[#DC2626] font-semibold">-0.50 Negative</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#EDE9FE] text-[#7C3AED] font-semibold">🔒 15m Sectional Lock</span>
+          </div>
+        </div>
+
+        <div onclick="selectTargetExam('ssc_chsl', 'SSC CHSL (10+2)')" class="exam-item exam-cat-ssc p-4 rounded-2xl border border-black/[0.06] hover:border-[#0071E3] hover:bg-[#F8F9FF] cursor-pointer transition-all">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-sm font-semibold text-[#1D1D1F]">SSC CHSL (10+2)</h4>
+                <span class="text-[10px] px-2 py-0.2 rounded-full bg-[#F5F3FF] text-[#7C3AED] font-semibold">SSC</span>
+              </div>
+              <p class="text-xs text-[#86868B] mt-0.5">Combined Higher Secondary Level (LDC, DEO, Junior Assistant)</p>
+            </div>
+            <span class="text-xs text-[#0071E3] font-bold">Select ➔</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5 mt-2.5 text-[10px]">
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">100 Questions</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">60 Mins</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#FEE2E2] text-[#DC2626] font-semibold">-0.50 Negative</span>
+          </div>
+        </div>
+
+        <div onclick="selectTargetExam('ssc_mts', 'SSC MTS & Havaldar')" class="exam-item exam-cat-ssc p-4 rounded-2xl border border-black/[0.06] hover:border-[#0071E3] hover:bg-[#F8F9FF] cursor-pointer transition-all">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-sm font-semibold text-[#1D1D1F]">SSC MTS & Havaldar</h4>
+                <span class="text-[10px] px-2 py-0.2 rounded-full bg-[#F5F3FF] text-[#7C3AED] font-semibold">SSC</span>
+              </div>
+              <p class="text-xs text-[#86868B] mt-0.5">Multi-Tasking Non-Technical Staff Computer Based Exam</p>
+            </div>
+            <span class="text-xs text-[#0071E3] font-bold">Select ➔</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5 mt-2.5 text-[10px]">
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">90 Questions</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">90 Mins</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#EDE9FE] text-[#7C3AED] font-semibold">🔒 45m Session Lock</span>
+          </div>
+        </div>
+
+        <div onclick="selectTargetExam('ssc_gd', 'SSC GD Constable')" class="exam-item exam-cat-ssc p-4 rounded-2xl border border-black/[0.06] hover:border-[#0071E3] hover:bg-[#F8F9FF] cursor-pointer transition-all">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-sm font-semibold text-[#1D1D1F]">SSC GD Constable</h4>
+                <span class="text-[10px] px-2 py-0.2 rounded-full bg-[#F5F3FF] text-[#7C3AED] font-semibold">SSC</span>
+              </div>
+              <p class="text-xs text-[#86868B] mt-0.5">Central Armed Police Forces (BSF, CISF, CRPF, ITBP)</p>
+            </div>
+            <span class="text-xs text-[#0071E3] font-bold">Select ➔</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5 mt-2.5 text-[10px]">
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">80 Questions</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">60 Mins</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#FEE2E2] text-[#DC2626] font-semibold">-0.50 Negative</span>
+          </div>
+        </div>
+
+        <!-- Banking Exams -->
+        <div onclick="selectTargetExam('ibps_sbi_clerk', 'IBPS / SBI Clerk')" class="exam-item exam-cat-banking p-4 rounded-2xl border border-black/[0.06] hover:border-[#0071E3] hover:bg-[#F8F9FF] cursor-pointer transition-all">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-sm font-semibold text-[#1D1D1F]">IBPS / SBI Clerk</h4>
+                <span class="text-[10px] px-2 py-0.2 rounded-full bg-[#FEF3C7] text-[#D97706] font-semibold">Banking</span>
+              </div>
+              <p class="text-xs text-[#86868B] mt-0.5">Clerical Cadre Preliminary CBT (English, Quant, Reasoning)</p>
+            </div>
+            <span class="text-xs text-[#0071E3] font-bold">Select ➔</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5 mt-2.5 text-[10px]">
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">100 Questions</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">60 Mins</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#FEE2E2] text-[#DC2626] font-semibold">-0.25 Negative</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#FEF3C7] text-[#B45309] font-semibold">🔒 20m Sectional Lock</span>
+          </div>
+        </div>
+
+        <div onclick="selectTargetExam('ibps_sbi_po', 'IBPS / SBI PO Prelims')" class="exam-item exam-cat-banking p-4 rounded-2xl border border-black/[0.06] hover:border-[#0071E3] hover:bg-[#F8F9FF] cursor-pointer transition-all">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-sm font-semibold text-[#1D1D1F]">IBPS / SBI PO Prelims</h4>
+                <span class="text-[10px] px-2 py-0.2 rounded-full bg-[#FEF3C7] text-[#D97706] font-semibold">Banking</span>
+              </div>
+              <p class="text-xs text-[#86868B] mt-0.5">Probationary Officers Preliminary CBT Examination</p>
+            </div>
+            <span class="text-xs text-[#0071E3] font-bold">Select ➔</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5 mt-2.5 text-[10px]">
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">100 Questions</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">60 Mins</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#FEE2E2] text-[#DC2626] font-semibold">-0.25 Negative</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#FEF3C7] text-[#B45309] font-semibold">🔒 20m Sectional Lock</span>
+          </div>
+        </div>
+
+        <div onclick="selectTargetExam('rbi_assistant', 'RBI Assistant Prelims')" class="exam-item exam-cat-banking p-4 rounded-2xl border border-black/[0.06] hover:border-[#0071E3] hover:bg-[#F8F9FF] cursor-pointer transition-all">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-sm font-semibold text-[#1D1D1F]">RBI Assistant Prelims</h4>
+                <span class="text-[10px] px-2 py-0.2 rounded-full bg-[#FEF3C7] text-[#D97706] font-semibold">Banking</span>
+              </div>
+              <p class="text-xs text-[#86868B] mt-0.5">Reserve Bank of India Assistant Preliminary CBT</p>
+            </div>
+            <span class="text-xs text-[#0071E3] font-bold">Select ➔</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5 mt-2.5 text-[10px]">
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">100 Questions</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#F5F5F7] text-[#475569] font-medium">60 Mins</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#FEE2E2] text-[#DC2626] font-semibold">-0.25 Negative</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#FEF3C7] text-[#B45309] font-semibold">🔒 20m Sectional Lock</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- JAVASCRIPT CONTROLLERS                                         -->
+  <!-- ============================================================== -->
+  <script>
+    function openExamSelectorModal() { document.getElementById('modal-exam-selector').classList.remove('hidden'); }
+    function closeExamSelectorModal() { document.getElementById('modal-exam-selector').classList.add('hidden'); }
+
+    function filterExamCategory(cat) {
+      document.querySelectorAll('.exam-cat-pill').forEach(btn => {
+        btn.className = 'exam-cat-pill px-3.5 py-1.5 rounded-full font-medium bg-[#F5F5F7] text-[#6E6E73] hover:text-[#1D1D1F] transition-all shrink-0';
+      });
+      const activeBtn = document.getElementById('cat-' + cat);
+      if (activeBtn) {
+        activeBtn.className = 'exam-cat-pill px-3.5 py-1.5 rounded-full font-semibold bg-[#0071E3] text-white transition-all shadow-xs shrink-0';
+      }
+
+      document.querySelectorAll('.exam-item').forEach(item => {
+        if (cat === 'all' || item.classList.contains('exam-cat-' + cat)) {
+          item.classList.remove('hidden');
+        } else {
+          item.classList.add('hidden');
+        }
+      });
+    }
+
+    function showToast(msg) {
+      let toast = document.getElementById('preview-floating-toast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'preview-floating-toast';
+        toast.className = 'fixed bottom-6 right-6 z-50 bg-[#1D1D1F] text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-2xl transition-all duration-300 opacity-0 transform translate-y-3 flex items-center gap-2 pointer-events-none border border-white/10';
+        document.body.appendChild(toast);
+      }
+      toast.innerHTML = '<span>' + msg + '</span>';
+      toast.classList.remove('opacity-0', 'translate-y-3');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'translate-y-3');
+      }, 2600);
+    }
+
+    function selectTargetExam(id, title) {
+      document.getElementById('current-exam-title').innerText = title;
+      closeExamSelectorModal();
+      showToast('🎯 Target exam calibrated to ' + title);
+    }
+
+    function switchScreen(screenId) {
+      document.getElementById('screen-hub').classList.add('hidden');
+      document.getElementById('screen-exam').classList.add('hidden');
+      document.getElementById('screen-summary').classList.add('hidden');
+      document.getElementById('screen-history').classList.add('hidden');
+
+      document.querySelectorAll('.apple-segmented-item').forEach(btn => {
+        btn.classList.remove('active');
+      });
+
+      document.getElementById('screen-' + screenId).classList.remove('hidden');
+      const activeTab = document.getElementById('tab-' + screenId);
+      if (activeTab) activeTab.classList.add('active');
+
+      const mobTab = document.getElementById('mob-tab-' + screenId);
+      if (mobTab) mobTab.classList.add('active');
+    }
+
+    function openHeartsModal() { document.getElementById('modal-hearts').classList.remove('hidden'); }
+    function closeHeartsModal() { document.getElementById('modal-hearts').classList.add('hidden'); }
+
+    function openPubgModal() { document.getElementById('modal-pubg').classList.remove('hidden'); }
+    function closePubgModal() { document.getElementById('modal-pubg').classList.add('hidden'); }
+
+    function openRoughSheet() {
+      document.getElementById('modal-rough').classList.remove('hidden');
+      initCanvas();
+    }
+    function closeRoughSheet() { document.getElementById('modal-rough').classList.add('hidden'); }
+
+    function triggerExitGuard() { document.getElementById('modal-exit').classList.remove('hidden'); }
+    function closeExitGuard() { document.getElementById('modal-exit').classList.add('hidden'); }
+    function confirmExit() {
+      closeExitGuard();
+      alert('1 Life Deducted (-1 ❤️). Candidates must maintain test discipline.');
+      switchScreen('hub');
+    }
+
+    // ==============================================================
+    // 2-HOUR RECOVERY SYSTEM strictly in parallel with time
+    // ==============================================================
+    const TOTAL_RECOVERY_SECONDS = 7200; // 2 hours = 120 mins
+    let recoveryRemainingSeconds = 4500; // 1h 15m remaining (37.5% elapsed)
+    let userLives = 4;
+
+    function applyParallelFill(ratio, remainingSec) {
+      const percent = (ratio * 100).toFixed(1);
+      const insetTop = (100 - (ratio * 100)).toFixed(2);
+
+      // Clip path sets the liquid fill height strictly from bottom upwards
+      const headerFill = document.getElementById('header-recovering-fill');
+      if (headerFill) {
+        headerFill.style.clipPath = `inset(${insetTop}% 0 0 0)`;
+      }
+      const modalFill = document.getElementById('modal-recovering-fill');
+      if (modalFill) {
+        modalFill.style.clipPath = `inset(${insetTop}% 0 0 0)`;
+      }
+
+      // Update countdown text
+      const hours = Math.floor(remainingSec / 3600);
+      const mins = Math.floor((remainingSec % 3600) / 60);
+      const secs = remainingSec % 60;
+      const timeStr = `${hours}h ${String(mins).padStart(2, '0')}m ${String(secs).padStart(2, '0')}s`;
+
+      const timerLabel = document.getElementById('modal-countdown-label');
+      if (timerLabel) {
+        timerLabel.innerText = `Next Life (+1 ❤️) in ${timeStr} (${percent}% loaded)`;
+      }
+      const bar = document.getElementById('modal-progress-bar');
+      if (bar) {
+        bar.style.width = `${percent}%`;
+      }
+    }
+
+    function updateRecoveryParallelUI() {
+      if (userLives >= 5) {
+        const h5 = document.getElementById('header-heart-5-container');
+        if (h5) h5.innerHTML = '<span class="text-sm select-none leading-none">❤️</span>';
+        const m5 = document.getElementById('modal-heart-5-container');
+        if (m5) m5.innerHTML = '<span class="text-3xl select-none leading-none">❤️</span>';
+        const timerLabel = document.getElementById('modal-countdown-label');
+        if (timerLabel) timerLabel.innerText = 'Full Stamina: 5/5 Hearts Active';
+        const bar = document.getElementById('modal-progress-bar');
+        if (bar) bar.style.width = '100%';
+        return;
+      }
+
+      recoveryRemainingSeconds = Math.max(0, recoveryRemainingSeconds - 1);
+      if (recoveryRemainingSeconds === 0) {
+        userLives = Math.min(5, userLives + 1);
+        recoveryRemainingSeconds = userLives < 5 ? TOTAL_RECOVERY_SECONDS : 0;
+      }
+
+      const elapsed = TOTAL_RECOVERY_SECONDS - recoveryRemainingSeconds;
+      const ratio = Math.min(1.0, Math.max(0.0, elapsed / TOTAL_RECOVERY_SECONDS));
+      applyParallelFill(ratio, recoveryRemainingSeconds);
+    }
+
+    function setSimulationProgress(ratio, remainingSec) {
+      recoveryRemainingSeconds = remainingSec;
+      if (ratio >= 1.0) {
+        userLives = 5;
+      } else {
+        userLives = 4;
+      }
+      applyParallelFill(ratio, remainingSec);
+    }
+
+    function refillWithXp() {
+      setSimulationProgress(1.0, 0);
+      alert('❤️❤️❤️❤️❤️ Full 5 Lives Restored! 50 XP deducted.');
+      closeHeartsModal();
+    }
+
+    function healOneDrill() {
+      setSimulationProgress(1.0, 0);
+      alert('+1 Life Healed! ❤️ Revision drill completed.');
+      closeHeartsModal();
+    }
+
+    setInterval(updateRecoveryParallelUI, 1000);
+    applyParallelFill((TOTAL_RECOVERY_SECONDS - recoveryRemainingSeconds) / TOTAL_RECOVERY_SECONDS, recoveryRemainingSeconds);
+
+    function setFontZoom(size) {
+      const container = document.getElementById('question-text-container');
+      const zoomSm = document.getElementById('zoom-sm');
+      const zoomMd = document.getElementById('zoom-md');
+      const zoomLg = document.getElementById('zoom-lg');
+
+      [zoomSm, zoomMd, zoomLg].forEach(b => {
+        b.className = 'px-2.5 py-1 rounded-md text-xs font-medium';
+      });
+
+      if (size === 'sm') {
+        container.style.fontSize = '13px';
+        zoomSm.className = 'px-2.5 py-1 rounded-md text-xs font-medium bg-white text-black shadow-sm';
+      } else if (size === 'md') {
+        container.style.fontSize = '15px';
+        zoomMd.className = 'px-2.5 py-1 rounded-md text-xs font-medium bg-white text-black shadow-sm';
+      } else if (size === 'lg') {
+        container.style.fontSize = '18px';
+        zoomLg.className = 'px-2.5 py-1 rounded-md text-xs font-medium bg-white text-black shadow-sm';
+      }
+    }
+
+    function setExamLang(lang) {
+      const enBtn = document.getElementById('lang-en');
+      const taBtn = document.getElementById('lang-ta');
+      const enP = document.getElementById('q-en');
+      const taP = document.getElementById('q-ta');
+
+      if (lang === 'en') {
+        enBtn.className = 'px-2.5 py-1 rounded-md font-medium bg-white text-black shadow-sm';
+        taBtn.className = 'px-2.5 py-1 rounded-md font-medium text-[#86868B]';
+        enP.classList.remove('hidden');
+      } else {
+        taBtn.className = 'px-2.5 py-1 rounded-md font-medium bg-white text-black shadow-sm';
+        enBtn.className = 'px-2.5 py-1 rounded-md font-medium text-[#86868B]';
+        taP.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    function saveAndNext() {
+      alert('Answer recorded cleanly. Advancing to Question 2.');
+    }
+    function markReview() {
+      alert('Marked for Review.');
+    }
+    function clearResponse() {
+      const radios = document.getElementsByName('apple-opt');
+      radios.forEach(r => r.checked = false);
+    }
+
+    let canvas, ctx, isDrawing = false;
+    function initCanvas() {
+      canvas = document.getElementById('rough-canvas');
+      if (!canvas) return;
+      ctx = canvas.getContext('2d');
+      ctx.lineWidth = 2.0;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#1D1D1F';
+
+      canvas.onmousedown = (e) => {
+        isDrawing = true;
+        const rect = canvas.getBoundingClientRect();
+        ctx.beginPath();
+        ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+      };
+      canvas.onmousemove = (e) => {
+        if (!isDrawing) return;
+        const rect = canvas.getBoundingClientRect();
+        ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+        ctx.stroke();
+      };
+      window.onmouseup = () => { isDrawing = false; };
+    }
+
+    function clearRoughCanvas() {
+      if (!canvas) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function insertSampleCalc() {
+      if (!ctx) return;
+      ctx.font = "500 15px -apple-system, sans-serif";
+      ctx.fillStyle = "#0071E3";
+      ctx.fillText("Price: 100 ➔ 120 (+20%)", 20, 40);
+      ctx.fillText("Reduction = r / (100+r) = 20/120", 20, 75);
+      ctx.fillText("Answer = 1/6 = 16.66%", 20, 110);
+    }
+  </script>
+</body>
+</html>
