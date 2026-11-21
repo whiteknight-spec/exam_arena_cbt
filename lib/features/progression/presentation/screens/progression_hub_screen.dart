@@ -26,29 +26,37 @@ class ProgressionHubScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final progress = ref.watch(progressionProvider);
     final notifier = ref.read(progressionProvider.notifier);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: isDark ? const Color(0xFF090D16) : const Color(0xFFF8FAFC),
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF111827) : Colors.white,
         title: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
+                color: isDark
+                    ? const Color(0xFF38BDF8).withValues(alpha: 0.15)
+                    : AppColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(Icons.military_tech_rounded, color: AppColors.primary, size: 20),
+              child: Icon(
+                Icons.terminal_rounded,
+                color: isDark ? const Color(0xFF38BDF8) : AppColors.primary,
+                size: 20,
+              ),
             ),
             const SizedBox(width: 8),
-            const Text(
+            Text(
               'Exam Arena CBT',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
-                color: AppColors.textPrimary,
+                color: isDark ? Colors.white : AppColors.textPrimary,
+                letterSpacing: -0.3,
               ),
             ),
             const Spacer(),
@@ -99,16 +107,16 @@ class ProgressionHubScreen extends ConsumerWidget {
                   onSelect: (newExam) => notifier.selectExam(newExam),
                 );
               },
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(14),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.border),
+                  color: isDark ? const Color(0xFF131B2E) : Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: isDark ? const Color(0xFF1E293B) : AppColors.border),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.03),
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -117,18 +125,11 @@ class ProgressionHubScreen extends ConsumerWidget {
                 child: Row(
                   children: [
                     Container(
-                      width: 14,
-                      height: 14,
+                      width: 12,
+                      height: 12,
                       decoration: BoxDecoration(
                         color: Color(progress.selectedExam.badgeColorHex),
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color(progress.selectedExam.badgeColorHex).withValues(alpha: 0.4),
-                            blurRadius: 6,
-                          ),
-                        ],
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -136,41 +137,44 @@ class ProgressionHubScreen extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'TARGET COMPETITIVE EXAM',
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w800,
-                              color: AppColors.textSecondary,
-                              letterSpacing: 0.6,
+                              color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
+                              letterSpacing: 0.8,
                             ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             progress.selectedExam.title,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w800,
-                              color: AppColors.textPrimary,
+                              color: isDark ? Colors.white : AppColors.textPrimary,
                             ),
                           ),
                           Text(
                             '${progress.selectedExam.totalQuestions} Qs • ${progress.selectedExam.totalDurationMinutes} mins • ${progress.selectedExam.hasOptionE ? "5 Options A–E (TNPSC)" : "4 Options A–D"}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 11,
-                              color: AppColors.textSecondary,
+                              color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
                             ),
                           ),
                         ],
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFEFF6FF),
+                        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
                         borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: isDark ? const Color(0xFF334155) : const Color(0xFFBFDBFE),
+                        ),
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
@@ -178,11 +182,15 @@ class ProgressionHubScreen extends ConsumerWidget {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.primary,
+                              color: isDark ? const Color(0xFF38BDF8) : AppColors.primary,
                             ),
                           ),
-                          SizedBox(width: 2),
-                          Icon(Icons.keyboard_arrow_down, size: 16, color: AppColors.primary),
+                          const SizedBox(width: 2),
+                          Icon(
+                            Icons.keyboard_arrow_down,
+                            size: 16,
+                            color: isDark ? const Color(0xFF38BDF8) : AppColors.primary,
+                          ),
                         ],
                       ),
                     ),
@@ -196,25 +204,25 @@ class ProgressionHubScreen extends ConsumerWidget {
             XpBar(progress: progress),
             const SizedBox(height: 12),
 
-            // PUBG Tier Showcase Quick Tile
+            // Aspirant Merit Standing Tile
             InkWell(
               onTap: () => PubgTierModal.show(context, progress: progress),
               borderRadius: BorderRadius.circular(14),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      progress.pubgTier.secondaryColor.withValues(alpha: 0.25),
-                      const Color(0xFF0F172A),
-                    ],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  ),
+                  color: isDark ? const Color(0xFF131B2E) : Colors.white,
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: progress.pubgTier.primaryColor.withValues(alpha: 0.5),
+                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: Row(
                   children: [
@@ -233,7 +241,7 @@ class ProgressionHubScreen extends ConsumerWidget {
                               Text(
                                 '${progress.pubgTier.title.toUpperCase()} ${progress.pubgTier.tierRoman}',
                                 style: TextStyle(
-                                  color: progress.pubgTier.accentColor,
+                                  color: isDark ? progress.pubgTier.accentColor : const Color(0xFF0F172A),
                                   fontWeight: FontWeight.w900,
                                   fontSize: 13,
                                   letterSpacing: 0.5,
@@ -243,15 +251,22 @@ class ProgressionHubScreen extends ConsumerWidget {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                                 decoration: BoxDecoration(
-                                  color: progress.pubgTier.primaryColor.withValues(alpha: 0.3),
+                                  color: isDark
+                                      ? progress.pubgTier.primaryColor.withValues(alpha: 0.3)
+                                      : const Color(0xFFF1F5F9),
                                   borderRadius: BorderRadius.circular(4),
+                                  border: Border.all(
+                                    color: isDark
+                                        ? progress.pubgTier.accentColor.withValues(alpha: 0.4)
+                                        : const Color(0xFFE2E8F0),
+                                  ),
                                 ),
                                 child: Text(
                                   'TIER ${progress.pubgTier.tierRoman}',
                                   style: TextStyle(
-                                    color: progress.pubgTier.accentColor,
+                                    color: isDark ? progress.pubgTier.accentColor : const Color(0xFF475569),
                                     fontSize: 10,
-                                    fontWeight: FontWeight.w700,
+                                    fontWeight: FontWeight.w800,
                                   ),
                                 ),
                               ),
@@ -259,18 +274,20 @@ class ProgressionHubScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            progress.pubgTier.nextTier != null
-                                ? 'Tap to view 8 PUBG Tier Badges • Next: ${progress.pubgTier.nextTier!.title}'
-                                : 'Apex Rank Achieved! View Trophy Room',
-                            style: const TextStyle(
-                              color: Colors.white70,
+                            'Aspirant Merit Standing • Tap to view 8 PUBG Tier Badges',
+                            style: TextStyle(
+                              color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
                               fontSize: 11,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const Icon(Icons.military_tech_rounded, size: 20, color: Color(0xFFFBBF24)),
+                    Icon(
+                      Icons.military_tech_rounded,
+                      size: 20,
+                      color: isDark ? const Color(0xFFFBBF24) : const Color(0xFFD97706),
+                    ),
                   ],
                 ),
               ),
@@ -284,24 +301,25 @@ class ProgressionHubScreen extends ConsumerWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: isDark ? const Color(0xFF131B2E) : Colors.white,
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: AppColors.border),
+                      border: Border.all(color: isDark ? const Color(0xFF1E293B) : AppColors.border),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Tests Completed',
-                          style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                          style: TextStyle(fontSize: 11, color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           '${progress.testsCompleted}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 18,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w900,
+                            color: isDark ? Colors.white : AppColors.textPrimary,
+                            fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                         ),
                       ],
@@ -313,24 +331,25 @@ class ProgressionHubScreen extends ConsumerWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: isDark ? const Color(0xFF131B2E) : Colors.white,
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: AppColors.border),
+                      border: Border.all(color: isDark ? const Color(0xFF1E293B) : AppColors.border),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Average Accuracy',
-                          style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                          style: TextStyle(fontSize: 11, color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           '${progress.averageAccuracy}%',
                           style: const TextStyle(
                             fontSize: 18,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF059669),
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFF10B981),
+                            fontFeatures: [FontFeature.tabularFigures()],
                           ),
                         ),
                       ],
@@ -353,21 +372,14 @@ class ProgressionHubScreen extends ConsumerWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isDark ? const Color(0xFF131B2E) : Colors.white,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppColors.border),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.02),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                  border: Border.all(color: isDark ? const Color(0xFF1E293B) : AppColors.border),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(Icons.insights_rounded, size: 20, color: AppColors.primary),
-                    SizedBox(width: 10),
+                    Icon(Icons.insights_rounded, size: 20, color: isDark ? const Color(0xFF38BDF8) : AppColors.primary),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -377,21 +389,21 @@ class ProgressionHubScreen extends ConsumerWidget {
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w800,
-                              color: AppColors.textPrimary,
+                              color: isDark ? Colors.white : AppColors.textPrimary,
                             ),
                           ),
-                          SizedBox(height: 2),
+                          const SizedBox(height: 2),
                           Text(
                             'Review previous mock scores, accuracy & SQLite attempts',
                             style: TextStyle(
                               fontSize: 11,
-                              color: AppColors.textSecondary,
+                              color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    Icon(Icons.chevron_right, size: 20, color: AppColors.textSecondary),
+                    Icon(Icons.chevron_right, size: 20, color: isDark ? const Color(0xFF64748B) : AppColors.textSecondary),
                   ],
                 ),
               ),
@@ -411,16 +423,10 @@ class ProgressionHubScreen extends ConsumerWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: Theme.of(context).brightness == Brightness.dark
-                        ? [const Color(0xFF881337).withValues(alpha: 0.35), const Color(0xFF1E1B4B).withValues(alpha: 0.35)]
-                        : [const Color(0xFFFFF1F2), const Color(0xFFFFF7ED)],
-                  ),
+                  color: isDark ? const Color(0xFF131B2E) : Colors.white,
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? const Color(0xFFBE123C).withValues(alpha: 0.4)
-                        : const Color(0xFFFECDD3),
+                    color: isDark ? const Color(0xFFBE123C).withValues(alpha: 0.4) : const Color(0xFFFECDD3),
                   ),
                 ),
                 child: Row(
@@ -428,29 +434,30 @@ class ProgressionHubScreen extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFE11D48).withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(10),
+                        color: const Color(0xFFE11D48).withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.auto_fix_high_rounded, color: Color(0xFFE11D48), size: 20),
+                      child: const Icon(Icons.troubleshoot_rounded, color: Color(0xFFE11D48), size: 20),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Mistake Vault (Error Notebook) 🎯',
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w800,
+                              color: isDark ? Colors.white : AppColors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Practice weak & failed questions • Master to heal +1 Life (❤️)',
+                            'Diagnostic Error Ledger • Practice weak questions to restore stamina',
                             style: TextStyle(
                               fontSize: 11,
-                              color: Theme.of(context).brightness == Brightness.dark ? Colors.white70 : AppColors.textSecondary,
+                              color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
                             ),
                           ),
                         ],
@@ -470,12 +477,13 @@ class ProgressionHubScreen extends ConsumerWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       '4-Tier Level Unlock Ladder',
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 16,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
+                        color: isDark ? Colors.white : AppColors.textPrimary,
+                        letterSpacing: -0.2,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -483,7 +491,7 @@ class ProgressionHubScreen extends ConsumerWidget {
                       '500 XP per tier progression rule',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey.shade600,
+                        color: isDark ? const Color(0xFF94A3B8) : Colors.grey.shade600,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -492,15 +500,19 @@ class ProgressionHubScreen extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFEF3C7),
+                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFFEF3C7),
                     borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF334155) : const Color(0xFFFDE68A),
+                    ),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Skill Ladder',
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 11,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF92400E),
+                      color: isDark ? const Color(0xFFFBBF24) : const Color(0xFF92400E),
+                      letterSpacing: 0.2,
                     ),
                   ),
                 ),

@@ -20,45 +20,62 @@ class LevelMapNode extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     Color getLevelColor() {
       switch (level) {
         case ArenaLevel.level1:
-          return AppColors.level1Sprint;
+          return const Color(0xFF0284C7); // Technical Sky Cobalt
         case ArenaLevel.level2:
-          return AppColors.level2Sectional;
+          return const Color(0xFF6366F1); // Precision Indigo
         case ArenaLevel.level3:
-          return AppColors.level3FullCBT;
+          return const Color(0xFFD97706); // Engineering Amber
         case ArenaLevel.level4:
-          return AppColors.level4Gauntlet;
+          return const Color(0xFF059669); // Adaptive Emerald
       }
     }
 
     final accentColor = getLevelColor();
 
+    IconData getLevelIcon() {
+      switch (level) {
+        case ArenaLevel.level1:
+          return Icons.speed_rounded;
+        case ArenaLevel.level2:
+          return Icons.timer_outlined;
+        case ArenaLevel.level3:
+          return Icons.computer_rounded;
+        case ArenaLevel.level4:
+          return Icons.psychology_rounded;
+      }
+    }
+
     return Column(
       children: [
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
+            color: isDark ? const Color(0xFF131B2E) : Colors.white,
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isUnlocked ? accentColor.withValues(alpha: 0.5) : AppColors.border,
-              width: isUnlocked ? 2.0 : 1.0,
+              color: isUnlocked
+                  ? accentColor.withValues(alpha: isDark ? 0.4 : 0.3)
+                  : (isDark ? const Color(0xFF1E293B) : AppColors.border),
+              width: 1.0,
             ),
             boxShadow: [
               BoxShadow(
                 color: isUnlocked
-                    ? accentColor.withValues(alpha: 0.12)
-                    : Colors.black.withValues(alpha: 0.03),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
+                    ? accentColor.withValues(alpha: isDark ? 0.1 : 0.05)
+                    : Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
           child: Material(
             color: Colors.transparent,
             child: InkWell(
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(16),
               onTap: isUnlocked
                   ? onTap
                   : () {
@@ -76,33 +93,28 @@ class LevelMapNode extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    // Node Avatar with Level Icon or Lock
+                    // Node Avatar with Technical Vector Glyph
                     Container(
-                      width: 54,
-                      height: 54,
+                      width: 50,
+                      height: 50,
                       decoration: BoxDecoration(
-                        gradient: isUnlocked
-                            ? LinearGradient(
-                                colors: [
-                                  accentColor.withValues(alpha: 0.2),
-                                  accentColor.withValues(alpha: 0.05),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              )
-                            : null,
-                        color: isUnlocked ? null : const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(16),
+                        color: isUnlocked
+                            ? accentColor.withValues(alpha: isDark ? 0.2 : 0.08)
+                            : (isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9)),
+                        borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: isUnlocked
-                              ? accentColor.withValues(alpha: 0.4)
-                              : const Color(0xFFE2E8F0),
+                              ? accentColor.withValues(alpha: isDark ? 0.5 : 0.25)
+                              : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
                         ),
                       ),
                       child: Center(
-                        child: Text(
-                          isUnlocked ? level.icon : '🔒',
-                          style: const TextStyle(fontSize: 26),
+                        child: Icon(
+                          isUnlocked ? getLevelIcon() : Icons.lock_outline_rounded,
+                          color: isUnlocked
+                              ? accentColor
+                              : (isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8)),
+                          size: 24,
                         ),
                       ),
                     ),
@@ -116,18 +128,28 @@ class LevelMapNode extends StatelessWidget {
                           Row(
                             children: [
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: isUnlocked ? accentColor : const Color(0xFF94A3B8),
-                                  borderRadius: BorderRadius.circular(6),
+                                  color: isUnlocked
+                                      ? accentColor.withValues(alpha: 0.15)
+                                      : (isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9)),
+                                  borderRadius: BorderRadius.circular(4),
+                                  border: Border.all(
+                                    color: isUnlocked
+                                        ? accentColor.withValues(alpha: 0.4)
+                                        : (isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1)),
+                                  ),
                                 ),
                                 child: Text(
                                   'LEVEL ${level.levelNumber}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w900,
+                                  style: TextStyle(
+                                    color: isUnlocked
+                                        ? accentColor
+                                        : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                                    fontWeight: FontWeight.w800,
                                     fontSize: 10,
                                     letterSpacing: 0.5,
+                                    fontFeatures: const [FontFeature.tabularFigures()],
                                   ),
                                 ),
                               ),
@@ -137,9 +159,7 @@ class LevelMapNode extends StatelessWidget {
                                   level.tamilTitle,
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: isUnlocked
-                                        ? AppColors.textSecondary
-                                        : const Color(0xFF94A3B8),
+                                    color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
                                     fontWeight: FontWeight.w600,
                                   ),
                                   overflow: TextOverflow.ellipsis,
@@ -153,7 +173,9 @@ class LevelMapNode extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w800,
-                              color: isUnlocked ? AppColors.textPrimary : const Color(0xFF64748B),
+                              color: isDark
+                                  ? (isUnlocked ? Colors.white : const Color(0xFF94A3B8))
+                                  : (isUnlocked ? AppColors.textPrimary : const Color(0xFF64748B)),
                             ),
                           ),
                           const SizedBox(height: 3),
@@ -161,7 +183,7 @@ class LevelMapNode extends StatelessWidget {
                             level.description,
                             style: TextStyle(
                               fontSize: 12,
-                              color: isUnlocked ? AppColors.textSecondary : const Color(0xFF94A3B8),
+                              color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
                               height: 1.3,
                             ),
                             maxLines: 2,
@@ -177,16 +199,19 @@ class LevelMapNode extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF1F5F9),
+                          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                          ),
                         ),
                         child: Text(
                           '${level.requiredXp} XP',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w800,
-                            color: Color(0xFF64748B),
+                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                            fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                         ),
                       )
@@ -194,12 +219,12 @@ class LevelMapNode extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: accentColor.withValues(alpha: 0.1),
+                          color: accentColor.withValues(alpha: 0.12),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           Icons.play_arrow_rounded,
-                          size: 22,
+                          size: 20,
                           color: accentColor,
                         ),
                       ),
@@ -213,12 +238,14 @@ class LevelMapNode extends StatelessWidget {
         // Connecting Ladder Path Indicator
         if (!isLast)
           Container(
-            height: 20,
-            width: 3,
+            height: 16,
+            width: 2,
             margin: const EdgeInsets.symmetric(vertical: 2),
             decoration: BoxDecoration(
-              color: isUnlocked ? accentColor.withValues(alpha: 0.5) : const Color(0xFFCBD5E1),
-              borderRadius: BorderRadius.circular(2),
+              color: isUnlocked
+                  ? accentColor.withValues(alpha: 0.4)
+                  : (isDark ? const Color(0xFF1E293B) : const Color(0xFFCBD5E1)),
+              borderRadius: BorderRadius.circular(1),
             ),
           ),
       ],

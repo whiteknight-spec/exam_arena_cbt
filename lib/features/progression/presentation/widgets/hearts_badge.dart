@@ -50,6 +50,7 @@ class _HeartsBadgeState extends ConsumerState<HeartsBadge> {
     final progress = ref.watch(progressionProvider);
     final hearts = progress.currentHearts;
     final isCritical = hearts <= 1;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final recoveryPercent = (progress.recoveringHeartProgress * 100).toStringAsFixed(1);
     final tooltipText = hearts >= UserProgress.maxHearts
@@ -64,17 +65,21 @@ class _HeartsBadgeState extends ConsumerState<HeartsBadge> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
           decoration: BoxDecoration(
-            color: isCritical ? const Color(0xFFFEF2F2) : Colors.white,
-            borderRadius: BorderRadius.circular(12),
+            color: isDark
+                ? (isCritical ? const Color(0xFF3B0712) : const Color(0xFF131B2E))
+                : (isCritical ? const Color(0xFFFEF2F2) : Colors.white),
+            borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: isCritical ? const Color(0xFFEF4444) : const Color(0xFFE2E8F0),
-              width: isCritical ? 1.5 : 1,
+              color: isDark
+                  ? (isCritical ? const Color(0xFFDC2626) : const Color(0xFF1E293B))
+                  : (isCritical ? const Color(0xFFEF4444) : const Color(0xFFE2E8F0)),
+              width: 1,
             ),
             boxShadow: [
               BoxShadow(
                 color: isCritical
                     ? const Color(0xFFEF4444).withValues(alpha: 0.15)
-                    : Colors.black.withValues(alpha: 0.03),
+                    : Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
                 blurRadius: 6,
                 offset: const Offset(0, 2),
               ),
