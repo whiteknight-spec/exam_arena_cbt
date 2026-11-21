@@ -319,6 +319,15 @@ class AppDatabase {
       where: '${AppConstants.colExamType} = ?',
       whereArgs: [examType],
     );
+    if (results.isEmpty && examType.toLowerCase().contains('upsc')) {
+      final upscResults = await db.query(
+        AppConstants.tableQuestions,
+        where: "${AppConstants.colExamType} LIKE 'upsc%'",
+      );
+      if (upscResults.isNotEmpty) {
+        return upscResults.map((m) => Question.fromMap(m)).toList();
+      }
+    }
     return results.map((m) => Question.fromMap(m)).toList();
   }
 

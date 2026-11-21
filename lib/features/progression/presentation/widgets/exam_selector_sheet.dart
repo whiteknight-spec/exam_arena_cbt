@@ -262,6 +262,8 @@ class _ExamSelectorSheetState extends State<ExamSelectorSheet> {
 
   IconData _getCategoryIcon(ExamCategory category) {
     switch (category) {
+      case ExamCategory.upsc:
+        return Icons.policy_rounded;
       case ExamCategory.tnpsc:
         return Icons.account_balance_rounded;
       case ExamCategory.railways:

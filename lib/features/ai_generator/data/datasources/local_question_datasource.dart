@@ -9,14 +9,14 @@ class LocalQuestionDatasource {
 
   LocalQuestionDatasource({required this.appDatabase});
 
-  /// Seeds all 30 universal high-yield bilingual questions if the database has fewer than 30 questions
+  /// Seeds all 30 universal high-yield bilingual questions if the database is empty.
   Future<void> seedIfEmpty() async {
     final db = await appDatabase.database;
     final count = Sqflite.firstIntValue(
       await db.rawQuery('SELECT COUNT(*) FROM ${AppConstants.tableQuestions}'),
     );
 
-    if (count == null || count < 30) {
+    if (count == null || count == 0) {
       final initialQuestions = SeedQuestions.getInitialQuestions();
       final batch = db.batch();
       for (final q in initialQuestions) {
@@ -30,8 +30,31 @@ class LocalQuestionDatasource {
     }
   }
 
+  /// Seeds authentic UPSC Civil Services & Defence question papers on demand
+  Future<void> seedUpscQuestionsIfNeeded() async {
+    final db = await appDatabase.database;
+    final upscCount = Sqflite.firstIntValue(
+      await db.rawQuery("SELECT COUNT(*) FROM ${AppConstants.tableQuestions} WHERE ${AppConstants.colExamType} LIKE 'upsc%'"),
+    );
+    if (upscCount == null || upscCount == 0) {
+      final upscQuestions = SeedQuestions.getUpscQuestions();
+      final batch = db.batch();
+      for (final q in upscQuestions) {
+        batch.insert(
+          AppConstants.tableQuestions,
+          q.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+      await batch.commit(noResult: true);
+    }
+  }
+
   Future<List<Question>> getQuestionsByExamType(String examType) async {
     await seedIfEmpty();
+    if (examType.toLowerCase().contains('upsc')) {
+      await seedUpscQuestionsIfNeeded();
+    }
     final db = await appDatabase.database;
     final maps = await db.query(
       AppConstants.tableQuestions,
@@ -40,6 +63,17 @@ class LocalQuestionDatasource {
     );
 
     if (maps.isEmpty) {
+      // Fallback: If a UPSC paper has no exact sub-id match, return all UPSC paper questions
+      if (examType.toLowerCase().contains('upsc')) {
+        final upscMaps = await db.query(
+          AppConstants.tableQuestions,
+          where: "${AppConstants.colExamType} LIKE 'upsc%'",
+        );
+        if (upscMaps.isNotEmpty) {
+          return upscMaps.map((m) => Question.fromMap(m)).toList();
+        }
+      }
+
       // Fallback: return all available questions if specific exam has no subset
       final allMaps = await db.query(AppConstants.tableQuestions);
       return allMaps.map((m) => Question.fromMap(m)).toList();

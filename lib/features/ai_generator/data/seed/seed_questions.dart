@@ -738,4 +738,361 @@ class SeedQuestions {
       ),
     ];
   }
+
+  // =========================================================================
+  // AUTHENTIC UPSC CIVIL SERVICES (CSE GS-1 & CSAT) BILINGUAL QUESTION PAPERS
+  // =========================================================================
+  static List<Question> getUpscQuestions() {
+    return const [
+      // 1. UPSC CSE GS-1: Indian Polity - Basic Structure Doctrine
+      Question(
+        id: 'upsc_01',
+        subject: 'Indian Polity & Governance',
+        category: 'General Awareness',
+        examType: 'upsc_cse_prelims_gs',
+        questionEn:
+            'With reference to the Constitution of India, which of the following statements is correct regarding the "Basic Structure Doctrine"?',
+        questionTa:
+            'இந்திய அரசியலமைப்பைப் பொறுத்தவரை, "அடிப்படை கட்டமைப்பு கோட்பாடு" (Basic Structure Doctrine) குறித்து பின்வருவனவற்றில் எது சரியானது?',
+        optionsEn: [
+          'It was propounded by the Supreme Court in the Kesavananda Bharati case (1973).',
+          'It is explicitly defined under Article 368 of the Constitution.',
+          'Parliament has unchecked constituent power to alter any part of the Constitution.',
+          'The President has the sole power to decide the basic structure of the Constitution.',
+        ],
+        optionsTa: [
+          'கேசவானந்த பாரதி வழக்கில் (1973) உச்ச நீதிமன்றத்தால் இது வகுக்கப்பட்டது.',
+          'இது அரசியலமைப்பின் 368-வது பிரிவில் வெளிப்படையாக வரையறுக்கப்பட்டுள்ளது.',
+          'பாராளுமன்றம் அரசியலமைப்பின் எந்தப் பகுதியையும் மாற்ற வரம்பற்ற அதிகாரம் கொண்டுள்ளது.',
+          'அரசியலமைப்பின் அடிப்படை கட்டமைப்பை தீர்மானிக்கும் முழு அதிகாரம் குடியரசுத் தலைவருக்கே உள்ளது.',
+        ],
+        correctIndex: 0,
+        explanationEn:
+            'In Kesavananda Bharati v. State of Kerala (1973), a historic 13-judge bench of the Supreme Court ruled that while Parliament can amend any part of the Constitution under Article 368, it cannot alter its basic structure or foundational framework.',
+        explanationTa:
+            'கேசவானந்த பாரதி எதிர் கேரள அரசு (1973) வழக்கில், அரசியலமைப்பின் 368-வது பிரிவின் கீழ் பாராளுமன்றம் சட்டத்திருத்தம் செய்ய அதிகாரம் பெற்றிருந்தாலும், அதன் அடிப்படை கட்டமைப்பை மாற்ற முடியாது என்று உச்ச நீதிமன்றம் வரலாற்றுச் சிறப்புமிக்க தீர்ப்பை வழங்கியது.',
+        hasOptionE: false,
+      ),
+
+      // 2. UPSC CSE GS-1: Indian Polity - Money Bill Powers (Art 109/110)
+      Question(
+        id: 'upsc_02',
+        subject: 'Indian Polity & Governance',
+        category: 'General Awareness',
+        examType: 'upsc_cse_prelims_gs',
+        questionEn:
+            'Regarding a "Money Bill" in the Indian Parliament, consider which of the following provisions is accurate under the Constitution:',
+        questionTa:
+            'இந்திய நாடாளுமன்றத்தில் "பண மசோதா" (Money Bill) தொடர்பாக அரசியலமைப்பின் கீழ் பின்வரும் விதிகளில் எது சரியானது?',
+        optionsEn: [
+          'Rajya Sabha cannot amend or reject a Money Bill; it must return it within 14 days.',
+          'A Money Bill can be introduced in either House of Parliament with President approval.',
+          'Rajya Sabha has co-equal veto power with Lok Sabha regarding Money Bills.',
+          'The President can withhold assent and send a Money Bill back for parliamentary reconsideration.',
+        ],
+        optionsTa: [
+          'மாநிலங்களவை பண மசோதாவை திருத்தவோ நிராகரிக்கவோ முடியாது; 14 நாட்களுக்குள் திருப்பி அனுப்ப வேண்டும்.',
+          'குடியரசுத் தலைவர் அனுமதியுடன் பண மசோதாவை நாடாளுமன்றத்தின் எந்த அவையிலும் தாக்கல் செய்யலாம்.',
+          'பண மசோதாக்கள் விவகாரத்தில் மாநிலங்களவை மக்களவைக்கு இணையான வீட்டோ அதிகாரத்தைக் கொண்டுள்ளது.',
+          'குடியரசுத் தலைவர் பண மசோதாவை மறுபரிசீலனைக்கு நாடாளுமன்றத்திற்கு திருப்பி அனுப்பலாம்.',
+        ],
+        correctIndex: 0,
+        explanationEn:
+            'Under Article 109, a Money Bill can only be introduced in the Lok Sabha. Rajya Sabha has 14 days to recommend changes; Lok Sabha may accept or reject them. If not returned in 14 days, it is deemed passed by both Houses.',
+        explanationTa:
+            'அரசியலமைப்புப் பிரிவு 109-ன் படி, பண மசோதாவை மக்களவையில் மட்டுமே தாக்கல் செய்ய முடியும். மாநிலங்களவை 14 நாட்களுக்குள் பரிந்துரைகளை மட்டுமே வழங்கலாம்; அதை ஏற்கவோ நிராகரிக்கவோ மக்களவைக்கு அதிகாரம் உண்டு.',
+        hasOptionE: false,
+      ),
+
+      // 3. UPSC CSE GS-1: Ancient Indian History - Dholavira Water Harvesting
+      Question(
+        id: 'upsc_03',
+        subject: 'Indian History & Culture',
+        category: 'General Awareness',
+        examType: 'upsc_cse_prelims_gs',
+        questionEn:
+            'Which one of the following Harappan sites is renowned for its elaborate system of water harvesting and management by building a series of dams and channelizing water into interconnected rock-cut reservoirs?',
+        questionTa:
+            'தொடர்ச்சியான அணைகளைக் கட்டி, இணைக்கப்பட்ட பாறைக்குடைவு நீர்த்தேக்கங்களில் தண்ணீரைத் திருப்பி சேமித்து நிர்வகிக்கும் அதிநவீன நீர் மேலாண்மை முறைக்கு பெயர் பெற்ற புகழ்பெற்ற சிந்து சமவெளி (ஹரப்பா) தளம் எது?',
+        optionsEn: [
+          'Dholavira (Rann of Kutch, Gujarat)',
+          'Kalibangan (Rajasthan)',
+          'Rakhigarhi (Haryana)',
+          'Banawali (Fatehabad)',
+        ],
+        optionsTa: [
+          'தோலாவிரா (கட்ச் வளைகுடா, குஜராத்)',
+          'காலிபங்கன் (ராஜஸ்தான்)',
+          'ராகிகர்கி (ஹரியானா)',
+          'பனவாலி (ஃபதேஹாபாத்)',
+        ],
+        correctIndex: 0,
+        explanationEn:
+            'Dholavira, located in Khadir Bet in Gujarat, is world-famous for its monumental rock-cut water reservoirs, sophisticated rainwater harvesting dams, and storm water drainage engineering (UNESCO World Heritage Site).',
+        explanationTa:
+            'குஜராத்தின் கட்ச் பகுதியில் உள்ள தோலாவிரா, உலகின் மிகப் பழமையான பாறைக்குடைவு நீர்த்தேக்கங்கள், மழைநீர் சேகரிப்பு அணைகள் மற்றும் விரிவான வடிகால் அமைப்புக்கு பெயர் பெற்றது (யுனெஸ்கோ உலக பாரம்பரிய தளம்).',
+        hasOptionE: false,
+      ),
+
+      // 4. UPSC CSE GS-1: Modern Indian History - Cripps Mission 1942
+      Question(
+        id: 'upsc_04',
+        subject: 'Modern Indian History',
+        category: 'General Awareness',
+        examType: 'upsc_cse_prelims_gs',
+        questionEn:
+            'With reference to the Cripps Mission sent to India in March 1942, what was the constitutional status proposed for India following World War II?',
+        questionTa:
+            'மார்ச் 1942-ல் இந்தியாவிற்கு வந்த கிரிப்ஸ் தூதுக்குழுவைப் பொறுத்தவரை, இரண்டாம் உலகப் போருக்குப் பின் இந்தியாவிற்கு முன்மொழியப்பட்ட அரசியல் அந்தஸ்து எது?',
+        optionsEn: [
+          'Dominion status with freedom to secede from the British Commonwealth.',
+          'Immediate complete independence with partition into India and Pakistan.',
+          'Direct crown colony status under the British War Cabinet.',
+          'An executive council with exclusively British military ministers.',
+        ],
+        optionsTa: [
+          'பிரிட்டிஷ் காமன்வெல்த்தில் இருந்து வெளியேறும் சுதந்திரத்துடன் கூடிய டொமினியன் அந்தஸ்து (Dominion Status).',
+          'உடனடி முழு சுதந்திரம் மற்றும் இந்தியா-பாகிஸ்தான் பிரிவினை.',
+          'பிரிட்டிஷ் போர் அமைச்சரவையின் நேரடி காலனி ஆதிக்க அந்தஸ்து.',
+          'முற்றிலும் பிரிட்டிஷ் ராணுவ அமைச்சர்களைக் கொண்ட நிர்வாக சபை.',
+        ],
+        correctIndex: 0,
+        explanationEn:
+            'Sir Stafford Cripps proposed Dominion Status for an Indian Union after the war, along with a constituent assembly. Mahatma Gandhi famously criticized it as a "post-dated cheque drawn on a crashing bank".',
+        explanationTa:
+            'சர் ஸ்டாஃபோர்ட் கிரிப்ஸ் போருக்குப் பின் இந்தியாவுக்கு தன்னாட்சி (டொமினியன்) அந்தஸ்து வழங்கப்படும் என உறுதியளித்தார். இதை மகாத்மா காந்தி "திவாலாகும் வங்கியின் பின்தேதியிட்ட காசோலை" என்று வர்ணித்தார்.',
+        hasOptionE: false,
+      ),
+
+      // 5. UPSC CSE GS-1: Physical Geography - Mountain Passes of Western Ghats
+      Question(
+        id: 'upsc_05',
+        subject: 'Physical & Indian Geography',
+        category: 'General Awareness',
+        examType: 'upsc_cse_prelims_gs',
+        questionEn:
+            'Which natural mountain pass in the Western Ghats connects Palakkad in Kerala with Coimbatore in Tamil Nadu?',
+        questionTa:
+            'மேற்குத் தொடர்ச்சி மலையில் கேரளாவின் பாலக்காட்டையும் தமிழ்நாட்டின் கோயம்புத்தூரையும் இணைக்கும் இயற்கை கணவாய் எது?',
+        optionsEn: [
+          'Palghat (Palakkad) Gap',
+          'Thal Ghat (Kasara Ghat)',
+          'Bhor Ghat',
+          'Shencottah Gap',
+        ],
+        optionsTa: [
+          'பாலக்காட்டு கணவாய் (Palghat Gap)',
+          'தால் கணவாய் (Thal Ghat)',
+          'போர் கணவாய் (Bhor Ghat)',
+          'செங்கோட்டை கணவாய் (Shencottah Gap)',
+        ],
+        correctIndex: 0,
+        explanationEn:
+            'The Palghat Gap is a significant break (approx. 30 km wide) in the Western Ghats between the Nilgiri Hills to the north and Anaimalai Hills to the south, serving as a primary transportation and monsoon funnel corridor.',
+        explanationTa:
+            'பாலக்காட்டு கணவாய் என்பது நீலகிரி மற்றும் ஆனைமலை குன்றுகளுக்கு இடையே உள்ள சுமார் 30 கி.மீ அகலமுள்ள முக்கிய இயற்கை கணவாயாகும். இது தென்மேற்கு பருவக்காற்று தமிழகத்திற்குள் நுழையவும் போக்குவரத்துக்கும் பெருமளவு உதவுகிறது.',
+        hasOptionE: false,
+      ),
+
+      // 6. UPSC CSE GS-1: Environment & Ecology - Ramsar Convention
+      Question(
+        id: 'upsc_06',
+        subject: 'Environment & Ecology',
+        category: 'General Awareness',
+        examType: 'upsc_cse_prelims_gs',
+        questionEn:
+            'Consider the following statements regarding the Ramsar Convention on Wetlands (1971): which statement is correct?',
+        questionTa:
+            'ஈரநிலங்களுக்கான ராம்சார் உடன்படிக்கை (Ramsar Convention 1971) தொடர்பான பின்வரும் கூற்றுகளில் எது சரியானது?',
+        optionsEn: [
+          'It is an international treaty for the conservation and sustainable "wise use" of wetlands and their resources.',
+          'India is not a signatory to the Ramsar Convention.',
+          'Ramsar sites can only be located in inland high-altitude freshwater lakes.',
+          'The Montreux Record only maintains a registry of newly formed volcanic lakes.',
+        ],
+        optionsTa: [
+          'இது சதுப்பு நிலங்கள் மற்றும் அவற்றின் வளங்களைப் பாதுகாப்பதற்கும் நிலையான "விவேகமான பயன்பாட்டிற்கும்" வழிகாட்டும் சர்வதேச ஒப்பந்தமாகும்.',
+          'இந்தியா ராம்சார் உடன்படிக்கையில் கையெழுத்திடாத நாடாகும்.',
+          'ராம்சார் தளங்கள் உள்நாட்டு உயரமான நன்னீர் ஏரிகளில் மட்டுமே அமைய முடியும்.',
+          'மான்ட்ராக்ஸ் பதிவு புதிதாக உருவான எரிமலை ஏரிகளை மட்டுமே பதிவு செய்கிறது.',
+        ],
+        correctIndex: 0,
+        explanationEn:
+            'Adopted in Ramsar, Iran in 1971, the Ramsar Convention is the only global treaty dedicated to wetland conservation and "wise use". India joined in 1982 and boasts over 80 designated Ramsar sites including Sundarbans and Chilika Lake.',
+        explanationTa:
+            '1971-ல் ஈரானின் ராம்சார் நகரில் கையெழுத்திடப்பட்ட இந்த ஒப்பந்தம், சதுப்பு நிலங்களின் பாதுகாப்பு மற்றும் விவேகமான பயன்பாட்டிற்கு வழிகாட்டுகிறது. இந்தியா 1982-ல் இதில் இணைந்தது.',
+        hasOptionE: false,
+      ),
+
+      // 7. UPSC CSE GS-1: Indian Economy - Monetary Policy Committee
+      Question(
+        id: 'upsc_07',
+        subject: 'Indian Economy & Banking',
+        category: 'General Awareness',
+        examType: 'upsc_cse_prelims_gs',
+        questionEn:
+            'In India, the Policy Repo Rate under the statutory Flexible Inflation Targeting framework is determined by which authority?',
+        questionTa:
+            'இந்தியாவில் சட்டப்பூர்வ நெகிழ்வான பணவீக்க இலக்கு கட்டமைப்பின் (Inflation Targeting) கீழ் கொள்கை ரெப்போ விகிதத்தை (Repo Rate) நிர்ணயிக்கும் அதிகாரம் கொண்ட அமைப்பு எது?',
+        optionsEn: [
+          'Monetary Policy Committee (MPC) headed by the RBI Governor',
+          'Union Ministry of Finance Department of Economic Affairs',
+          'NITI Aayog Governing Council',
+          'Financial Stability and Development Council (FSDC)',
+        ],
+        optionsTa: [
+          'ஆர்பிஐ ஆளுநர் தலைமையிலான பணவியல் கொள்கைக் குழு (Monetary Policy Committee - MPC)',
+          'மத்திய நிதி அமைச்சகத்தின் பொருளாதார விவகாரங்கள் துறை',
+          'நிதி ஆயோக் நிர்வாகக் குழு (NITI Aayog)',
+          'நிதி நிலைத்தன்மை மற்றும் மேம்பாட்டு கவுன்சில் (FSDC)',
+        ],
+        correctIndex: 0,
+        explanationEn:
+            'Under Section 45ZB of the Reserve Bank of India Act, 1934, the 6-member Monetary Policy Committee (MPC) fixes the benchmark Policy Repo Rate to contain Consumer Price Index (CPI) inflation within the mandated target band of 4% (+/- 2%).',
+        explanationTa:
+            'ஆர்பிஐ சட்டம் 1934-ன் பிரிவு 45ZB-ன் கீழ் அமைக்கப்பட்ட 6 உறுப்பினர்களைக் கொண்ட பணவியல் கொள்கைக் குழு (MPC), சில்லறை பணவீக்கத்தை 4% (+/- 2%) வரம்பிற்குள் வைத்திருக்க ரெப்போ விகிதத்தை நிர்ணயிக்கிறது.',
+        hasOptionE: false,
+      ),
+
+      // 8. UPSC CSAT (GS-2): Critical Reading Comprehension & Inference
+      Question(
+        id: 'upsc_08',
+        subject: 'CSAT Comprehension',
+        category: 'Logical Reasoning',
+        examType: 'upsc_cse_csat',
+        questionEn:
+            '"Economic growth without social justice creates extreme wealth concentration, structural inequality, and fragile institutions. Genuine national progress requires expanding substantive human capabilities, healthcare access, and quality education." Which of the following is the most logical corollary from the passage?',
+        questionTa:
+            '"சமூக நீதியற்ற பொருளாதார வளர்ச்சி தீவிர செல்வக் குவிப்பையும், கட்டமைப்பு சமத்துவமின்மையையும் உருவாக்குகிறது. உண்மையான தேசிய வளர்ச்சி என்பது மனித திறன்கள், சுகாதார வசதிகள் மற்றும் தரமான கல்வியை விரிவாக்குவதாகும்." மேற்கண்ட பத்தியிலிருந்து பெறப்படும் மிகவும் தர்க்கரீதியான முடிவு எது?',
+        optionsEn: [
+          'Gross Domestic Product (GDP) growth alone is an incomplete measure of real human well-being and development.',
+          'Industrial investment must be immediately banned to achieve equitable wealth distribution.',
+          'Free market competition automatically eliminates structural social inequalities without government intervention.',
+          'Developing countries should abandon infrastructure modernization completely.',
+        ],
+        optionsTa: [
+          'மொத்த உள்நாட்டு உற்பத்தி (GDP) வளர்ச்சி மட்டுமே உண்மையான மனித நல்வாழ்வு மற்றும் வளர்ச்சியை அளவிட போதுமானதல்ல.',
+          'சமமான செல்வப் பகிர்வை அடைய தொழில்துறை முதலீடுகளை உடனடியாக தடை செய்ய வேண்டும்.',
+          'தடையற்ற சந்தை போட்டி அரசின் தலையீடு இன்றியே கட்டமைப்பு ஏற்றத்தாழ்வுகளை தானாகவே நீக்கிவிடும்.',
+          'வளரும் நாடுகள் உள்கட்டமைப்பு நவீனமயமாக்கலை முற்றிலும் கைவிட வேண்டும்.',
+        ],
+        correctIndex: 0,
+        explanationEn:
+            'The passage underscores that macroeconomic expansion (GDP growth) is fundamentally insufficient without human capability enhancement (Amartya Sen capability approach). Hence, GDP alone cannot gauge true development.',
+        explanationTa:
+            'பொருளாதார வளர்ச்சி மட்டுமே போதாது, மனித திறன்களின் மேம்பாடே உண்மையான வளர்ச்சி என்ற அமர்த்தியா சென்னின் கோட்பாட்டை இந்த பத்தி விளக்குகிறது. எனவே ஜிடிபி வளர்ச்சி மட்டுமே உண்மையான மனித வளர்ச்சியை அளவிட முடியாது.',
+        hasOptionE: false,
+      ),
+
+      // 9. UPSC CSAT (GS-2): Logical Deduction & Analytical Reasoning
+      Question(
+        id: 'upsc_09',
+        subject: 'CSAT Logical Reasoning',
+        category: 'Logical Reasoning',
+        examType: 'upsc_cse_csat',
+        questionEn:
+            'Statements:\n1. All Civil Servants are ethical administrators.\n2. Some ethical administrators are technology innovators.\n\nConclusions:\nI. Some technology innovators are ethical administrators.\nII. All Civil Servants are technology innovators.\n\nWhich of the conclusion(s) logically follows?',
+        questionTa:
+            'கூற்றுகள்:\n1. அனைத்து குடிமைப் பணியாளர்களும் நேர்மையான நிர்வாகிகள்.\n2. சில நேர்மையான நிர்வாகிகள் தொழில்நுட்ப கண்டுபிடிப்பாளர்கள்.\n\nமுடிவுகள்:\nI. சில தொழில்நுட்ப கண்டுபிடிப்பாளர்கள் நேர்மையான நிர்வாகிகள்.\nII. அனைத்து குடிமைப் பணியாளர்களும் தொழில்நுட்ப கண்டுபிடிப்பாளர்கள்.\n\nஎந்த முடிவு(கள்) தர்க்கரீதியாக சரியானது?',
+        optionsEn: [
+          'Only Conclusion I follows.',
+          'Only Conclusion II follows.',
+          'Both Conclusions I and II follow.',
+          'Neither Conclusion I nor II follows.',
+        ],
+        optionsTa: [
+          'முடிவு I மட்டுமே சரியானது.',
+          'முடிவு II மட்டுமே சரியானது.',
+          'முடிவுகள் I மற்றும் II ஆகிய இரண்டும் சரியானவை.',
+          'முடிவு I மற்றும் II இரண்டும் தவறானவை.',
+        ],
+        correctIndex: 0,
+        explanationEn:
+            'By rules of immediate categorical inference, Statement 2 ("Some A are B") converts validly to "Some B are A" (Conclusion I follows). There is no distributed link between All Civil Servants and technology innovators (Conclusion II is invalid).',
+        explanationTa:
+            'தர்க்க விதிகளின்படி, "சில A, B ஆகும்" என்பது "சில B, A ஆகும்" என நேரடியாக மாறும் (முடிவு I சரி). ஆனால் அனைத்து குடிமைப் பணியாளர்களும் கண்டுபிடிப்பாளர்கள் என்று கூற முடியாது (முடிவு II தவறு).',
+        hasOptionE: false,
+      ),
+
+      // 10. UPSC CSAT (GS-2): Quantitative Aptitude - Negative Marking Equation
+      Question(
+        id: 'upsc_10',
+        subject: 'CSAT Basic Numeracy',
+        category: 'Quantitative Aptitude',
+        examType: 'upsc_cse_csat',
+        questionEn:
+            'In a competitive examination consisting of 80 objective questions, each correct answer is awarded 2.5 marks, while 0.833 marks (1/3rd penalty) are deducted for each incorrect answer. A candidate attempts all 80 questions and scores 140 marks. How many questions did the candidate answer correctly?',
+        questionTa:
+            '80 புறவய வினாக்களைக் கொண்ட ஒரு போட்டித் தேர்வில், ஒவ்வொரு சரியான பதிலுக்கும் 2.5 மதிப்பெண்கள் வழங்கப்படுகின்றன, மேலும் ஒவ்வொரு தவறான பதிலுக்கும் 0.833 மதிப்பெண்கள் (1/3 அபராதம்) கழிக்கப்படுகின்றன. ஒரு தேர்வர் அனைத்து 80 கேள்விகளுக்கும் விடையளித்து 140 மதிப்பெண்கள் பெறுகிறார் எனில், அவர் சரியாக விடையளித்த கேள்விகள் எத்தனை?',
+        optionsEn: ['62', '58', '66', '54'],
+        optionsTa: ['62', '58', '66', '54'],
+        correctIndex: 0,
+        explanationEn:
+            'Let C = correct answers and W = (80 - C) wrong answers.\nScore = 2.5*C - (2.5/3)*(80 - C) = 140.\nMultiply by 3:\n7.5*C - 2.5*(80 - C) = 420\n7.5*C - 200 + 2.5*C = 420\n10*C = 620 => C = 62 correct answers.',
+        explanationTa:
+            'சரியான பதில்கள் = C, தவறான பதில்கள் = 80 - C.\n2.5*C - (2.5/3)*(80 - C) = 140.\nஇருபுறமும் 3-ஆல் பெருக்க:\n7.5*C - 2.5*(80 - C) = 420\n10*C - 200 = 420 => 10*C = 620 => C = 62 கேள்விகள் சரி.',
+        hasOptionE: false,
+      ),
+
+      // 11. UPSC CDS: Defence Technology - LCA Tejas
+      Question(
+        id: 'upsc_11',
+        subject: 'Defence & Security',
+        category: 'General Awareness',
+        examType: 'upsc_cds',
+        questionEn:
+            'Which indigenous 4.5 generation, single-engine, delta-wing multirole light fighter aircraft was designed by the Aeronautical Development Agency (ADA) and manufactured by Hindustan Aeronautics Limited (HAL) for the Indian Armed Forces?',
+        questionTa:
+            'இந்திய ஆயுதப் படைகளுக்காக ஏரோநாட்டிகல் டெவலப்மென்ட் ஏஜென்சியால் (ADA) வடிவமைக்கப்பட்டு, இந்துஸ்தான் ஏரோநாட்டிக்ஸ் லிமிடெட் (HAL) நிறுவனத்தால் தயாரிக்கப்பட்ட உள்நாட்டு 4.5 தலைமுறை, ஒற்றை எஞ்சின் கொண்ட இலகுரக போர் விமானம் எது?',
+        optionsEn: [
+          'LCA Tejas',
+          'Sukhoi Su-30MKI',
+          'Mirage 2000',
+          'Mikoyan MiG-29UPG',
+        ],
+        optionsTa: [
+          'தேஜஸ் (LCA Tejas)',
+          'சுகோய் Su-30MKI',
+          'மிராஜ் 2000',
+          'மிக்-29UPG',
+        ],
+        correctIndex: 0,
+        explanationEn:
+            'LCA Tejas is India\'s indigenous lightweight, multirole supersonic fighter jet with fly-by-wire flight control and advanced avionics, inducted into active squadrons of the Indian Air Force.',
+        explanationTa:
+            'தேஜஸ் (LCA Tejas) என்பது இந்தியாவின் உள்நாட்டு தயாரிப்பான அதிநவீன இலகுரக போர் விமானமாகும். இது இந்திய விமானப்படையின் முன்னணி படைப்பிரிவுகளில் சேர்க்கப்பட்டு வெற்றிகரமாக செயல்பட்டு வருகிறது.',
+        hasOptionE: false,
+      ),
+
+      // 12. UPSC CSE GS-1: Science & Technology - Aditya-L1 Solar Mission
+      Question(
+        id: 'upsc_12',
+        subject: 'Science & Technology',
+        category: 'General Awareness',
+        examType: 'upsc_cse_prelims_gs',
+        questionEn:
+            'India\'s first dedicated space-based solar observatory, Aditya-L1, was successfully placed into a halo orbit around which gravitational equilibrium point of the Sun-Earth system?',
+        questionTa:
+            'சூரியனை ஆய்வு செய்வதற்கான இந்தியாவின் முதல் விண்வெளி ஆய்வகமான ஆதித்யா-L1, சூரியன்-பூமி அமைப்பின் எந்த ஈர்ப்பு சமநிலை புள்ளியைச் சுற்றியுள்ள ஹாலோ சுற்றுப்பாதையில் நிலைநிறுத்தப்பட்டது?',
+        optionsEn: [
+          'Lagrange Point 1 (L1), roughly 1.5 million km from Earth',
+          'Lagrange Point 2 (L2), behind the Earth',
+          'Lagrange Point 4 (L4), leading Earth\'s orbit',
+          'Geostationary Earth Orbit (GEO) at 35,786 km',
+        ],
+        optionsTa: [
+          'பூமியிலிருந்து சுமார் 15 லட்சம் கி.மீ தூரத்திலுள்ள லாக்ராஞ்சியன் புள்ளி 1 (L1)',
+          'பூமிக்கு பின்னால் உள்ள லாக்ராஞ்சியன் புள்ளி 2 (L2)',
+          'பூமியின் சுற்றுப்பாதைக்கு முன்னால் உள்ள லாக்ராஞ்சியன் புள்ளி 4 (L4)',
+          '35,786 கி.மீ உயரத்தில் உள்ள புவிசார் சுற்றுப்பாதை (GEO)',
+        ],
+        correctIndex: 0,
+        explanationEn:
+            'ISRO launched Aditya-L1 to the Sun-Earth L1 Lagrange point (1.5 million km from Earth) because a spacecraft placed in this halo orbit can continuously view the Sun without any occultations or eclipses.',
+        explanationTa:
+            'பூமியிலிருந்து 15 லட்சம் கி.மீ தொலைவில் உள்ள சூரியன்-பூமி L1 புள்ளியில் எவ்வித கிரகணத் தடைகளும் இன்றி சூரியனை 24 மணி நேரமும் தடையின்றி கண்காணிக்க முடியும் என்பதால் இஸ்ரோ ஆதித்யா-L1-ஐ அங்கு நிலைநிறுத்தியது.',
+        hasOptionE: false,
+      ),
+    ];
+  }
 }
