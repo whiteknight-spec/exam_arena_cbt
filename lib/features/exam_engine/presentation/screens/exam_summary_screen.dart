@@ -10,6 +10,7 @@ import '../../../progression/domain/models/user_progress.dart';
 import '../../../progression/domain/models/pubg_tier.dart';
 import '../../../progression/presentation/providers/progression_provider.dart';
 import '../../../progression/presentation/widgets/pubg_tier_badge.dart';
+import '../../../progression/presentation/screens/mistake_vault_screen.dart';
 
 class ExamSummaryScreen extends ConsumerStatefulWidget {
   final ExamResult result;
@@ -307,6 +308,146 @@ class _ExamSummaryScreenState extends ConsumerState<ExamSummaryScreen> {
                 ],
               ),
             ),
+            const SizedBox(height: 14),
+
+            // CUT-OFF BENCHMARK & ESTIMATED PERCENTILE PREDICTOR CARD
+            () {
+              final exam = progress.selectedExam;
+              double benchmarkCutoffPercent = 60.0;
+              if (exam.id.contains('upsc_cse_prelims_gs')) {
+                benchmarkCutoffPercent = 44.0;
+              } else if (exam.id.contains('upsc_cse_csat')) {
+                benchmarkCutoffPercent = 33.33;
+              } else if (exam.id.contains('rrb')) {
+                benchmarkCutoffPercent = 70.0;
+              } else if (exam.id.contains('ssc')) {
+                benchmarkCutoffPercent = 67.5;
+              } else if (exam.id.contains('tnpsc')) {
+                benchmarkCutoffPercent = 55.0;
+              }
+
+              final maxScore = result.maximumMarks > 0 ? result.maximumMarks : 1.0;
+              final netScorePercent = ((result.netScore / maxScore) * 100).clamp(0.0, 100.0);
+              final benchmarkCutoffMarks = (benchmarkCutoffPercent / 100) * maxScore;
+              final isCutoffCleared = result.netScore >= benchmarkCutoffMarks;
+              final cutoffGap = result.netScore - benchmarkCutoffMarks;
+
+              double estimatedPercentile;
+              if (netScorePercent >= benchmarkCutoffPercent) {
+                final headroom = 100.0 - benchmarkCutoffPercent;
+                final progressInHeadroom = headroom > 0 ? (netScorePercent - benchmarkCutoffPercent) / headroom : 1.0;
+                estimatedPercentile = (85.0 + progressInHeadroom * 14.8).clamp(85.0, 99.8);
+              } else {
+                estimatedPercentile = (benchmarkCutoffPercent > 0
+                    ? (netScorePercent / benchmarkCutoffPercent) * 84.5
+                    : 50.0).clamp(5.0, 84.9);
+              }
+
+              return Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: isCutoffCleared ? const Color(0xFFECFDF5) : const Color(0xFFFFF7ED),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isCutoffCleared ? const Color(0xFFA7F3D0) : const Color(0xFFFED7AA),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              isCutoffCleared ? Icons.verified_rounded : Icons.trending_up_rounded,
+                              color: isCutoffCleared ? const Color(0xFF059669) : const Color(0xFFD97706),
+                              size: 18,
+                            ),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'OFFICIAL CUT-OFF & PERCENTILE PREDICTOR',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.6,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: isCutoffCleared ? const Color(0xFF059669) : const Color(0xFFD97706),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            isCutoffCleared ? 'CUT-OFF CLEARED' : 'BORDERLINE GAP',
+                            style: const TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Estimated All-India Percentile',
+                              style: TextStyle(fontSize: 11, color: Colors.grey.shade700, fontWeight: FontWeight.w600),
+                            ),
+                            Text(
+                              '${estimatedPercentile.toStringAsFixed(1)}%ile',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w900,
+                                color: isCutoffCleared ? const Color(0xFF065F46) : const Color(0xFF92400E),
+                                fontFeatures: const [FontFeature.tabularFigures()],
+                              ),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              'Target Benchmark Cut-Off',
+                              style: TextStyle(fontSize: 11, color: Colors.grey.shade700, fontWeight: FontWeight.w600),
+                            ),
+                            Text(
+                              '${benchmarkCutoffMarks.toStringAsFixed(1)} Marks (${benchmarkCutoffPercent.toStringAsFixed(0)}%)',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w800,
+                                fontFeatures: [FontFeature.tabularFigures()],
+                              ),
+                            ),
+                            Text(
+                              isCutoffCleared
+                                  ? '+${cutoffGap.toStringAsFixed(1)} Marks Surplus'
+                                  : '${cutoffGap.toStringAsFixed(1)} Marks Gap to Target',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: isCutoffCleared ? const Color(0xFF059669) : const Color(0xFFDC2626),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            }(),
             const SizedBox(height: 16),
 
             // PERFORMANCE METRICS GRID
@@ -613,6 +754,31 @@ class _ExamSummaryScreenState extends ConsumerState<ExamSummaryScreen> {
                         ),
                       ],
                     ),
+                    if (isWeak) ...[
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 32,
+                        child: OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Color(0xFFEF4444)),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                          ),
+                          icon: const Icon(Icons.troubleshoot_rounded, size: 14, color: Color(0xFFDC2626)),
+                          label: const Text(
+                            'Drill Weak Topic in Mistake Vault 🎯',
+                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Color(0xFFDC2626)),
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const MistakeVaultScreen()),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               );

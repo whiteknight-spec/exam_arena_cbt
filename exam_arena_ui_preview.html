@@ -357,6 +357,9 @@
                 <button onclick="openRoughSheet()" class="px-3 py-1.5 rounded-full bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#1D1D1F] font-medium flex items-center gap-1.5 transition-colors">
                   <span>📝 Rough Sheet</span>
                 </button>
+                <button onclick="openQuestionPaperModal()" class="px-3 py-1.5 rounded-full bg-[#F0F9FF] hover:bg-[#E0F2FE] text-[#0284C7] font-semibold flex items-center gap-1.5 transition-colors border border-[#BAE6FD]">
+                  <span>📄 Question Paper</span>
+                </button>
 
                 <!-- Language Toggle -->
                 <div class="inline-flex rounded-lg bg-[#E5E5EA]/70 p-0.5 text-xs text-[#6E6E73]">
@@ -365,6 +368,13 @@
                 </div>
               </div>
 
+            </div>
+
+            <!-- 5-Minute Warning Alert Banner (Simulates TCS iON Exam Pressure) -->
+            <div id="cbt-5min-banner" class="flex items-center gap-2.5 p-3.5 bg-[#FEF2F2] border border-[#FECDD3] rounded-2xl text-xs text-[#991B1B] font-bold shadow-xs">
+              <span class="text-base leading-none">⚠️</span>
+              <span class="flex-1">5-Minute Warning: Exam auto-submits at 00:00! Review flagged and unattempted answers now.</span>
+              <span class="text-[10px] bg-[#DC2626] text-white px-2 py-0.5 rounded-md uppercase font-black tracking-wider">LIVE ALERT</span>
             </div>
 
             <!-- Question Statement -->
@@ -544,6 +554,70 @@
         <button onclick="openHeartsModal()" class="text-xs text-[#0071E3] font-medium hover:underline">
           View Details
         </button>
+      </div>
+
+      <!-- Feature 4: Official Cut-Off & All-India Percentile Predictor -->
+      <div class="apple-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 border-l-4 border-l-[#059669] bg-[#F0FDF4]/30">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-black text-[#059669] uppercase tracking-wider">Official Cut-Off & All-India Percentile Predictor</span>
+            <span class="text-[10px] font-black text-white bg-[#059669] px-2.5 py-0.5 rounded-full">CUT-OFF CLEARED</span>
+          </div>
+          <div class="text-3xl font-black text-[#065F46] mt-1 font-mono tracking-tight">94.8%ile <span class="text-xs font-semibold text-[#64748B]">(Top 5.2% of test takers)</span></div>
+          <div class="text-xs text-[#64748B] mt-0.5">Estimated All-India rank standing based on official marking rules and score distribution curve.</div>
+        </div>
+        <div class="flex items-center gap-6 sm:border-l sm:border-black/[0.06] sm:pl-6 w-full sm:w-auto justify-between sm:justify-start">
+          <div>
+            <div class="text-[11px] text-[#64748B] font-semibold">Target Cut-Off</div>
+            <div class="text-base font-black text-[#1D1D1F] font-mono">17.50 M (70%)</div>
+          </div>
+          <div>
+            <div class="text-[11px] text-[#059669] font-semibold">Surplus Margin</div>
+            <div class="text-base font-black text-[#059669] font-mono">+1.17 Marks</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature 2: Topic-Wise Weakness Heatmap & One-Tap Mistake Vault Drill -->
+      <div class="apple-card p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-base font-bold text-[#1D1D1F]">Topic-Wise Weakness Heatmap</h3>
+            <p class="text-xs text-[#86868B]">Diagnostic breakdown to focus your targeted revision drills</p>
+          </div>
+          <span class="text-xs px-2.5 py-1 rounded-full bg-[#EFF6FF] text-[#1D4ED8] font-bold">Diagnostic Active</span>
+        </div>
+        <div class="space-y-3">
+          <!-- Strong Topic -->
+          <div class="p-3.5 rounded-xl border border-[#A7F3D0] bg-[#ECFDF5] flex items-center justify-between">
+            <div>
+              <div class="text-xs font-bold text-[#065F46]">Indian Polity & Constitution</div>
+              <div class="text-[11px] text-[#047857]">4/4 Correct • 100% Accuracy</div>
+            </div>
+            <span class="text-xs font-extrabold text-[#059669]">🎯 Strong Mastery</span>
+          </div>
+          <!-- Moderate Topic -->
+          <div class="p-3.5 rounded-xl border border-[#BAE6FD] bg-[#F0F9FF] flex items-center justify-between">
+            <div>
+              <div class="text-xs font-bold text-[#0369A1]">Quantitative Aptitude & CSAT Numeracy</div>
+              <div class="text-[11px] text-[#0284C7]">6/8 Correct • 75% Accuracy</div>
+            </div>
+            <span class="text-xs font-extrabold text-[#0284C7]">⚡ Proficient</span>
+          </div>
+          <!-- Weak Topic with one-tap Mistake Vault drill -->
+          <div class="p-3.5 rounded-xl border border-[#FECDD3] bg-[#FFF1F2] space-y-2">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-xs font-bold text-[#9F1239]">Environment, Ecology & Ramsar Wetlands</div>
+                <div class="text-[11px] text-[#BE123C]">1/3 Correct • 33.3% Accuracy (-0.67 Neg)</div>
+              </div>
+              <span class="text-xs font-extrabold text-[#E11D48]">⚠️ High Error Risk</span>
+            </div>
+            <button onclick="alert('Navigating to Mistake Vault: Loading failed questions for targeted drill!')" class="w-full py-1.5 rounded-lg border border-[#E11D48] text-[#E11D48] font-bold text-xs hover:bg-[#E11D48] hover:text-white transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+              <span>🎯 Drill Weak Topic in Mistake Vault (+1 ❤️ Heal)</span>
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- AI Memory Shortcuts (Apple Intelligence Siri Style) -->
@@ -1246,7 +1320,10 @@
       <!-- Category Filter Pills (Apple Segmented Bar) -->
       <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
         <button onclick="filterExamCategory('all')" id="cat-all" class="exam-cat-pill px-3.5 py-1.5 rounded-full font-semibold bg-[#0071E3] text-white transition-all shadow-xs shrink-0">
-          All (17)
+          All (23)
+        </button>
+        <button onclick="filterExamCategory('pyq')" id="cat-pyq" class="exam-cat-pill px-3.5 py-1.5 rounded-full font-bold bg-[#FEF3C7] text-[#92400E] hover:bg-[#FDE68A] transition-all shrink-0 border border-[#FDE68A]">
+          📜 Official PYQ Papers (6)
         </button>
         <button onclick="filterExamCategory('upsc')" id="cat-upsc" class="exam-cat-pill px-3.5 py-1.5 rounded-full font-medium bg-[#EEF2FF] text-[#3730A3] hover:bg-[#E0E7FF] font-bold transition-all shrink-0 border border-[#C7D2FE]">
           🏛️ UPSC Civil Services (4)
@@ -1267,6 +1344,101 @@
 
       <!-- Exam Cards List -->
       <div class="space-y-3 overflow-y-auto flex-1 pr-1" id="exam-list-container">
+
+        <!-- OFFICIAL PREVIOUS YEAR PAPERS (PYQ) -->
+        <div onclick="selectTargetExam('pyq_upsc_2024_gs1', 'UPSC CSE 2024 Prelims GS-1 (PYQ)')" class="exam-item exam-cat-pyq exam-cat-upsc p-4 rounded-2xl border-2 border-[#D97706]/40 bg-[#FFFBEB] hover:border-[#B45309] cursor-pointer transition-all shadow-xs">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-sm font-extrabold text-[#78350F]">UPSC CSE 2024 Prelims GS Paper 1</h4>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#D97706] text-white font-black">2024 PYQ</span>
+                <span class="text-[9px] px-2 py-0.5 rounded-full bg-[#10B981]/20 text-[#047857] font-bold">OFFICIAL</span>
+              </div>
+              <p class="text-xs text-[#92400E] mt-1 font-medium">Official Historical Paper • Morning Session (Polity, History, Geo, Env, Economy)</p>
+            </div>
+            <span class="text-xs text-[#D97706] font-bold shrink-0">Select ➔</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5 mt-2.5 text-[10px]">
+            <span class="px-2 py-0.5 rounded-md bg-white border border-[#FDE68A] text-[#78350F] font-bold">100 Questions</span>
+            <span class="px-2 py-0.5 rounded-md bg-white border border-[#FDE68A] text-[#78350F] font-bold">120 Mins</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#EFF6FF] text-[#1D4ED8] font-bold">+2.0 Marks</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#FEE2E2] text-[#DC2626] font-bold">-0.67 Penalty (1/3rd)</span>
+          </div>
+        </div>
+
+        <div onclick="selectTargetExam('pyq_upsc_2024_csat', 'UPSC CSAT 2024 Paper 2 (PYQ)')" class="exam-item exam-cat-pyq exam-cat-upsc p-4 rounded-2xl border border-[#FDE68A] bg-[#FFFDF7] hover:border-[#B45309] cursor-pointer transition-all">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-sm font-bold text-[#78350F]">UPSC CSAT 2024 Paper 2 (GS-2)</h4>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#F59E0B] text-white font-bold">2024 CSAT</span>
+              </div>
+              <p class="text-xs text-[#92400E] mt-0.5">Official Afternoon Session: Reading Comprehension, Logical Reasoning & Numeracy</p>
+            </div>
+            <span class="text-xs text-[#D97706] font-bold shrink-0">Select ➔</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5 mt-2.5 text-[10px]">
+            <span class="px-2 py-0.5 rounded-md bg-white border border-[#FDE68A] text-[#78350F] font-medium">80 Questions</span>
+            <span class="px-2 py-0.5 rounded-md bg-white border border-[#FDE68A] text-[#78350F] font-medium">120 Mins</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#EFF6FF] text-[#1D4ED8] font-semibold">+2.5 Marks</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#FEE2E2] text-[#DC2626] font-semibold">-0.83 Penalty</span>
+          </div>
+        </div>
+
+        <div onclick="selectTargetExam('pyq_tnpsc_2024_grp4', 'TNPSC Group 4 2024 (PYQ)')" class="exam-item exam-cat-pyq exam-cat-tnpsc p-4 rounded-2xl border border-[#A7F3D0] bg-[#F0FDF4] hover:border-[#059669] cursor-pointer transition-all">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-sm font-bold text-[#065F46]">TNPSC Group 4 2024 Official Paper</h4>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#059669] text-white font-bold">2024 TNPSC</span>
+              </div>
+              <p class="text-xs text-[#047857] mt-0.5">Tamil Nadu Combined Civil Services Examination IV (VAO, Typist, Junior Assistant)</p>
+            </div>
+            <span class="text-xs text-[#059669] font-bold shrink-0">Select ➔</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5 mt-2.5 text-[10px]">
+            <span class="px-2 py-0.5 rounded-md bg-white border border-[#A7F3D0] text-[#065F46] font-medium">200 Questions</span>
+            <span class="px-2 py-0.5 rounded-md bg-white border border-[#A7F3D0] text-[#065F46] font-medium">180 Mins</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#ECFDF5] text-[#059669] font-bold">Zero Negative</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#FEF3C7] text-[#D97706] font-bold">5 Options (A–E)</span>
+          </div>
+        </div>
+
+        <div onclick="selectTargetExam('pyq_rrb_ntpc_cbt1', 'RRB NTPC CBT-1 (PYQ)')" class="exam-item exam-cat-pyq exam-cat-railways p-4 rounded-2xl border border-[#BAE6FD] bg-[#F0F9FF] hover:border-[#0284C7] cursor-pointer transition-all">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-sm font-bold text-[#0C4A6E]">RRB NTPC Previous Year CBT-1 Shift 1</h4>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#0284C7] text-white font-bold">RRB PYQ</span>
+              </div>
+              <p class="text-xs text-[#0369A1] mt-0.5">Railways Non-Technical Popular Categories Official Benchmark Paper</p>
+            </div>
+            <span class="text-xs text-[#0284C7] font-bold shrink-0">Select ➔</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5 mt-2.5 text-[10px]">
+            <span class="px-2 py-0.5 rounded-md bg-white border border-[#BAE6FD] text-[#0C4A6E] font-medium">100 Questions</span>
+            <span class="px-2 py-0.5 rounded-md bg-white border border-[#BAE6FD] text-[#0C4A6E] font-medium">90 Mins</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#FEE2E2] text-[#DC2626] font-bold">-0.33 Penalty</span>
+          </div>
+        </div>
+
+        <div onclick="selectTargetExam('pyq_ssc_cgl_2024_tier1', 'SSC CGL 2024 Tier 1 (PYQ)')" class="exam-item exam-cat-pyq exam-cat-ssc p-4 rounded-2xl border border-[#DDD6FE] bg-[#F5F3FF] hover:border-[#7C3AED] cursor-pointer transition-all">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-sm font-bold text-[#4C1D95]">SSC CGL 2024 Tier 1 Official Shift</h4>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#7C3AED] text-white font-bold">2024 SSC</span>
+              </div>
+              <p class="text-xs text-[#6D28D9] mt-0.5">Combined Graduate Level Tier-1 Official Computer Based Test</p>
+            </div>
+            <span class="text-xs text-[#7C3AED] font-bold shrink-0">Select ➔</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5 mt-2.5 text-[10px]">
+            <span class="px-2 py-0.5 rounded-md bg-white border border-[#DDD6FE] text-[#4C1D95] font-medium">100 Questions</span>
+            <span class="px-2 py-0.5 rounded-md bg-white border border-[#DDD6FE] text-[#4C1D95] font-medium">60 Mins</span>
+            <span class="px-2 py-0.5 rounded-md bg-[#FEE2E2] text-[#DC2626] font-bold">-0.50 Penalty</span>
+          </div>
+        </div>
 
         <!-- UPSC Civil Services & Defence Exams -->
         <div onclick="selectTargetExam('upsc_cse_prelims_gs', 'UPSC CSE Prelims (GS-1)')" class="exam-item exam-cat-upsc p-4 rounded-2xl border-2 border-[#1E3A8A]/30 bg-[#F0F4FF] hover:border-[#1E3A8A] cursor-pointer transition-all shadow-xs">
@@ -1599,11 +1771,129 @@
   </div>
 
   <!-- ============================================================== -->
+  <!-- MODAL 6: OFFICIAL QUESTION PAPER OVERVIEW MODAL                -->
+  <!-- ============================================================== -->
+  <div id="modal-question-paper" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-[32px] sm:rounded-[32px] max-w-2xl w-full p-6 shadow-2xl border border-black/[0.06] space-y-4 max-h-[88vh] flex flex-col">
+      
+      <!-- Apple Drag Notch -->
+      <div class="w-10 h-1 bg-[#D1D1D6] rounded-full mx-auto sm:hidden mb-1"></div>
+
+      <div class="flex items-center justify-between pb-3 border-b border-black/[0.06]">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-[#F0F9FF] border border-[#BAE6FD] flex items-center justify-center text-[#0284C7] text-lg font-bold">
+            📄
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-[#1D1D1F]">Official Question Paper Overview</h3>
+            <p class="text-xs text-[#64748B]">TCS iON CBT Hall • 30 Questions Complete Inspection</p>
+          </div>
+        </div>
+        <button onclick="closeQuestionPaperModal()" class="w-8 h-8 rounded-full bg-[#F5F5F7] hover:bg-[#E5E5EA] flex items-center justify-center text-[#86868B] text-xs font-bold transition-colors">✕</button>
+      </div>
+
+      <!-- Quick Question Filter Pills -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+        <span class="px-2.5 py-1 rounded-md bg-[#22C55E]/10 text-[#16A34A] font-semibold">1 Answered</span>
+        <span class="px-2.5 py-1 rounded-md bg-[#8B5CF6]/10 text-[#7C3AED] font-semibold">1 Marked Review</span>
+        <span class="px-2.5 py-1 rounded-md bg-[#EF4444]/10 text-[#DC2626] font-semibold">1 Not Answered</span>
+        <span class="px-2.5 py-1 rounded-md bg-[#94A3B8]/15 text-[#475569] font-semibold">27 Not Visited</span>
+      </div>
+
+      <!-- Scrollable Questions List -->
+      <div class="overflow-y-auto divide-y divide-black/[0.06] pr-1 space-y-4 text-xs">
+        
+        <!-- Question Item 1 -->
+        <div class="pt-4 first:pt-0 space-y-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded-md bg-[#22C55E]/15 text-[#16A34A] font-bold text-[11px] border border-[#22C55E]/30">Q1</span>
+              <span class="font-bold text-[#64748B] text-[11px]">Quantitative Aptitude • Percentages</span>
+            </div>
+            <span class="px-2 py-0.5 rounded-full bg-[#22C55E]/10 text-[#16A34A] text-[10px] font-bold">Answered</span>
+          </div>
+          <p class="font-semibold text-[#1E293B] leading-relaxed">
+            If the price of sugar is increased by 20%, by how much percentage must a household reduce its consumption so that the total expenditure remains constant?
+          </p>
+          <p class="text-[#64748B] italic">
+            சர்க்கரையின் விலை 20% உயர்த்தப்பட்டால், குடும்பத்தின் மொத்த செலவு மாறாமல் இருக்க சர்க்கரை நுகர்வை எத்தனை சதவீதம் குறைக்க வேண்டும்?
+          </p>
+          <div class="grid grid-cols-2 gap-2 pt-1 font-medium text-[11px]">
+            <div class="p-2 rounded-lg bg-[#F8FAFC] text-[#64748B] border border-black/[0.04]">A) 15%</div>
+            <div class="p-2 rounded-lg bg-[#EBF5FF] text-[#0071E3] font-bold border border-[#0071E3]/30">B) 16.67% (Marked ✓)</div>
+            <div class="p-2 rounded-lg bg-[#F8FAFC] text-[#64748B] border border-black/[0.04]">C) 20%</div>
+            <div class="p-2 rounded-lg bg-[#F8FAFC] text-[#64748B] border border-black/[0.04]">D) 25%</div>
+          </div>
+        </div>
+
+        <!-- Question Item 2 -->
+        <div class="pt-4 space-y-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded-md bg-[#8B5CF6]/15 text-[#7C3AED] font-bold text-[11px] border border-[#8B5CF6]/30">Q2</span>
+              <span class="font-bold text-[#64748B] text-[11px]">Logical Reasoning • Series</span>
+            </div>
+            <span class="px-2 py-0.5 rounded-full bg-[#8B5CF6]/10 text-[#7C3AED] text-[10px] font-bold">Marked for Review</span>
+          </div>
+          <p class="font-semibold text-[#1E293B] leading-relaxed">
+            Find the next number in the sequence: 3, 7, 15, 31, 63, ?
+          </p>
+          <p class="text-[#64748B] italic">
+            பின்வரும் தொடரில் அடுத்த எண்ணைக் காண்க: 3, 7, 15, 31, 63, ?
+          </p>
+          <div class="grid grid-cols-2 gap-2 pt-1 font-medium text-[11px]">
+            <div class="p-2 rounded-lg bg-[#F8FAFC] text-[#64748B] border border-black/[0.04]">A) 95</div>
+            <div class="p-2 rounded-lg bg-[#F8FAFC] text-[#64748B] border border-black/[0.04]">B) 124</div>
+            <div class="p-2 rounded-lg bg-[#EBF5FF] text-[#0071E3] font-bold border border-[#0071E3]/30">C) 127 (Marked ✓)</div>
+            <div class="p-2 rounded-lg bg-[#F8FAFC] text-[#64748B] border border-black/[0.04]">D) 129</div>
+          </div>
+        </div>
+
+        <!-- Question Item 3 -->
+        <div class="pt-4 space-y-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded-md bg-[#EF4444]/15 text-[#DC2626] font-bold text-[11px] border border-[#EF4444]/30">Q3</span>
+              <span class="font-bold text-[#64748B] text-[11px]">General Awareness • Indian Polity</span>
+            </div>
+            <span class="px-2 py-0.5 rounded-full bg-[#EF4444]/10 text-[#DC2626] text-[10px] font-bold">Not Answered</span>
+          </div>
+          <p class="font-semibold text-[#1E293B] leading-relaxed">
+            Which Article of the Indian Constitution is described as the "Heart and Soul of the Constitution" by Dr. B.R. Ambedkar?
+          </p>
+          <p class="text-[#64748B] italic">
+            டாக்டர் பி.ஆர். அம்பேத்கரால் இந்திய அரசியலமைப்பின் "இதயம் மற்றும் ஆன்மா" என வர்ணிக்கப்பட்ட சட்டப்பிரிவு எது?
+          </p>
+          <div class="grid grid-cols-2 gap-2 pt-1 font-medium text-[11px]">
+            <div class="p-2 rounded-lg bg-[#F8FAFC] text-[#64748B] border border-black/[0.04]">A) Article 14</div>
+            <div class="p-2 rounded-lg bg-[#F8FAFC] text-[#64748B] border border-black/[0.04]">B) Article 19</div>
+            <div class="p-2 rounded-lg bg-[#F8FAFC] text-[#64748B] border border-black/[0.04]">C) Article 21</div>
+            <div class="p-2 rounded-lg bg-[#F8FAFC] text-[#64748B] border border-black/[0.04]">D) Article 32</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Action Footer -->
+      <div class="pt-2 border-t border-black/[0.06] flex items-center justify-between">
+        <span class="text-xs text-[#64748B]">Click any question in CBT Exam Hall to jump directly</span>
+        <button onclick="closeQuestionPaperModal()" class="px-4 py-2 rounded-full bg-[#0071E3] hover:bg-[#0077ED] text-white font-semibold text-xs transition-all shadow-sm">
+          Return to CBT Exam
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
   <!-- JAVASCRIPT CONTROLLERS                                         -->
   <!-- ============================================================== -->
   <script>
     function openExamSelectorModal() { document.getElementById('modal-exam-selector').classList.remove('hidden'); }
     function closeExamSelectorModal() { document.getElementById('modal-exam-selector').classList.add('hidden'); }
+
+    function openQuestionPaperModal() { document.getElementById('modal-question-paper').classList.remove('hidden'); }
+    function closeQuestionPaperModal() { document.getElementById('modal-question-paper').classList.add('hidden'); }
 
     function filterExamCategory(cat) {
       document.querySelectorAll('.exam-cat-pill').forEach(btn => {

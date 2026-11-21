@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/haptic_feedback_helper.dart';
 import '../../../progression/domain/models/arena_level.dart';
 import '../../../progression/domain/models/exam_type.dart';
 import '../../domain/models/question.dart';
@@ -36,6 +37,7 @@ class CbtExamScreen extends ConsumerStatefulWidget {
 class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isInitializing = true;
+  bool _hasWarned5Min = false;
   double _fontScale = 1.0;
   final TextEditingController _roughSheetController = TextEditingController();
 
@@ -43,6 +45,155 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
   void dispose() {
     _roughSheetController.dispose();
     super.dispose();
+  }
+
+  void _showQuestionPaperModal(BuildContext context, ExamSessionState sessionState) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(ctx).size.height * 0.88,
+        ),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                const Icon(Icons.description_outlined, color: Color(0xFF0284C7), size: 22),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Official Question Paper: ${widget.examType.title}',
+                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                      ),
+                      Text(
+                        'Full Paper Overview • ${sessionState.questions.length} Total Questions',
+                        style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close_rounded, size: 20),
+                  onPressed: () => Navigator.pop(ctx),
+                ),
+              ],
+            ),
+            const Divider(),
+            Expanded(
+              child: ListView.separated(
+                itemCount: sessionState.questions.length,
+                separatorBuilder: (context, index) => const Divider(height: 16),
+                itemBuilder: (ctx, idx) {
+                  final q = sessionState.questions[idx];
+                  final status = sessionState.statuses[idx] ?? QuestionStatus.notVisited;
+                  final userSel = sessionState.userSelections[idx];
+                  final isAnswered = status == QuestionStatus.answered || status == QuestionStatus.answeredReview;
+                  final statusColor = status.backgroundColor == AppColors.tcsNotVisited
+                      ? AppColors.textPrimary
+                      : status.backgroundColor;
+
+                  return InkWell(
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      ref.read(examSessionProvider.notifier).jumpToQuestion(idx);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: status.backgroundColor.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(color: status.borderColor.withValues(alpha: 0.4)),
+                                ),
+                                child: Text(
+                                  'Q${idx + 1}',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 11,
+                                    color: statusColor,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  q.subject,
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                isAnswered ? 'Marked' : status.label,
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  color: statusColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            sessionState.isTamil ? q.questionTa : q.questionEn,
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, height: 1.3),
+                          ),
+                          const SizedBox(height: 6),
+                          ...q.getOptions(sessionState.isTamil).asMap().entries.map((opt) {
+                            final isUserChoice = userSel == opt.key;
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 2),
+                              child: Text(
+                                '${String.fromCharCode(65 + opt.key)}) ${opt.value}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: isUserChoice ? FontWeight.w800 : FontWeight.w400,
+                                  color: isUserChoice ? AppColors.primary : AppColors.textPrimary,
+                                ),
+                              ),
+                            );
+                          }),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _showRoughSheetModal(BuildContext context) {
@@ -321,19 +472,24 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
     final sessionState = ref.watch(examSessionProvider);
     final notifier = ref.read(examSessionProvider.notifier);
 
-    // Listen for exam submission
+    // Listen for exam submission and 5-minute threshold
     ref.listen<ExamSessionState?>(examSessionProvider, (prev, next) {
-      if (next != null && next.isSubmitted && next.result != null) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => ExamSummaryScreen(
-              result: next.result!,
-              questions: next.questions,
-              userSelections: next.userSelections,
+      if (next != null) {
+        if (next.isSubmitted && next.result != null) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ExamSummaryScreen(
+                result: next.result!,
+                questions: next.questions,
+                userSelections: next.userSelections,
+              ),
             ),
-          ),
-        );
+          );
+        } else if (next.remainingSeconds <= 300 && next.remainingSeconds > 0 && !_hasWarned5Min) {
+          _hasWarned5Min = true;
+          HapticFeedbackHelper.heavyImpact();
+        }
       }
     });
 
@@ -431,6 +587,14 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
             ),
             const SizedBox(width: 4),
 
+            // Official Question Paper Full View Button
+            IconButton(
+              icon: const Icon(Icons.description_outlined, color: Color(0xFF0284C7)),
+              tooltip: 'Question Paper',
+              onPressed: () => _showQuestionPaperModal(context, sessionState),
+            ),
+            const SizedBox(width: 4),
+
             // Open TCS iON Palette Drawer Button
             IconButton(
               icon: const Icon(Icons.apps_rounded, color: AppColors.primary),
@@ -444,6 +608,33 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
         ),
         body: Column(
           children: [
+            // 5-Minute Warning Banner (Simulates authentic TCS iON Exam Hall pressure)
+            if (sessionState.remainingSeconds <= 300 && sessionState.remainingSeconds > 0)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFEF2F2),
+                  border: Border(bottom: BorderSide(color: Color(0xFFFECDD3))),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.warning_amber_rounded, size: 16, color: Color(0xFFDC2626)),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '⚠️ 5-Minute Warning: Exam auto-submits at 00:00! Review flagged and unattempted answers.',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF991B1B),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
             // Sectional Lock Banner (for SSC CGL & IBPS Clerk)
             if (sessionState.hasSectionalLock)
               Container(
