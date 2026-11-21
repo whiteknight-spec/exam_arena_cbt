@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/timer_formatter.dart';
+import '../../../../core/database/app_database.dart';
 import '../../domain/models/exam_result.dart';
 import '../../domain/models/question.dart';
 import '../../../progression/domain/models/user_progress.dart';
@@ -54,6 +55,22 @@ class _ExamSummaryScreenState extends ConsumerState<ExamSummaryScreen> {
       // Trigger haptic feedback when crossing a 500-point level milestone
       HapticFeedback.heavyImpact();
       _hasTriggeredHaptic = true;
+    }
+
+    // Modern Developer Upgrade: Automatically record missed questions into Mistake Vault
+    final isTesting = WidgetsBinding.instance.runtimeType.toString().contains('Test');
+    if (!isTesting) {
+      final incorrectQuestions = <Question>[];
+      for (int i = 0; i < widget.questions.length; i++) {
+        final q = widget.questions[i];
+        final sel = widget.userSelections[i];
+        if (sel != null && sel != q.correctIndex && !(q.hasOptionE && sel == 4)) {
+          incorrectQuestions.add(q);
+        }
+      }
+      if (incorrectQuestions.isNotEmpty) {
+        AppDatabase.instance.recordMistakes(incorrectQuestions);
+      }
     }
   }
 

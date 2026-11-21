@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as p;
 import '../constants/app_constants.dart';
@@ -119,6 +120,29 @@ class AppDatabase {
         ${AppConstants.colEarnedXp} INTEGER NOT NULL
       )
     ''');
+
+    // 5. Mistake Vault (Failed Questions for Targeted Revision)
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS ${AppConstants.tableMistakeVault} (
+        ${AppConstants.colMistakeId} TEXT PRIMARY KEY,
+        ${AppConstants.colMistakeQuestionId} TEXT NOT NULL UNIQUE,
+        ${AppConstants.colMistakeQuestionJson} TEXT NOT NULL,
+        ${AppConstants.colMistakeTimestamp} TEXT NOT NULL,
+        ${AppConstants.colMistakeFailedCount} INTEGER NOT NULL DEFAULT 1,
+        ${AppConstants.colMistakeIsMastered} INTEGER NOT NULL DEFAULT 0
+      )
+    ''');
+
+    // Indices for optimal scaling and sub-millisecond query performance
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_questions_exam_cat ON ${AppConstants.tableQuestions} (${AppConstants.colExamType}, ${AppConstants.colCategory});',
+    );
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_attempts_timestamp ON ${AppConstants.tableTestAttempts} (${AppConstants.colTimestamp} DESC);',
+    );
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_mistakes_mastered ON ${AppConstants.tableMistakeVault} (${AppConstants.colMistakeIsMastered});',
+    );
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -159,6 +183,28 @@ class AppDatabase {
           );
         }
       } catch (_) {}
+    }
+
+    if (oldVersion < 4) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS ${AppConstants.tableMistakeVault} (
+          ${AppConstants.colMistakeId} TEXT PRIMARY KEY,
+          ${AppConstants.colMistakeQuestionId} TEXT NOT NULL UNIQUE,
+          ${AppConstants.colMistakeQuestionJson} TEXT NOT NULL,
+          ${AppConstants.colMistakeTimestamp} TEXT NOT NULL,
+          ${AppConstants.colMistakeFailedCount} INTEGER NOT NULL DEFAULT 1,
+          ${AppConstants.colMistakeIsMastered} INTEGER NOT NULL DEFAULT 0
+        )
+      ''');
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_questions_exam_cat ON ${AppConstants.tableQuestions} (${AppConstants.colExamType}, ${AppConstants.colCategory});',
+      );
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_attempts_timestamp ON ${AppConstants.tableTestAttempts} (${AppConstants.colTimestamp} DESC);',
+      );
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_mistakes_mastered ON ${AppConstants.tableMistakeVault} (${AppConstants.colMistakeIsMastered});',
+      );
     }
   }
 
@@ -297,6 +343,95 @@ class AppDatabase {
       );
     }
     await batch.commit(noResult: true);
+  }
+
+  // =========================================================================
+  // MISTAKE VAULT PERSISTENCE (ERROR NOTEBOOK FOR RETENTION)
+  // =========================================================================
+
+  Future<void> recordMistake(Question question) async {
+    final db = await database;
+    final now = DateTime.now().toIso8601String();
+    final jsonStr = jsonEncode(question.toMap());
+
+    final existing = await db.query(
+      AppConstants.tableMistakeVault,
+      where: '${AppConstants.colMistakeQuestionId} = ?',
+      whereArgs: [question.id],
+    );
+
+    if (existing.isNotEmpty) {
+      final currentCount = (existing.first[AppConstants.colMistakeFailedCount] as int? ?? 1) + 1;
+      await db.update(
+        AppConstants.tableMistakeVault,
+        {
+          AppConstants.colMistakeFailedCount: currentCount,
+          AppConstants.colMistakeTimestamp: now,
+          AppConstants.colMistakeIsMastered: 0,
+        },
+        where: '${AppConstants.colMistakeQuestionId} = ?',
+        whereArgs: [question.id],
+      );
+    } else {
+      await db.insert(
+        AppConstants.tableMistakeVault,
+        {
+          AppConstants.colMistakeId: 'mistake_${DateTime.now().millisecondsSinceEpoch}_${question.id}',
+          AppConstants.colMistakeQuestionId: question.id,
+          AppConstants.colMistakeQuestionJson: jsonStr,
+          AppConstants.colMistakeTimestamp: now,
+          AppConstants.colMistakeFailedCount: 1,
+          AppConstants.colMistakeIsMastered: 0,
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+  }
+
+  Future<void> recordMistakes(List<Question> questions) async {
+    for (final q in questions) {
+      await recordMistake(q);
+    }
+  }
+
+  Future<List<Question>> getActiveMistakes() async {
+    final db = await database;
+    final results = await db.query(
+      AppConstants.tableMistakeVault,
+      where: '${AppConstants.colMistakeIsMastered} = ?',
+      whereArgs: [0],
+      orderBy: '${AppConstants.colMistakeTimestamp} DESC',
+    );
+    return results.map((m) {
+      final jsonStr = m[AppConstants.colMistakeQuestionJson] as String;
+      final map = jsonDecode(jsonStr) as Map<String, dynamic>;
+      return Question.fromMap(map);
+    }).toList();
+  }
+
+  Future<int> getActiveMistakeCount() async {
+    final db = await database;
+    final count = Sqflite.firstIntValue(
+      await db.rawQuery(
+        'SELECT COUNT(*) FROM ${AppConstants.tableMistakeVault} WHERE ${AppConstants.colMistakeIsMastered} = 0',
+      ),
+    );
+    return count ?? 0;
+  }
+
+  Future<void> markMistakeMastered(String questionId) async {
+    final db = await database;
+    await db.update(
+      AppConstants.tableMistakeVault,
+      {AppConstants.colMistakeIsMastered: 1},
+      where: '${AppConstants.colMistakeQuestionId} = ?',
+      whereArgs: [questionId],
+    );
+  }
+
+  Future<void> clearAllMistakes() async {
+    final db = await database;
+    await db.delete(AppConstants.tableMistakeVault);
   }
 
   Future<void> close() async {

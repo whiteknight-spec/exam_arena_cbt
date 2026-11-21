@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/theme_provider.dart';
+import '../../../../core/utils/haptic_feedback_helper.dart';
 import '../providers/progression_provider.dart';
 import '../../domain/models/arena_level.dart';
 import '../widgets/xp_bar.dart';
@@ -8,8 +10,10 @@ import '../widgets/streak_badge.dart';
 import '../widgets/exam_selector_sheet.dart';
 import '../widgets/level_map_node.dart';
 import '../../../exam_engine/presentation/screens/cbt_exam_screen.dart';
+import '../../../exam_engine/presentation/widgets/virtual_hall_ticket_sheet.dart';
 import '../../../ai_generator/presentation/screens/ai_gauntlet_screen.dart';
 import 'test_history_screen.dart';
+import 'mistake_vault_screen.dart';
 import '../widgets/pubg_tier_badge.dart';
 import '../widgets/pubg_tier_modal.dart';
 import '../widgets/hearts_badge.dart';
@@ -52,6 +56,22 @@ class ProgressionHubScreen extends ConsumerWidget {
             const SizedBox(width: 6),
             const HeartsBadge(),
             const SizedBox(width: 2),
+            IconButton(
+              icon: Icon(
+                Theme.of(context).brightness == Brightness.dark
+                    ? Icons.light_mode_rounded
+                    : Icons.dark_mode_rounded,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.amber
+                    : const Color(0xFF64748B),
+                size: 20,
+              ),
+              tooltip: 'Toggle Midnight Study Theme',
+              onPressed: () {
+                HapticFeedbackHelper.selectionClick();
+                ref.read(themeModeProvider.notifier).toggleTheme();
+              },
+            ),
             IconButton(
               icon: const Icon(Icons.history_rounded, color: AppColors.primary),
               tooltip: 'Test History & Analytics',
@@ -376,6 +396,71 @@ class ProgressionHubScreen extends ConsumerWidget {
                 ),
               ),
             ),
+            const SizedBox(height: 12),
+
+            // Modern Upgrade: Mistake Vault (Error Notebook for Targeted Revision)
+            InkWell(
+              onTap: () {
+                HapticFeedbackHelper.lightImpact();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const MistakeVaultScreen()),
+                );
+              },
+              borderRadius: BorderRadius.circular(14),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: Theme.of(context).brightness == Brightness.dark
+                        ? [const Color(0xFF881337).withValues(alpha: 0.35), const Color(0xFF1E1B4B).withValues(alpha: 0.35)]
+                        : [const Color(0xFFFFF1F2), const Color(0xFFFFF7ED)],
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? const Color(0xFFBE123C).withValues(alpha: 0.4)
+                        : const Color(0xFFFECDD3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE11D48).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.auto_fix_high_rounded, color: Color(0xFFE11D48), size: 20),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Mistake Vault (Error Notebook) 🎯',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Practice weak & failed questions • Master to heal +1 Life (❤️)',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Theme.of(context).brightness == Brightness.dark ? Colors.white70 : AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.chevron_right, size: 20, color: Color(0xFFE11D48)),
+                  ],
+                ),
+              ),
+            ),
             const SizedBox(height: 24),
 
             // 4-Tier Level Unlock Ladder Heading
@@ -454,14 +539,21 @@ class ProgressionHubScreen extends ConsumerWidget {
                       ),
                     );
                   } else {
-                    Navigator.push(
+                    VirtualHallTicketSheet.show(
                       context,
-                      MaterialPageRoute(
-                        builder: (_) => CbtExamScreen(
-                          level: level,
-                          examType: progress.selectedExam,
-                        ),
-                      ),
+                      level: level,
+                      examType: progress.selectedExam,
+                      onEnter: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => CbtExamScreen(
+                              level: level,
+                              examType: progress.selectedExam,
+                            ),
+                          ),
+                        );
+                      },
                     );
                   }
                 },

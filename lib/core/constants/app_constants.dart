@@ -2,7 +2,7 @@ class AppConstants {
   static const String appTitle = 'Exam Arena CBT';
   static const String geminiModel = 'gemini-2.5-flash';
   static const String dbName = 'exam_arena_cbt.db';
-  static const int dbVersion = 3;
+  static const int dbVersion = 4;
 
   // Question Table
   static const String tableQuestions = 'questions';
@@ -61,4 +61,13 @@ class AppConstants {
   static const String colTimeSpentSeconds = 'time_spent_seconds';
   static const String colAccuracy = 'accuracy';
   static const String colEarnedXp = 'earned_xp';
+
+  // Mistake Vault Table (Error Notebook for Targeted Revision)
+  static const String tableMistakeVault = 'mistake_vault';
+  static const String colMistakeId = 'id';
+  static const String colMistakeQuestionId = 'question_id';
+  static const String colMistakeQuestionJson = 'question_json';
+  static const String colMistakeTimestamp = 'timestamp';
+  static const String colMistakeFailedCount = 'failed_count';
+  static const String colMistakeIsMastered = 'is_mastered';
 }

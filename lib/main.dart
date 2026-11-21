@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/theme_provider.dart';
 import 'core/database/app_database.dart';
 import 'features/ai_generator/data/datasources/local_question_datasource.dart';
 import 'features/progression/domain/models/user_progress.dart';
@@ -26,15 +27,19 @@ void main() async {
   );
 }
 
-class ExamArenaApp extends StatelessWidget {
+class ExamArenaApp extends ConsumerWidget {
   const ExamArenaApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+
     return MaterialApp(
       title: 'Exam Arena CBT',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeMode,
       home: const ProgressionHubScreen(),
     );
   }
