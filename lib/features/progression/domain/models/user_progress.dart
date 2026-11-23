@@ -14,12 +14,12 @@ class UserProgress {
   final DateTime? lastHeartRefillTime;
 
   const UserProgress({
-    this.xp = 350,
-    this.streakDays = 7,
+    this.xp = 0,
+    this.streakDays = 0,
     this.lastActiveDate,
     this.selectedExam = ExamType.rrbNtpc,
-    this.testsCompleted = 12,
-    this.averageAccuracy = 82.5,
+    this.testsCompleted = 0,
+    this.averageAccuracy = 0.0,
     this.customUnlockedLevels,
     this.hearts = 5,
     this.lastHeartRefillTime,
@@ -284,10 +284,10 @@ class UserProgress {
     }
 
     // Defensive Security: Clamp all numeric variables to safe ranges against local SQLite tampering
-    final parsedXp = ((map['xp'] as num?)?.toInt() ?? 350).clamp(0, 9999999);
-    final parsedStreak = ((map['streak_days'] as num?)?.toInt() ?? 7).clamp(0, 36500);
-    final parsedTests = ((map['tests_completed'] as num?)?.toInt() ?? 12).clamp(0, 1000000);
-    final parsedAccuracy = ((map['average_accuracy'] as num?)?.toDouble() ?? 82.5).clamp(0.0, 100.0);
+    final parsedXp = ((map['xp'] as num?)?.toInt() ?? 0).clamp(0, 9999999);
+    final parsedStreak = ((map['streak_days'] as num?)?.toInt() ?? 0).clamp(0, 36500);
+    final parsedTests = ((map['tests_completed'] as num?)?.toInt() ?? 0).clamp(0, 1000000);
+    final parsedAccuracy = ((map['average_accuracy'] as num?)?.toDouble() ?? 0.0).clamp(0.0, 100.0);
     final parsedHearts = ((map['hearts'] as num?)?.toInt() ?? 5).clamp(0, maxHearts);
 
     return UserProgress(

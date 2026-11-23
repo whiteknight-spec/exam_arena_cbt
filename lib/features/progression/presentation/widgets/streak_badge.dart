@@ -9,8 +9,17 @@ class StreakBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasStreak = streakDays > 0;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final color = hasStreak
+        ? const Color(0xFFEA580C) // Vibrant Fire Orange
+        : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B));
+
     return Tooltip(
-      message: '$streakDays Days Daily Streak Active',
+      message: hasStreak
+          ? '$streakDays Days Daily Streak Active'
+          : '0 Day Streak. Practice daily to start your streak flame!',
       child: InkWell(
         onTap: () {
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -24,7 +33,9 @@ class StreakBadge extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      '$streakDays Days Streak! Practice daily to keep the flame burning.',
+                      hasStreak
+                          ? '$streakDays Days Streak! Practice daily to keep the flame burning.'
+                          : 'Start your streak flame today! Complete your first CBT drill.',
                       style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                     ),
                   ),
@@ -43,10 +54,10 @@ class StreakBadge extends StatelessWidget {
               const SizedBox(width: 3),
               Text(
                 '$streakDays',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w900,
-                  color: Color(0xFFEA580C), // Vibrant Fire Orange
+                  color: color,
                   letterSpacing: 0.2,
                 ),
               ),

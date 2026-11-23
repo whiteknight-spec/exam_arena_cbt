@@ -19,9 +19,15 @@ class ProgressionNotifier extends Notifier<UserProgress> {
     try {
       final savedProgress = await _db.getUserProgress();
       if (savedProgress != null) {
-        state = savedProgress;
+        if (savedProgress.xp == 350 && savedProgress.testsCompleted == 12 && savedProgress.streakDays == 7) {
+          const fresh = UserProgress();
+          state = fresh;
+          await _db.saveUserProgress(fresh);
+        } else {
+          state = savedProgress;
+        }
       } else {
-        // Initialize default user progress in SQLite if not yet persisted
+        // Initialize default clean user progress in SQLite if not yet persisted
         await _db.saveUserProgress(state);
       }
     } catch (_) {

@@ -2,7 +2,7 @@ class AppConstants {
   static const String appTitle = 'Exam Arena CBT';
   static const String geminiModel = 'gemini-2.5-flash';
   static const String dbName = 'exam_arena_cbt.db';
-  static const int dbVersion = 4;
+  static const int dbVersion = 5;
 
   // Question Table
   static const String tableQuestions = 'questions';

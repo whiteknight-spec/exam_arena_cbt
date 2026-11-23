@@ -9,14 +9,21 @@ class AccuracyBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasData = accuracy > 0.0;
     final isHigh = accuracy >= 80.0;
     final isMid = accuracy >= 60.0;
-    final color = isHigh
-        ? const Color(0xFF059669)
-        : (isMid ? const Color(0xFF0284C7) : const Color(0xFFD97706));
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final color = hasData
+        ? (isHigh
+            ? const Color(0xFF059669)
+            : (isMid ? const Color(0xFF0284C7) : const Color(0xFFD97706)))
+        : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B));
 
     return Tooltip(
-      message: 'Average Accuracy: ${accuracy.toStringAsFixed(1)}%',
+      message: hasData
+          ? 'Average Accuracy: ${accuracy.toStringAsFixed(1)}%'
+          : 'No test attempts yet. Complete a CBT drill to calculate accuracy!',
       child: InkWell(
         onTap: () {
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -30,7 +37,9 @@ class AccuracyBadge extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Accuracy: ${accuracy.toStringAsFixed(1)}%! Keep precision high to avoid negative marking.',
+                      hasData
+                          ? 'Accuracy: ${accuracy.toStringAsFixed(1)}%! Keep precision high to avoid negative marking.'
+                          : 'No test attempts yet. Take your first CBT drill to measure accuracy!',
                       style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                     ),
                   ),

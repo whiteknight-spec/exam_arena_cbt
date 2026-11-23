@@ -76,12 +76,12 @@ class AppDatabase {
     await db.execute('''
       CREATE TABLE IF NOT EXISTS ${AppConstants.tableUserProgress} (
         ${AppConstants.colProgressId} TEXT PRIMARY KEY,
-        ${AppConstants.colXp} INTEGER NOT NULL DEFAULT 350,
-        ${AppConstants.colStreakDays} INTEGER NOT NULL DEFAULT 7,
+        ${AppConstants.colXp} INTEGER NOT NULL DEFAULT 0,
+        ${AppConstants.colStreakDays} INTEGER NOT NULL DEFAULT 0,
         ${AppConstants.colLastActiveDate} TEXT,
         ${AppConstants.colSelectedExam} TEXT NOT NULL DEFAULT 'rrb_ntpc',
-        ${AppConstants.colTestsCompleted} INTEGER NOT NULL DEFAULT 12,
-        ${AppConstants.colAverageAccuracy} REAL NOT NULL DEFAULT 82.5,
+        ${AppConstants.colTestsCompleted} INTEGER NOT NULL DEFAULT 0,
+        ${AppConstants.colAverageAccuracy} REAL NOT NULL DEFAULT 0.0,
         ${AppConstants.colUnlockedLevels} TEXT NOT NULL DEFAULT '[1]',
         ${AppConstants.colHearts} INTEGER NOT NULL DEFAULT 5,
         ${AppConstants.colLastHeartRefill} TEXT
@@ -206,6 +206,25 @@ class AppDatabase {
         'CREATE INDEX IF NOT EXISTS idx_mistakes_mastered ON ${AppConstants.tableMistakeVault} (${AppConstants.colMistakeIsMastered});',
       );
     }
+
+    if (oldVersion < 5) {
+      // Purge legacy prototype mock progress (350 XP, 7 streaks, 12 tests)
+      // and reset existing installs to a clean 0-state aspirant profile
+      try {
+        await db.execute('''
+          UPDATE ${AppConstants.tableUserProgress}
+          SET ${AppConstants.colXp} = 0,
+              ${AppConstants.colStreakDays} = 0,
+              ${AppConstants.colLastActiveDate} = NULL,
+              ${AppConstants.colTestsCompleted} = 0,
+              ${AppConstants.colAverageAccuracy} = 0.0,
+              ${AppConstants.colUnlockedLevels} = '[1]',
+              ${AppConstants.colHearts} = 5,
+              ${AppConstants.colLastHeartRefill} = NULL
+          WHERE ${AppConstants.colXp} = 350 AND ${AppConstants.colTestsCompleted} = 12
+        ''');
+      } catch (_) {}
+    }
   }
 
   // =========================================================================
@@ -230,7 +249,14 @@ class AppDatabase {
     );
 
     if (results.isNotEmpty) {
-      return UserProgress.fromMap(results.first);
+      final user = UserProgress.fromMap(results.first);
+      // Auto-sanitize legacy prototype mock data
+      if (user.xp == 350 && user.testsCompleted == 12 && user.streakDays == 7) {
+        const fresh = UserProgress();
+        await saveUserProgress(fresh);
+        return fresh;
+      }
+      return user;
     }
     return null;
   }

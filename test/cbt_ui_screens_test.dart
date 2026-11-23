@@ -94,7 +94,7 @@ void main() {
       // Header and Streak Counter
       expect(find.text('Exam Arena CBT'), findsOneWidget);
       expect(find.byType(StreakBadge), findsOneWidget);
-      expect(find.text('7'), findsWidgets);
+      expect(find.text('0'), findsWidgets);
 
       // Level Badge & XP Bar
       expect(find.textContaining('LVL'), findsWidgets);

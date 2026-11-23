@@ -14,9 +14,10 @@ void main() async {
   final localDatasource = LocalQuestionDatasource(appDatabase: AppDatabase.instance);
   await localDatasource.seedIfEmpty();
 
-  // Ensure user progress is persisted in SQLite out of the box
+  // Ensure user progress is persisted in SQLite out of the box (clean 0-state for new users)
   final currentProgress = await AppDatabase.instance.getUserProgress();
-  if (currentProgress == null) {
+  if (currentProgress == null ||
+      (currentProgress.xp == 350 && currentProgress.testsCompleted == 12 && currentProgress.streakDays == 7)) {
     await AppDatabase.instance.saveUserProgress(const UserProgress());
   }
 

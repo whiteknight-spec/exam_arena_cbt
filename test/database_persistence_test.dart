@@ -171,12 +171,12 @@ void main() {
           await db.execute('''
             CREATE TABLE IF NOT EXISTS ${AppConstants.tableUserProgress} (
               ${AppConstants.colProgressId} TEXT PRIMARY KEY,
-              ${AppConstants.colXp} INTEGER NOT NULL DEFAULT 350,
-              ${AppConstants.colStreakDays} INTEGER NOT NULL DEFAULT 7,
+              ${AppConstants.colXp} INTEGER NOT NULL DEFAULT 0,
+              ${AppConstants.colStreakDays} INTEGER NOT NULL DEFAULT 0,
               ${AppConstants.colLastActiveDate} TEXT,
               ${AppConstants.colSelectedExam} TEXT NOT NULL DEFAULT 'rrb_ntpc',
-              ${AppConstants.colTestsCompleted} INTEGER NOT NULL DEFAULT 12,
-              ${AppConstants.colAverageAccuracy} REAL NOT NULL DEFAULT 82.5,
+              ${AppConstants.colTestsCompleted} INTEGER NOT NULL DEFAULT 0,
+              ${AppConstants.colAverageAccuracy} REAL NOT NULL DEFAULT 0.0,
               ${AppConstants.colUnlockedLevels} TEXT NOT NULL DEFAULT '[1]',
               ${AppConstants.colHearts} INTEGER NOT NULL DEFAULT 5,
               ${AppConstants.colLastHeartRefill} TEXT
