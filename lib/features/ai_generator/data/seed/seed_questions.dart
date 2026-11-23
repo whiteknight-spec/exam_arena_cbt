@@ -1,4 +1,5 @@
 import 'package:exam_arena_cbt/features/exam_engine/domain/models/question.dart';
+import 'expanded_exam_questions.dart';
 
 class SeedQuestions {
   static List<Question> getInitialQuestions() {
@@ -1093,6 +1094,15 @@ class SeedQuestions {
             'பூமியிலிருந்து 15 லட்சம் கி.மீ தொலைவில் உள்ள சூரியன்-பூமி L1 புள்ளியில் எவ்வித கிரகணத் தடைகளும் இன்றி சூரியனை 24 மணி நேரமும் தடையின்றி கண்காணிக்க முடியும் என்பதால் இஸ்ரோ ஆதித்யா-L1-ஐ அங்கு நிலைநிறுத்தியது.',
         hasOptionE: false,
       ),
+    ];
+  }
+
+  /// Combines baseline universal questions with UPSC, TNPSC, RRB, SSC, and Banking expanded questions
+  static List<Question> getAllComprehensiveQuestions() {
+    return [
+      ...getInitialQuestions(),
+      ...getUpscQuestions(),
+      ...ExpandedExamQuestions.getAllExpandedQuestions(),
     ];
   }
 }

@@ -348,16 +348,16 @@ void main() {
 
       // Query by Category
       final quantQuestions = await datasource.getQuestionsByCategory('Quantitative Aptitude');
-      expect(quantQuestions.length, 8);
+      expect(quantQuestions.length, greaterThanOrEqualTo(8));
 
       final reasoningQuestions = await datasource.getQuestionsByCategory('Logical Reasoning');
-      expect(reasoningQuestions.length, 7);
+      expect(reasoningQuestions.length, greaterThanOrEqualTo(7));
 
       final gaQuestions = await datasource.getQuestionsByCategory('General Awareness');
-      expect(gaQuestions.length, 8);
+      expect(gaQuestions.length, greaterThanOrEqualTo(8));
 
       final langQuestions = await datasource.getQuestionsByCategory('General Tamil & English');
-      expect(langQuestions.length, 7);
+      expect(langQuestions.length, greaterThanOrEqualTo(7));
     });
 
     test('QuestionRepository works 100% offline out of the box with SQLite', () async {
@@ -375,7 +375,25 @@ void main() {
       expect(offlineQuestions.first.questionTa.isNotEmpty, isTrue);
 
       final allQuestions = await repository.getAllOfflineQuestions();
-      expect(allQuestions.length, 30);
+      expect(allQuestions.length, greaterThanOrEqualTo(30));
+    });
+
+    test('ExpandedExamQuestions provides 80+ authentic questions across all exam categories', () async {
+      final datasource = LocalQuestionDatasource(appDatabase: appDb);
+      await datasource.seedAllExpandedQuestionsIfNeeded();
+
+      final tnpsc = await datasource.getQuestionsByExamType('tnpsc_group_2_4');
+      expect(tnpsc.length, greaterThanOrEqualTo(25));
+      expect(tnpsc.every((q) => q.hasOptionE), isTrue);
+
+      final rrb = await datasource.getQuestionsByExamType('rrb_ntpc');
+      expect(rrb.length, greaterThanOrEqualTo(14));
+
+      final ssc = await datasource.getQuestionsByExamType('ssc_cgl');
+      expect(ssc.length, greaterThanOrEqualTo(14));
+
+      final banking = await datasource.getQuestionsByExamType('ibps_sbi_clerk');
+      expect(banking.length, greaterThanOrEqualTo(9));
     });
   });
 }

@@ -294,6 +294,25 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
       questions = await localDs.getAllQuestions();
     }
 
+    // Level-specific authentic sizing & replay variety:
+    // If custom questions are passed (e.g. from tests or AI gauntlet), respect them
+    if (widget.customQuestions == null && questions.isNotEmpty) {
+      final shuffled = List<Question>.from(questions)..shuffle();
+      if (widget.level == ArenaLevel.level1) {
+        // Level 1: 15-min Topic Speed Sprint -> 10 Questions
+        questions = shuffled.take(10).toList();
+      } else if (widget.level == ArenaLevel.level2) {
+        // Level 2: Sectional Timed Drill -> 20 Questions
+        questions = shuffled.take(20).toList();
+      } else if (widget.level == ArenaLevel.level3) {
+        // Level 3: Full-Length CBT Mock -> All available authentic questions
+        questions = shuffled;
+      } else if (widget.level == ArenaLevel.level4) {
+        // Level 4: AI Adaptive Boss Gauntlet -> 10 Questions
+        questions = shuffled.take(10).toList();
+      }
+    }
+
     // Set duration based on level and exam specifications
     int durationSecs = 900; // 15 mins for Level 1 Topic Speed Sprint
     if (widget.level == ArenaLevel.level1) {

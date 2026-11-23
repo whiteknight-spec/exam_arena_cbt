@@ -10,9 +10,10 @@ import 'features/progression/presentation/screens/progression_hub_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize SQLite database and seed initial 30 offline bilingual questions
+  // Initialize SQLite database and seed initial 30 offline bilingual questions & expanded bank
   final localDatasource = LocalQuestionDatasource(appDatabase: AppDatabase.instance);
   await localDatasource.seedIfEmpty();
+  await localDatasource.seedAllExpandedQuestionsIfNeeded();
 
   // Ensure user progress is persisted in SQLite out of the box (clean 0-state for new users)
   final currentProgress = await AppDatabase.instance.getUserProgress();

@@ -50,8 +50,29 @@ class LocalQuestionDatasource {
     }
   }
 
+  /// Seeds all authentic expanded questions for TNPSC, RRB, SSC, Banking and UPSC if needed.
+  Future<void> seedAllExpandedQuestionsIfNeeded() async {
+    final db = await appDatabase.database;
+    final totalCount = Sqflite.firstIntValue(
+      await db.rawQuery('SELECT COUNT(*) FROM ${AppConstants.tableQuestions}'),
+    );
+    if (totalCount == null || totalCount < 70) {
+      final expanded = SeedQuestions.getAllComprehensiveQuestions();
+      final batch = db.batch();
+      for (final q in expanded) {
+        batch.insert(
+          AppConstants.tableQuestions,
+          q.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+      await batch.commit(noResult: true);
+    }
+  }
+
   Future<List<Question>> getQuestionsByExamType(String examType) async {
     await seedIfEmpty();
+    await seedAllExpandedQuestionsIfNeeded();
     if (examType.toLowerCase().contains('upsc')) {
       await seedUpscQuestionsIfNeeded();
     }
@@ -63,6 +84,17 @@ class LocalQuestionDatasource {
     );
 
     if (maps.isEmpty) {
+      // Fallback: If a Railways paper has no exact sub-id match, return all Railways questions
+      if (examType.toLowerCase().contains('rrb')) {
+        final rrbMaps = await db.query(
+          AppConstants.tableQuestions,
+          where: "${AppConstants.colExamType} LIKE 'rrb%'",
+        );
+        if (rrbMaps.isNotEmpty) {
+          return rrbMaps.map((m) => Question.fromMap(m)).toList();
+        }
+      }
+
       // Fallback: If a UPSC paper has no exact sub-id match, return all UPSC paper questions
       if (examType.toLowerCase().contains('upsc')) {
         final upscMaps = await db.query(
@@ -71,6 +103,17 @@ class LocalQuestionDatasource {
         );
         if (upscMaps.isNotEmpty) {
           return upscMaps.map((m) => Question.fromMap(m)).toList();
+        }
+      }
+
+      // Fallback: If an SSC paper has no exact sub-id match, return all SSC questions
+      if (examType.toLowerCase().contains('ssc')) {
+        final sscMaps = await db.query(
+          AppConstants.tableQuestions,
+          where: "${AppConstants.colExamType} LIKE 'ssc%'",
+        );
+        if (sscMaps.isNotEmpty) {
+          return sscMaps.map((m) => Question.fromMap(m)).toList();
         }
       }
 
