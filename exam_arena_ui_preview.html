@@ -168,6 +168,39 @@
     </nav>
   </div>
 
+  <!-- Android Release APK Ready Banner -->
+  <div class="max-w-5xl mx-auto w-full px-4 sm:px-6 pt-3">
+    <div class="bg-gradient-to-r from-[#1E1B4B] via-[#0F172A] to-[#1E293B] rounded-2xl p-4 sm:p-5 text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg border border-white/10">
+      <div class="flex items-center gap-3.5">
+        <div class="w-12 h-12 rounded-2xl bg-white p-1 shadow-md flex items-center justify-center shrink-0 border border-white/20">
+          <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="9" stroke="#8B5CF6" stroke-width="1.8" stroke-dasharray="2 2"/>
+            <circle cx="12" cy="12" r="6" stroke="#06B6D4" stroke-width="1.8"/>
+            <circle cx="12" cy="12" r="2.5" fill="#F59E0B"/>
+            <path d="M12 5.5l1.6 3.5h-3.2z" fill="#F59E0B"/>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 class="text-sm sm:text-base font-bold">Exam Arena CBT • Android Release APK Ready</h2>
+            <span class="text-[10px] bg-[#10B981]/20 text-[#34D399] border border-[#10B981]/30 px-2 py-0.5 rounded-full font-extrabold uppercase">v1.0.0 Ready</span>
+          </div>
+          <p class="text-xs text-[#94A3B8] mt-0.5">54.2 MB • Concept 2 Prismatic Target Icon • High-Yield Offline CBT Engine</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+        <a href="ExamArenaCBT.apk" download="ExamArenaCBT.apk" class="flex-1 sm:flex-initial px-4 py-2.5 bg-[#0071E3] hover:bg-[#0077ED] text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>Download APK (54 MB)</span>
+        </a>
+        <button onclick="openApkQrModal()" class="px-3.5 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-semibold transition-all border border-white/15 flex items-center gap-1.5 cursor-pointer" title="Scan with Mobile Camera">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          <span class="hidden sm:inline">Phone QR</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ============================================================== -->
   <!-- MAIN CONTENT CONTAINER                                         -->
   <!-- ============================================================== -->
@@ -2038,9 +2071,36 @@
   </div>
 
   <!-- ============================================================== -->
+  <!-- MODAL 8: MOBILE APK INSTALL & QR CODE                          -->
+  <!-- ============================================================== -->
+  <div id="modal-apk-qr" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-white rounded-[32px] max-w-sm w-full p-6 shadow-2xl border border-black/[0.08] text-center space-y-4">
+      <div class="flex items-center justify-between pb-2 border-b border-black/[0.06]">
+        <h3 class="text-base font-bold text-[#1D1D1F]">Scan to Install on Mobile</h3>
+        <button onclick="closeApkQrModal()" class="w-8 h-8 rounded-full bg-[#F5F5F7] hover:bg-[#E5E5EA] flex items-center justify-center text-[#86868B] text-xs font-bold transition-colors">✕</button>
+      </div>
+      <p class="text-xs text-[#64748B]">Scan this QR code with your mobile phone camera to download & install:</p>
+      <div class="p-4 bg-[#F8FAFC] rounded-2xl border border-black/[0.06] flex flex-col items-center justify-center">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=http://10.54.12.134:8089/ExamArenaCBT.apk" alt="Mobile Download QR Code" class="w-48 h-48 rounded-xl shadow-xs" />
+        <span class="mt-2 text-[11px] font-mono font-bold text-[#0071E3] select-all">http://10.54.12.134:8089/ExamArenaCBT.apk</span>
+      </div>
+      <div class="space-y-2 pt-1">
+        <a href="ExamArenaCBT.apk" download="ExamArenaCBT.apk" class="w-full py-2.5 rounded-xl bg-[#0071E3] hover:bg-[#0077ED] text-white font-bold text-xs transition-all shadow-sm flex items-center justify-center gap-2">
+          <span>Direct Download on Mac (54 MB)</span>
+        </a>
+        <button onclick="closeApkQrModal()" class="w-full py-2 rounded-xl bg-[#F5F5F7] hover:bg-[#E5E5EA] text-[#64748B] font-semibold text-xs transition-all">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
   <!-- JAVASCRIPT CONTROLLERS                                         -->
   <!-- ============================================================== -->
   <script>
+    function openApkQrModal() { document.getElementById('modal-apk-qr').classList.remove('hidden'); }
+    function closeApkQrModal() { document.getElementById('modal-apk-qr').classList.add('hidden'); }
     function openLogoShowcaseModal() { document.getElementById('modal-logo-showcase').classList.remove('hidden'); }
     function closeLogoShowcaseModal() { document.getElementById('modal-logo-showcase').classList.add('hidden'); }
 
