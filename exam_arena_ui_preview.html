@@ -2079,10 +2079,19 @@
         <h3 class="text-base font-bold text-[#1D1D1F]">Scan to Install on Mobile</h3>
         <button onclick="closeApkQrModal()" class="w-8 h-8 rounded-full bg-[#F5F5F7] hover:bg-[#E5E5EA] flex items-center justify-center text-[#86868B] text-xs font-bold transition-colors">✕</button>
       </div>
-      <p class="text-xs text-[#64748B]">Scan this QR code with your mobile phone camera to download & install:</p>
+      <p class="text-xs text-[#64748B]">Scan with your mobile phone camera or click the link below to download directly:</p>
       <div class="p-4 bg-[#F8FAFC] rounded-2xl border border-black/[0.06] flex flex-col items-center justify-center">
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=http://10.54.12.134:8089/ExamArenaCBT.apk" alt="Mobile Download QR Code" class="w-48 h-48 rounded-xl shadow-xs" />
-        <span class="mt-2 text-[11px] font-mono font-bold text-[#0071E3] select-all">http://10.54.12.134:8089/ExamArenaCBT.apk</span>
+        <a href="http://10.54.12.134:8089/ExamArenaCBT.apk" target="_blank" title="Click to download ExamArenaCBT.apk" class="block cursor-pointer group">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=http://10.54.12.134:8089/ExamArenaCBT.apk" alt="Mobile Download QR Code" class="w-48 h-48 rounded-xl shadow-xs group-hover:scale-102 transition-transform" />
+          <span class="block mt-1 text-[10px] text-[#64748B] group-hover:text-[#0071E3]">Tap QR to Download</span>
+        </a>
+        <a href="http://10.54.12.134:8089/ExamArenaCBT.apk" target="_blank" class="mt-3 px-3 py-1.5 rounded-lg bg-[#E0F2FE] hover:bg-[#BAE6FD] text-[#0284C7] text-xs font-mono font-bold flex items-center gap-1.5 transition-colors cursor-pointer break-all shadow-xs" title="Click to open or download">
+          <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          <span>http://10.54.12.134:8089/ExamArenaCBT.apk</span>
+        </a>
+        <button onclick="copyApkLink()" id="btn-copy-apk" class="mt-2 text-xs text-[#0071E3] font-semibold hover:underline flex items-center justify-center gap-1 cursor-pointer">
+          <span>📋 Copy Link to Clipboard</span>
+        </button>
       </div>
       <div class="space-y-2 pt-1">
         <a href="ExamArenaCBT.apk" download="ExamArenaCBT.apk" class="w-full py-2.5 rounded-xl bg-[#0071E3] hover:bg-[#0077ED] text-white font-bold text-xs transition-all shadow-sm flex items-center justify-center gap-2">
@@ -2101,6 +2110,17 @@
   <script>
     function openApkQrModal() { document.getElementById('modal-apk-qr').classList.remove('hidden'); }
     function closeApkQrModal() { document.getElementById('modal-apk-qr').classList.add('hidden'); }
+    function copyApkLink() {
+      const url = 'http://10.54.12.134:8089/ExamArenaCBT.apk';
+      navigator.clipboard.writeText(url).then(() => {
+        const btn = document.getElementById('btn-copy-apk');
+        btn.innerHTML = '<span>✅ Copied Link to Clipboard!</span>';
+        setTimeout(() => { btn.innerHTML = '<span>📋 Copy Link to Clipboard</span>'; }, 2500);
+        showToast('APK Link copied to clipboard!');
+      }).catch(() => {
+        showToast('Link: http://10.54.12.134:8089/ExamArenaCBT.apk');
+      });
+    }
     function openLogoShowcaseModal() { document.getElementById('modal-logo-showcase').classList.remove('hidden'); }
     function closeLogoShowcaseModal() { document.getElementById('modal-logo-showcase').classList.add('hidden'); }
 
