@@ -79,14 +79,17 @@
   <!-- ============================================================== -->
   <header class="apple-glass sticky top-0 z-40 px-6 py-3.5 flex items-center justify-between transition-all">
     
-    <!-- Left: Minimalist Brand -->
+    <!-- Left: Minimalist Brand (Click opens Logo Concepts Studio) -->
     <div class="flex items-center gap-3">
-      <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-[#0F172A] to-[#1E293B] text-[#38BDF8] flex items-center justify-center font-black text-xs shadow-sm tracking-tight border border-white/10">
+      <div id="brand-logo-container" onclick="openLogoShowcaseModal()" class="w-8 h-8 rounded-xl bg-gradient-to-br from-[#0F172A] to-[#1E293B] text-[#38BDF8] flex items-center justify-center font-black text-xs shadow-sm tracking-tight border border-white/10 cursor-pointer hover:scale-105 transition-all" title="Click to view & test 4 Logo Design Concepts">
         EA
       </div>
-      <div>
-        <h1 class="text-sm font-semibold tracking-tight text-[#1D1D1F]">ExamArena</h1>
-        <p class="text-[11px] text-[#86868B] font-normal">CBT Mock Suite</p>
+      <div onclick="openLogoShowcaseModal()" class="cursor-pointer" title="Click to open Logo Showcase Studio">
+        <h1 class="text-sm font-semibold tracking-tight text-[#1D1D1F] flex items-center gap-1.5">
+          ExamArena
+          <span class="text-[9px] bg-[#E0F2FE] text-[#0369A1] px-1.5 py-0.5 rounded-full font-bold">Logo Studio</span>
+        </h1>
+        <p class="text-[11px] text-[#86868B] font-normal">CBT Mock Suite • Tap to test designs</p>
       </div>
     </div>
 
@@ -198,6 +201,26 @@
             </div>
             <span class="text-[10px] text-[#D97706] group-hover:translate-x-0.5 transition-transform">›</span>
           </button>
+        </div>
+      </div>
+
+      <!-- Logo Studio Invitation Banner -->
+      <div onclick="openLogoShowcaseModal()" class="p-4 rounded-2xl bg-gradient-to-r from-[#0F172A] to-[#1E3A8A] text-white border border-[#38BDF8]/20 flex items-center justify-between gap-4 cursor-pointer hover:border-[#38BDF8]/50 shadow-md transition-all group">
+        <div class="flex items-center gap-3.5">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#38BDF8] to-[#0284C7] text-white flex items-center justify-center font-black text-sm shadow-sm group-hover:scale-105 transition-transform">
+            EA
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-[#38BDF8] uppercase tracking-wider">Exam Arena Logo Studio</span>
+              <span class="text-[9px] bg-[#38BDF8]/20 text-[#38BDF8] px-2 py-0.5 rounded-full font-extrabold">4 CONCEPTS READY</span>
+            </div>
+            <p class="text-xs text-white/80 font-medium mt-0.5">Explore 4 custom logo designs and live-preview them on the top bar</p>
+          </div>
+        </div>
+        <div class="px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-xs font-bold text-[#38BDF8] flex items-center gap-1 shrink-0 border border-white/10">
+          <span>Explore Designs</span>
+          <span>➔</span>
         </div>
       </div>
 
@@ -1871,9 +1894,165 @@
   </div>
 
   <!-- ============================================================== -->
+  <!-- MODAL 7: EXAM ARENA LOGO CONCEPTS SHOWCASE STUDIO               -->
+  <!-- ============================================================== -->
+  <div id="modal-logo-showcase" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white rounded-t-[32px] sm:rounded-[32px] max-w-3xl w-full p-6 shadow-2xl border border-black/[0.06] space-y-5 max-h-[90vh] flex flex-col">
+      
+      <!-- Apple Drag Notch -->
+      <div class="w-10 h-1 bg-[#D1D1D6] rounded-full mx-auto sm:hidden mb-1"></div>
+
+      <div class="flex items-center justify-between pb-3 border-b border-black/[0.06]">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#0F172A] to-[#1E293B] text-[#38BDF8] flex items-center justify-center font-black text-sm shadow-sm border border-white/10">
+            EA
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-[#1D1D1F]">Exam Arena • Logo Design Concepts</h3>
+            <p class="text-xs text-[#64748B]">Explore & live-test 4 professional brand identities for Exam Arena CBT</p>
+          </div>
+        </div>
+        <button onclick="closeLogoShowcaseModal()" class="w-8 h-8 rounded-full bg-[#F5F5F7] hover:bg-[#E5E5EA] flex items-center justify-center text-[#86868B] text-xs font-bold transition-colors">✕</button>
+      </div>
+
+      <!-- Scrollable Studio Content -->
+      <div class="overflow-y-auto space-y-5 pr-1 text-xs">
+        
+        <!-- High-Resolution 4K Board Render -->
+        <div class="rounded-2xl overflow-hidden border border-black/[0.08] shadow-md bg-[#0F172A]">
+          <img src="exam_arena_branding_showcase.jpg" alt="Exam Arena Logo Concepts Presentation Board" class="w-full h-auto object-cover" />
+        </div>
+
+        <!-- 4 Interactive Concept Selection Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+          
+          <!-- Concept 1 -->
+          <div class="p-4 rounded-2xl border border-black/[0.08] bg-[#FAFAFC] hover:border-[#0284C7] transition-all space-y-2.5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-[#0F172A] to-[#1E293B] text-[#38BDF8] flex items-center justify-center font-black text-xs shadow-xs border border-white/10">
+                  EA
+                </div>
+                <div>
+                  <h4 class="font-extrabold text-[#0F172A] text-sm">Concept 1: Monogram EA</h4>
+                  <span class="text-[10px] text-[#0284C7] font-semibold bg-[#E0F2FE] px-1.5 py-0.2 rounded-md">Tech Native • Minimalist</span>
+                </div>
+              </div>
+            </div>
+            <p class="text-[#64748B] text-[11px] leading-relaxed">
+              Interlocking geometric letters 'E' & 'A' forming a sharp CBT speed checkmark. Apple & Vercel design system inspired.
+            </p>
+            <button onclick="applyLogoConcept('c1')" class="w-full py-1.5 rounded-lg bg-[#0071E3] hover:bg-[#0077ED] text-white font-bold text-xs transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer">
+              <span>Preview Live in Top Bar</span>
+            </button>
+          </div>
+
+          <!-- Concept 2 -->
+          <div class="p-4 rounded-2xl border border-black/[0.08] bg-[#FAFAFC] hover:border-[#059669] transition-all space-y-2.5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-[#064E3B] to-[#022C22] text-[#34D399] flex items-center justify-center shadow-xs border border-[#34D399]/30">
+                  <svg class="w-4 h-4 text-[#34D399]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v3m0 12v3M3 12h3m12 0h3"/></svg>
+                </div>
+                <div>
+                  <h4 class="font-extrabold text-[#0F172A] text-sm">Concept 2: Precision Gateway</h4>
+                  <span class="text-[10px] text-[#059669] font-semibold bg-[#ECFDF5] px-1.5 py-0.2 rounded-md">Accuracy & Cut-Off Focus</span>
+                </div>
+              </div>
+            </div>
+            <p class="text-[#64748B] text-[11px] leading-relaxed">
+              Classical Indian triumphal gateway silhouette merging with an emerald precision target reticle. Focus on zero negative marks.
+            </p>
+            <button onclick="applyLogoConcept('c2')" class="w-full py-1.5 rounded-lg bg-[#059669] hover:bg-[#047857] text-white font-bold text-xs transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer">
+              <span>Preview Live in Top Bar</span>
+            </button>
+          </div>
+
+          <!-- Concept 3 -->
+          <div class="p-4 rounded-2xl border border-black/[0.08] bg-[#FAFAFC] hover:border-[#D97706] transition-all space-y-2.5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-[#7C2D12] to-[#451A03] text-[#FBBF24] flex items-center justify-center shadow-xs border border-[#F59E0B]/30">
+                  <span class="text-xs">🛡️</span>
+                </div>
+                <div>
+                  <h4 class="font-extrabold text-[#0F172A] text-sm">Concept 3: Vanguard Shield</h4>
+                  <span class="text-[10px] text-[#D97706] font-semibold bg-[#FFFBEB] px-1.5 py-0.2 rounded-md">Discipline & Streak Flame</span>
+                </div>
+              </div>
+            </div>
+            <p class="text-[#64748B] text-[11px] leading-relaxed">
+              Tactical titanium shield encasing a golden quill nib that ignites into an orange streak flame. Symbolizes study stamina and wisdom.
+            </p>
+            <button onclick="applyLogoConcept('c3')" class="w-full py-1.5 rounded-lg bg-[#D97706] hover:bg-[#B45309] text-white font-bold text-xs transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer">
+              <span>Preview Live in Top Bar</span>
+            </button>
+          </div>
+
+          <!-- Concept 4 -->
+          <div class="p-4 rounded-2xl border border-black/[0.08] bg-[#FAFAFC] hover:border-[#7C3AED] transition-all space-y-2.5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-[#4C1D95] to-[#1E1B4B] text-[#A78BFA] flex items-center justify-center shadow-xs border border-[#A78BFA]/30">
+                  <span class="text-xs">👑</span>
+                </div>
+                <div>
+                  <h4 class="font-extrabold text-[#0F172A] text-sm">Concept 4: Sovereign Wings</h4>
+                  <span class="text-[10px] text-[#7C3AED] font-semibold bg-[#F5F3FF] px-1.5 py-0.2 rounded-md">Civil Services & AIR 1 Crest</span>
+                </div>
+              </div>
+            </div>
+            <p class="text-[#64748B] text-[11px] leading-relaxed">
+              Heraldic gold and sapphire wings embracing a central glowing diamond star. Inspired by UPSC National emblem honor.
+            </p>
+            <button onclick="applyLogoConcept('c4')" class="w-full py-1.5 rounded-lg bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold text-xs transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer">
+              <span>Preview Live in Top Bar</span>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Action Footer -->
+      <div class="pt-2 border-t border-black/[0.06] flex items-center justify-between">
+        <span class="text-xs text-[#64748B]">Tell the assistant which concept you prefer to set it as default</span>
+        <button onclick="closeLogoShowcaseModal()" class="px-4 py-2 rounded-full bg-[#1D1D1F] hover:bg-black text-white font-semibold text-xs transition-all shadow-sm">
+          Close Studio
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
   <!-- JAVASCRIPT CONTROLLERS                                         -->
   <!-- ============================================================== -->
   <script>
+    function openLogoShowcaseModal() { document.getElementById('modal-logo-showcase').classList.remove('hidden'); }
+    function closeLogoShowcaseModal() { document.getElementById('modal-logo-showcase').classList.add('hidden'); }
+
+    function applyLogoConcept(conceptId) {
+      const container = document.getElementById('brand-logo-container');
+      if (conceptId === 'c1') {
+        container.innerHTML = 'EA';
+        container.className = 'w-8 h-8 rounded-xl bg-gradient-to-br from-[#0F172A] to-[#1E293B] text-[#38BDF8] flex items-center justify-center font-black text-xs shadow-sm tracking-tight border border-white/10 cursor-pointer hover:scale-105 transition-all';
+        showToast('Applied Concept 1: Monogram EA to Top Bar');
+      } else if (conceptId === 'c2') {
+        container.innerHTML = '<svg class="w-4 h-4 text-[#34D399]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v3m0 12v3M3 12h3m12 0h3"/></svg>';
+        container.className = 'w-8 h-8 rounded-xl bg-gradient-to-br from-[#064E3B] to-[#022C22] text-[#34D399] flex items-center justify-center shadow-sm border border-[#34D399]/30 cursor-pointer hover:scale-105 transition-all';
+        showToast('Applied Concept 2: Precision Gateway Target to Top Bar');
+      } else if (conceptId === 'c3') {
+        container.innerHTML = '<span class="text-xs">🛡️</span>';
+        container.className = 'w-8 h-8 rounded-xl bg-gradient-to-br from-[#7C2D12] to-[#451A03] text-[#FBBF24] flex items-center justify-center shadow-sm border border-[#F59E0B]/30 cursor-pointer hover:scale-105 transition-all';
+        showToast('Applied Concept 3: Vanguard Shield & Flame to Top Bar');
+      } else if (conceptId === 'c4') {
+        container.innerHTML = '<span class="text-xs">👑</span>';
+        container.className = 'w-8 h-8 rounded-xl bg-gradient-to-br from-[#4C1D95] to-[#1E1B4B] text-[#A78BFA] flex items-center justify-center shadow-sm border border-[#A78BFA]/30 cursor-pointer hover:scale-105 transition-all';
+        showToast('Applied Concept 4: Sovereign Aspirant Wings to Top Bar');
+      }
+    }
+
     function openExamSelectorModal() { document.getElementById('modal-exam-selector').classList.remove('hidden'); }
     function closeExamSelectorModal() { document.getElementById('modal-exam-selector').classList.add('hidden'); }
 
