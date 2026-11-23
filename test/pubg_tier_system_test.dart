@@ -153,10 +153,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('PUBG Tier Arena Badges'), findsOneWidget);
-      expect(find.text('CURRENT BATTLE RANK'), findsOneWidget);
+      expect(find.text('Aspirant Rank Progression'), findsOneWidget);
+      expect(find.text('CURRENT ASPIRANT RANK'), findsOneWidget);
       expect(find.text('GOLD III'), findsOneWidget);
-      expect(find.text('ALL 8 PUBG BATTLE TIERS'), findsOneWidget);
+      expect(find.text('ASPIRANT PROGRESSION LADDER'), findsOneWidget);
 
       // Verify tiers in ladder
       expect(find.text('Bronze I'), findsOneWidget);
@@ -183,14 +183,14 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Tap on the PUBG tier badge tile in ProgressionHubScreen
-      expect(find.textContaining('Tap to view 8 PUBG Tier Badges'), findsOneWidget);
-      await tester.tap(find.textContaining('Tap to view 8 PUBG Tier Badges'));
+      // Tap on the tier badge tile in ProgressionHubScreen
+      expect(find.textContaining('Tap to view Rank Insignia'), findsOneWidget);
+      await tester.tap(find.textContaining('Tap to view Rank Insignia'));
       await tester.pumpAndSettle();
 
       // Trophy Room modal should open
-      expect(find.text('PUBG Tier Arena Badges'), findsOneWidget);
-      expect(find.text('ALL 8 PUBG BATTLE TIERS'), findsOneWidget);
+      expect(find.text('Aspirant Rank Progression'), findsOneWidget);
+      expect(find.text('ASPIRANT PROGRESSION LADDER'), findsOneWidget);
     });
   });
 }

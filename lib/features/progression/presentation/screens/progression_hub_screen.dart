@@ -264,7 +264,7 @@ class ProgressionHubScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Aspirant Merit Standing • Tap to view 8 PUBG Tier Badges',
+                            'Aspirant Merit Standing • Tap to view Rank Insignia',
                             style: TextStyle(
                               color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
                               fontSize: 11,

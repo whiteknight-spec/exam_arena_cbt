@@ -208,7 +208,7 @@ class _ExamSummaryScreenState extends ConsumerState<ExamSummaryScreen> {
                               border: Border.all(color: projectedTier.accentColor.withValues(alpha: 0.6)),
                             ),
                             child: Text(
-                              'PUBG Battle Tier: ${projectedTier.title.toUpperCase()} ${projectedTier.tierRoman} (${projectedTier.tamilTitle})',
+                              'Aspirant Merit Rank: ${projectedTier.title.toUpperCase()} ${projectedTier.tierRoman} (${projectedTier.tamilTitle})',
                               style: TextStyle(
                                 color: projectedTier.accentColor,
                                 fontWeight: FontWeight.w900,

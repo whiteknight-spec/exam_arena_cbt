@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../domain/models/pubg_tier.dart';
 import '../../domain/models/user_progress.dart';
 import 'pubg_tier_badge.dart';
@@ -23,14 +24,21 @@ class PubgTierModal extends StatelessWidget {
     final nextTier = currentTier.nextTier;
     final progressToNext = currentTier.progressToNextTier(progress.xp);
     final xpNeeded = currentTier.xpNeededForNextTier(progress.xp);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.88,
       ),
-      decoration: const BoxDecoration(
-        color: Color(0xFF0F172A), // Dark esports tactical theme
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF111827) : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        border: Border(
+          top: BorderSide(
+            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+            width: 1.0,
+          ),
+        ),
       ),
       child: Column(
         children: [
@@ -41,7 +49,7 @@ class PubgTierModal extends StatelessWidget {
               width: 44,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.white24,
+                color: isDark ? const Color(0xFF334155) : Colors.grey.shade300,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -53,23 +61,23 @@ class PubgTierModal extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Column(
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'BATTLE TIER RANKING',
+                      'ASPIRANT MERIT STANDING',
                       style: TextStyle(
-                        color: Color(0xFF38BDF8),
+                        color: isDark ? const Color(0xFF38BDF8) : AppColors.primary,
                         fontSize: 11,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 1.2,
                       ),
                     ),
-                    SizedBox(height: 2),
+                    const SizedBox(height: 2),
                     Text(
-                      'PUBG Tier Arena Badges',
+                      'Aspirant Rank Progression',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: isDark ? Colors.white : AppColors.textPrimary,
                         fontSize: 18,
                         fontWeight: FontWeight.w900,
                       ),
@@ -77,53 +85,60 @@ class PubgTierModal extends StatelessWidget {
                   ],
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close_rounded, color: Colors.white70),
+                  icon: Icon(
+                    Icons.close_rounded,
+                    color: isDark ? Colors.white70 : Colors.grey.shade600,
+                  ),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
               ],
             ),
           ),
-          const Divider(color: Colors.white12, height: 1),
+          Divider(
+            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+            height: 1,
+          ),
 
           Expanded(
             child: ListView(
               padding: const EdgeInsets.all(20),
               children: [
-                // Current Tier Showcase Card
+                // Current Tier Showcase Card (Apple HIG Clean Card)
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        currentTier.secondaryColor.withValues(alpha: 0.5),
-                        const Color(0xFF1E293B),
-                        const Color(0xFF0F172A),
-                      ],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    ),
+                    color: isDark
+                        ? const Color(0xFF1E293B)
+                        : currentTier.primaryColor.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: currentTier.primaryColor.withValues(alpha: 0.6),
+                      color: currentTier.primaryColor.withValues(alpha: isDark ? 0.6 : 0.35),
                       width: 1.5,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: currentTier.glowColor.withValues(alpha: 0.25),
-                        blurRadius: 18,
-                        offset: const Offset(0, 4),
+                        color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.03),
+                        blurRadius: 12,
+                        offset: const Offset(0, 3),
                       ),
                     ],
                   ),
                   child: Column(
                     children: [
-                      const Text(
-                        'CURRENT BATTLE RANK',
-                        style: TextStyle(
-                          color: Colors.white54,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 1.0,
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: currentTier.primaryColor.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          'CURRENT ASPIRANT RANK',
+                          style: TextStyle(
+                            color: isDark ? currentTier.accentColor : currentTier.secondaryColor,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.0,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -139,16 +154,17 @@ class PubgTierModal extends StatelessWidget {
                       Text(
                         '${currentTier.title.toUpperCase()} ${currentTier.tierRoman}',
                         style: TextStyle(
-                          color: currentTier.accentColor,
+                          color: isDark ? currentTier.accentColor : AppColors.textPrimary,
                           fontSize: 22,
                           fontWeight: FontWeight.w900,
-                          letterSpacing: 0.8,
+                          letterSpacing: 0.5,
                         ),
                       ),
+                      const SizedBox(height: 2),
                       Text(
-                        currentTier.badgeSubtitle,
-                        style: const TextStyle(
-                          color: Colors.white70,
+                        '${currentTier.tamilTitle} • ${currentTier.badgeSubtitle}',
+                        style: TextStyle(
+                          color: isDark ? Colors.white70 : AppColors.textSecondary,
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
@@ -162,8 +178,8 @@ class PubgTierModal extends StatelessWidget {
                           children: [
                             Text(
                               'Next: ${nextTier.title} ${nextTier.tierRoman}',
-                              style: const TextStyle(
-                                color: Colors.white70,
+                              style: TextStyle(
+                                color: isDark ? Colors.white70 : AppColors.textPrimary,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
                               ),
@@ -171,7 +187,7 @@ class PubgTierModal extends StatelessWidget {
                             Text(
                               '$xpNeeded XP needed',
                               style: TextStyle(
-                                color: nextTier.primaryColor,
+                                color: isDark ? nextTier.accentColor : currentTier.secondaryColor,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w800,
                               ),
@@ -184,8 +200,8 @@ class PubgTierModal extends StatelessWidget {
                           child: LinearProgressIndicator(
                             value: progressToNext,
                             minHeight: 10,
-                            backgroundColor: Colors.white12,
-                            valueColor: AlwaysStoppedAnimation<Color>(nextTier.primaryColor),
+                            backgroundColor: isDark ? Colors.white12 : Colors.grey.shade200,
+                            valueColor: AlwaysStoppedAnimation<Color>(currentTier.primaryColor),
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -193,8 +209,8 @@ class PubgTierModal extends StatelessWidget {
                           alignment: Alignment.centerRight,
                           child: Text(
                             '${progress.xp} / ${nextTier.minXp} XP',
-                            style: const TextStyle(
-                              color: Colors.white38,
+                            style: TextStyle(
+                              color: isDark ? Colors.white38 : Colors.grey.shade600,
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
                             ),
@@ -204,19 +220,19 @@ class PubgTierModal extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFEF3C7).withValues(alpha: 0.1),
+                            color: const Color(0xFFFEF3C7),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(color: const Color(0xFFFBBF24)),
                           ),
                           child: const Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.emoji_events_rounded, color: Color(0xFFFBBF24), size: 18),
+                              Icon(Icons.emoji_events_rounded, color: Color(0xFFB45309), size: 18),
                               SizedBox(width: 8),
                               Text(
                                 'Apex Conqueror Rank Achieved! State Rank 1.',
                                 style: TextStyle(
-                                  color: Color(0xFFFBBF24),
+                                  color: Color(0xFF78350F),
                                   fontWeight: FontWeight.w800,
                                   fontSize: 12,
                                 ),
@@ -231,14 +247,27 @@ class PubgTierModal extends StatelessWidget {
                 const SizedBox(height: 24),
 
                 // All Tiers Ladder Header
-                const Text(
-                  'ALL 8 PUBG BATTLE TIERS',
-                  style: TextStyle(
-                    color: Color(0xFF94A3B8),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.0,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'ASPIRANT PROGRESSION LADDER',
+                      style: TextStyle(
+                        color: isDark ? const Color(0xFF94A3B8) : Colors.grey.shade700,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                    Text(
+                      '8 Merit Tiers',
+                      style: TextStyle(
+                        color: isDark ? const Color(0xFF64748B) : Colors.grey.shade500,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12),
 
@@ -251,16 +280,20 @@ class PubgTierModal extends StatelessWidget {
                     margin: const EdgeInsets.only(bottom: 12),
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: isCurrent
-                          ? tier.secondaryColor.withValues(alpha: 0.25)
-                          : const Color(0xFF1E293B),
+                      color: isDark
+                          ? (isCurrent
+                              ? tier.secondaryColor.withValues(alpha: 0.25)
+                              : const Color(0xFF1E293B))
+                          : (isCurrent
+                              ? tier.primaryColor.withValues(alpha: 0.08)
+                              : const Color(0xFFF8FAFC)),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color: isCurrent
                             ? tier.primaryColor
-                            : isUnlocked
-                                ? tier.primaryColor.withValues(alpha: 0.4)
-                                : Colors.white10,
+                            : (isUnlocked
+                                ? (isDark ? tier.primaryColor.withValues(alpha: 0.4) : const Color(0xFFCBD5E1))
+                                : (isDark ? Colors.white10 : const Color(0xFFE2E8F0))),
                         width: isCurrent ? 2 : 1,
                       ),
                     ),
@@ -285,12 +318,14 @@ class PubgTierModal extends StatelessWidget {
                                   Text(
                                     '${tier.title} ${tier.tierRoman}',
                                     style: TextStyle(
-                                      color: isUnlocked ? tier.accentColor : Colors.white54,
+                                      color: isDark
+                                          ? (isUnlocked ? tier.accentColor : Colors.white54)
+                                          : (isUnlocked ? AppColors.textPrimary : Colors.grey.shade500),
                                       fontSize: 15,
                                       fontWeight: FontWeight.w900,
                                     ),
                                   ),
-                                   const Spacer(),
+                                  const Spacer(),
                                   if (isCurrent)
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -309,14 +344,46 @@ class PubgTierModal extends StatelessWidget {
                                       ),
                                     )
                                   else if (isUnlocked)
-                                    const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 16)
+                                    const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 15),
+                                        SizedBox(width: 3),
+                                        Text(
+                                          'Unlocked',
+                                          style: TextStyle(
+                                            color: Color(0xFF059669),
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ],
+                                    )
                                   else
-                                    Text(
-                                      '${tier.minXp} XP',
-                                      style: const TextStyle(
-                                        color: Colors.white38,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w700,
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: isDark ? const Color(0xFF0F172A) : const Color(0xFFE2E8F0),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.lock_outline_rounded,
+                                            size: 11,
+                                            color: isDark ? Colors.white38 : Colors.grey.shade600,
+                                          ),
+                                          const SizedBox(width: 3),
+                                          Text(
+                                            '${tier.minXp} XP',
+                                            style: TextStyle(
+                                              color: isDark ? Colors.white38 : Colors.grey.shade700,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                 ],
@@ -325,7 +392,9 @@ class PubgTierModal extends StatelessWidget {
                               Text(
                                 tier.perkDescription,
                                 style: TextStyle(
-                                  color: isUnlocked ? Colors.white70 : Colors.white38,
+                                  color: isDark
+                                      ? (isUnlocked ? Colors.white70 : Colors.white38)
+                                      : (isUnlocked ? const Color(0xFF475569) : Colors.grey.shade400),
                                   fontSize: 11,
                                   height: 1.3,
                                 ),
@@ -334,7 +403,7 @@ class PubgTierModal extends StatelessWidget {
                               Text(
                                 '${tier.minXp} - ${tier.maxXp >= 999999 ? "∞" : tier.maxXp} XP',
                                 style: TextStyle(
-                                  color: tier.primaryColor.withValues(alpha: 0.8),
+                                  color: tier.primaryColor,
                                   fontSize: 10,
                                   fontWeight: FontWeight.w800,
                                 ),
