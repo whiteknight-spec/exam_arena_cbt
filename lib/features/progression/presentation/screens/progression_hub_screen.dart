@@ -63,9 +63,9 @@ class ProgressionHubScreen extends ConsumerWidget {
             const Spacer(),
             StreakBadge(streakDays: progress.streakDays),
             const SizedBox(width: 4),
-            const HeartsBadge(),
-            const SizedBox(width: 4),
             AccuracyBadge(accuracy: progress.averageAccuracy),
+            const SizedBox(width: 4),
+            const HeartsBadge(),
             const SizedBox(width: 2),
             IconButton(
               icon: Icon(

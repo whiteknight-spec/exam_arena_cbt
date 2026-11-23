@@ -81,8 +81,8 @@
     
     <!-- Left: Minimalist Brand -->
     <div class="flex items-center gap-3">
-      <div class="w-8 h-8 rounded-full bg-[#1D1D1F] text-white flex items-center justify-center font-semibold text-sm shadow-sm">
-        
+      <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-[#0F172A] to-[#1E293B] text-[#38BDF8] flex items-center justify-center font-black text-xs shadow-sm tracking-tight border border-white/10">
+        EA
       </div>
       <div>
         <h1 class="text-sm font-semibold tracking-tight text-[#1D1D1F]">ExamArena</h1>
@@ -106,15 +106,21 @@
       </button>
     </nav>
 
-    <!-- Right: Candidate Quick Status (Simple Streak, 5 Hearts & Smart Accuracy Pill) -->
+    <!-- Right: Candidate Quick Status (Streak -> Accuracy -> Life -> SV) -->
     <div class="flex items-center gap-2">
-      <!-- Simple Streak Indicator (No separate bulky block) -->
+      <!-- 1. Simple Streak Indicator -->
       <div title="Daily Consistency Streak: 4 Days Active (Practice daily to maintain your streak!)" class="flex items-center gap-1 px-2.5 py-1.5 bg-white/90 hover:bg-[#FFF7ED] rounded-full text-xs font-bold text-[#EA580C] border border-black/[0.06] hover:border-[#FED7AA] shadow-xs cursor-pointer transition-all">
         <span class="text-sm select-none leading-none">🔥</span>
         <span class="text-xs font-black">4</span>
       </div>
 
-      <!-- 5 Hearts Life Indicator (Tap to open refill sheet) -->
+      <!-- 2. Simple Smart Accuracy Indicator -->
+      <div title="Average Accuracy: 84.2% across mock tests" class="flex items-center gap-1 px-2.5 py-1.5 bg-white/90 hover:bg-[#ECFDF5] rounded-full text-xs font-bold text-[#059669] border border-black/[0.06] hover:border-[#A7F3D0] shadow-xs cursor-pointer transition-all">
+        <span class="text-xs select-none leading-none">🎯</span>
+        <span class="text-xs font-black">84%</span>
+      </div>
+
+      <!-- 3. 5 Hearts Life Indicator (Tap to open refill sheet) -->
       <button onclick="openHeartsModal()" title="Stamina: 4/5 Lives (Heart 5 Recovering • 2-Hour Recovery)" class="flex items-center gap-1.5 px-3 py-1.5 bg-white/90 hover:bg-[#FFF0F2] rounded-full text-xs font-medium transition-all border border-black/[0.06] hover:border-[#FDA4AF] shadow-xs cursor-pointer group">
         <!-- 4 Solid Red Hearts -->
         <span class="text-sm select-none leading-none">❤️</span>
@@ -136,13 +142,7 @@
         </div>
       </button>
 
-      <!-- Simple Smart Accuracy Indicator (No separate bulky block) -->
-      <div title="Average Accuracy: 84.2% across mock tests" class="flex items-center gap-1 px-2.5 py-1.5 bg-white/90 hover:bg-[#ECFDF5] rounded-full text-xs font-bold text-[#059669] border border-black/[0.06] hover:border-[#A7F3D0] shadow-xs cursor-pointer transition-all">
-        <span class="text-xs select-none leading-none">🎯</span>
-        <span class="text-xs font-black">84%</span>
-      </div>
-
-      <!-- Profile Avatar -->
+      <!-- 4. Profile Avatar (Preserved as SV) -->
       <div class="w-8 h-8 rounded-full bg-[#E5E5EA] text-[#1D1D1F] flex items-center justify-center text-xs font-bold border border-black/[0.06]">
         SV
       </div>
