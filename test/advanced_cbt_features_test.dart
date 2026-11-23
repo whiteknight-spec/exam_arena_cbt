@@ -8,6 +8,8 @@ import 'package:exam_arena_cbt/features/progression/domain/models/arena_level.da
 import 'package:exam_arena_cbt/features/progression/domain/models/exam_type.dart';
 import 'package:exam_arena_cbt/features/progression/domain/models/pyq_paper.dart';
 import 'package:exam_arena_cbt/features/progression/presentation/widgets/exam_selector_sheet.dart';
+import 'package:exam_arena_cbt/features/progression/presentation/widgets/accuracy_badge.dart';
+import 'package:exam_arena_cbt/features/progression/presentation/screens/progression_hub_screen.dart';
 import 'package:exam_arena_cbt/features/exam_engine/domain/models/exam_result.dart';
 import 'package:exam_arena_cbt/features/exam_engine/domain/models/question.dart';
 import 'package:exam_arena_cbt/features/exam_engine/presentation/screens/cbt_exam_screen.dart';
@@ -236,6 +238,49 @@ void main() {
       expect(find.text('Topic & Sectional Analytics'), findsOneWidget);
       expect(find.text('⚠️ Needs Revision'), findsOneWidget);
       expect(find.text('Drill Weak Topic in Mistake Vault 🎯'), findsOneWidget);
+    });
+  });
+
+  group('Feature 5: Smart Accuracy Placement (No standalone bulky block)', () {
+    testWidgets('AccuracyBadge renders accuracy and shows SnackBar on tap', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: AccuracyBadge(accuracy: 82.5),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('83%'), findsOneWidget);
+      expect(find.text('🎯'), findsOneWidget);
+
+      await tester.tap(find.byType(AccuracyBadge));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Accuracy: 82.5%!'), findsOneWidget);
+    });
+
+    testWidgets('ProgressionHubScreen integrates accuracy seamlessly without bulky stats block', (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: ProgressionHubScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // AccuracyBadge present in the top AppBar
+      expect(find.byType(AccuracyBadge), findsOneWidget);
+
+      // Verify no standalone "Average Accuracy" box block exists
+      expect(find.text('Average Accuracy'), findsNothing);
+
+      // Verify accuracy is integrated into the History & Analytics tile
+      expect(find.textContaining('average accuracy'), findsOneWidget);
     });
   });
 }

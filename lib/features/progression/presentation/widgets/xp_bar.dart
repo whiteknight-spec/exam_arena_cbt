@@ -104,29 +104,60 @@ class XpBar extends StatelessWidget {
                   ],
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.bolt, size: 16, color: Color(0xFFFBBF24)),
-                    const SizedBox(width: 2),
-                    Text(
-                      '${progress.xp} XP',
-                      style: const TextStyle(
-                        color: Color(0xFFFBBF24),
-                        fontWeight: FontWeight.w900,
-                        fontSize: 15,
-                        fontFeatures: [FontFeature.tabularFigures()],
-                      ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Smart Accuracy Pill (Integrated, no separate block needed)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF10B981).withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0xFF34D399).withValues(alpha: 0.35)),
                     ),
-                  ],
-                ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.gps_fixed_rounded, size: 12, color: Color(0xFF34D399)),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${progress.averageAccuracy}%',
+                          style: const TextStyle(
+                            color: Color(0xFF34D399),
+                            fontWeight: FontWeight.w900,
+                            fontSize: 12,
+                            fontFeatures: [FontFeature.tabularFigures()],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.bolt, size: 16, color: Color(0xFFFBBF24)),
+                        const SizedBox(width: 2),
+                        Text(
+                          '${progress.xp} XP',
+                          style: const TextStyle(
+                            color: Color(0xFFFBBF24),
+                            fontWeight: FontWeight.w900,
+                            fontSize: 14,
+                            fontFeatures: [FontFeature.tabularFigures()],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

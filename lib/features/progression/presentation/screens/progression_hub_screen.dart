@@ -7,6 +7,7 @@ import '../providers/progression_provider.dart';
 import '../../domain/models/arena_level.dart';
 import '../widgets/xp_bar.dart';
 import '../widgets/streak_badge.dart';
+import '../widgets/accuracy_badge.dart';
 import '../widgets/exam_selector_sheet.dart';
 import '../widgets/level_map_node.dart';
 import '../../../exam_engine/presentation/screens/cbt_exam_screen.dart';
@@ -61,8 +62,10 @@ class ProgressionHubScreen extends ConsumerWidget {
             ),
             const Spacer(),
             StreakBadge(streakDays: progress.streakDays),
-            const SizedBox(width: 6),
+            const SizedBox(width: 4),
             const HeartsBadge(),
+            const SizedBox(width: 4),
+            AccuracyBadge(accuracy: progress.averageAccuracy),
             const SizedBox(width: 2),
             IconButton(
               icon: Icon(
@@ -292,75 +295,9 @@ class ProgressionHubScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
 
-            // Quick Stats Row
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
-                    decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF131B2E) : Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: isDark ? const Color(0xFF1E293B) : AppColors.border),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Tests Completed',
-                          style: TextStyle(fontSize: 11, color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${progress.testsCompleted}',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w900,
-                            color: isDark ? Colors.white : AppColors.textPrimary,
-                            fontFeatures: const [FontFeature.tabularFigures()],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
-                    decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF131B2E) : Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: isDark ? const Color(0xFF1E293B) : AppColors.border),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Average Accuracy',
-                          style: TextStyle(fontSize: 11, color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${progress.averageAccuracy}%',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w900,
-                            color: Color(0xFF10B981),
-                            fontFeatures: [FontFeature.tabularFigures()],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            // Link to Test History & Score Trends
+            // Link to Test History & Score Trends (with smart inline accuracy & tests count, no bulky block)
             InkWell(
               onTap: () {
                 Navigator.push(
@@ -384,17 +321,40 @@ class ProgressionHubScreen extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Past Test History & Analytics',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w800,
-                              color: isDark ? Colors.white : AppColors.textPrimary,
-                            ),
+                          Row(
+                            children: [
+                              Text(
+                                'Past Test History & Analytics',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w800,
+                                  color: isDark ? Colors.white : AppColors.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                                decoration: BoxDecoration(
+                                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(
+                                    color: isDark ? const Color(0xFF334155) : const Color(0xFFBFDBFE),
+                                  ),
+                                ),
+                                child: Text(
+                                  '${progress.testsCompleted} TESTS',
+                                  style: TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w900,
+                                    color: isDark ? const Color(0xFF38BDF8) : AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Review previous mock scores, accuracy & SQLite attempts',
+                            '${progress.testsCompleted} mock attempts • ${progress.averageAccuracy}% average accuracy',
                             style: TextStyle(
                               fontSize: 11,
                               color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
@@ -403,6 +363,30 @@ class ProgressionHubScreen extends ConsumerWidget {
                         ],
                       ),
                     ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF065F46).withValues(alpha: 0.3) : const Color(0xFFECFDF5),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.3)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.gps_fixed_rounded, size: 11, color: Color(0xFF10B981)),
+                          const SizedBox(width: 3),
+                          Text(
+                            '${progress.averageAccuracy}%',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF10B981),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 6),
                     Icon(Icons.chevron_right, size: 20, color: isDark ? const Color(0xFF64748B) : AppColors.textSecondary),
                   ],
                 ),
