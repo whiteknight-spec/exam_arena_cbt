@@ -9,6 +9,7 @@ import 'package:exam_arena_cbt/features/progression/domain/models/exam_type.dart
 import 'package:exam_arena_cbt/features/progression/domain/models/pyq_paper.dart';
 import 'package:exam_arena_cbt/features/progression/presentation/widgets/exam_selector_sheet.dart';
 import 'package:exam_arena_cbt/features/progression/presentation/widgets/accuracy_badge.dart';
+import 'package:exam_arena_cbt/features/progression/presentation/widgets/exam_arena_logo.dart';
 import 'package:exam_arena_cbt/features/progression/presentation/screens/progression_hub_screen.dart';
 import 'package:exam_arena_cbt/features/exam_engine/domain/models/exam_result.dart';
 import 'package:exam_arena_cbt/features/exam_engine/domain/models/question.dart';
@@ -281,6 +282,54 @@ void main() {
 
       // Verify accuracy is integrated into the History & Analytics tile
       expect(find.textContaining('average accuracy'), findsOneWidget);
+    });
+  });
+
+  group('Feature 6: Official Prismatic Target Brand Logo (Concept 2)', () {
+    testWidgets('ExamArenaLogo renders custom prismatic painter with squircle base', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: ExamArenaLogo(size: 32),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ExamArenaLogo), findsOneWidget);
+      expect(find.byType(CustomPaint), findsWidgets);
+    });
+
+    testWidgets('ExamArenaLogo with showText displays brand title and subtitle', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: ExamArenaLogo(size: 40, showText: true, subtitle: 'Official Brand'),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Exam Arena'), findsOneWidget);
+      expect(find.text('Official Brand'), findsOneWidget);
+    });
+
+    testWidgets('ProgressionHubScreen AppBar displays the official ExamArenaLogo', (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: ProgressionHubScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ExamArenaLogo), findsOneWidget);
+      expect(find.text('Exam Arena CBT'), findsOneWidget);
     });
   });
 }

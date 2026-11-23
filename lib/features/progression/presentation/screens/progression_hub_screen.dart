@@ -8,6 +8,7 @@ import '../../domain/models/arena_level.dart';
 import '../widgets/xp_bar.dart';
 import '../widgets/streak_badge.dart';
 import '../widgets/accuracy_badge.dart';
+import '../widgets/exam_arena_logo.dart';
 import '../widgets/exam_selector_sheet.dart';
 import '../widgets/level_map_node.dart';
 import '../../../exam_engine/presentation/screens/cbt_exam_screen.dart';
@@ -36,20 +37,7 @@ class ProgressionHubScreen extends ConsumerWidget {
         backgroundColor: isDark ? const Color(0xFF111827) : Colors.white,
         title: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: isDark
-                    ? const Color(0xFF38BDF8).withValues(alpha: 0.15)
-                    : AppColors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                Icons.terminal_rounded,
-                color: isDark ? const Color(0xFF38BDF8) : AppColors.primary,
-                size: 20,
-              ),
-            ),
+            const ExamArenaLogo(size: 30),
             const SizedBox(width: 8),
             Text(
               'Exam Arena CBT',
