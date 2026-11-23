@@ -7,11 +7,13 @@ import 'hearts_refill_modal.dart';
 
 enum HeartFillState { full, recovering, empty }
 
-/// Displays 5 hearts side-by-side in the top-right corner of the app.
-/// Full hearts are solid red. Lost hearts are empty outlines.
-/// The currently recovering heart displays a progressive vertical red liquid loading fill.
+/// Displays stamina / lives in the top-right corner of the app.
+/// In standard mode, displays 5 hearts side-by-side.
+/// In compact mode (optimized for mobile AppBars), displays a single heart with '$hearts/5' counter.
 class HeartsBadge extends ConsumerStatefulWidget {
-  const HeartsBadge({super.key});
+  final bool compact;
+
+  const HeartsBadge({super.key, this.compact = false});
 
   @override
   ConsumerState<HeartsBadge> createState() => _HeartsBadgeState();
@@ -85,30 +87,53 @@ class _HeartsBadgeState extends ConsumerState<HeartsBadge> {
               ),
             ],
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: List.generate(UserProgress.maxHearts, (index) {
-              HeartFillState state;
-              if (index < hearts) {
-                state = HeartFillState.full;
-              } else if (index == hearts) {
-                state = HeartFillState.recovering;
-              } else {
-                state = HeartFillState.empty;
-              }
+          child: widget.compact
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SingleHeartWidget(
+                      state: hearts > 0 ? HeartFillState.full : HeartFillState.empty,
+                      recoveryProgress: progress.recoveringHeartProgress,
+                      size: 14,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '$hearts/${UserProgress.maxHearts}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                        color: isDark
+                            ? (isCritical ? const Color(0xFFF87171) : Colors.white)
+                            : (isCritical ? const Color(0xFFE11D48) : const Color(0xFF1E293B)),
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                  ],
+                )
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: List.generate(UserProgress.maxHearts, (index) {
+                    HeartFillState state;
+                    if (index < hearts) {
+                      state = HeartFillState.full;
+                    } else if (index == hearts) {
+                      state = HeartFillState.recovering;
+                    } else {
+                      state = HeartFillState.empty;
+                    }
 
-              return Padding(
-                padding: EdgeInsets.only(
-                  right: index < UserProgress.maxHearts - 1 ? 3.5 : 0.0,
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        right: index < UserProgress.maxHearts - 1 ? 3.5 : 0.0,
+                      ),
+                      child: SingleHeartWidget(
+                        state: state,
+                        recoveryProgress: progress.recoveringHeartProgress,
+                        size: 16,
+                      ),
+                    );
+                  }),
                 ),
-                child: SingleHeartWidget(
-                  state: state,
-                  recoveryProgress: progress.recoveringHeartProgress,
-                  size: 16,
-                ),
-              );
-            }),
-          ),
         ),
       ),
     );

@@ -358,26 +358,33 @@ class _ExamSummaryScreenState extends ConsumerState<ExamSummaryScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
-                          children: [
-                            Icon(
-                              isCutoffCleared ? Icons.verified_rounded : Icons.trending_up_rounded,
-                              color: isCutoffCleared ? const Color(0xFF059669) : const Color(0xFFD97706),
-                              size: 18,
-                            ),
-                            const SizedBox(width: 8),
-                            const Text(
-                              'OFFICIAL CUT-OFF & PERCENTILE PREDICTOR',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.6,
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Icon(
+                                isCutoffCleared ? Icons.verified_rounded : Icons.trending_up_rounded,
+                                color: isCutoffCleared ? const Color(0xFF059669) : const Color(0xFFD97706),
+                                size: 16,
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 6),
+                              const Expanded(
+                                child: Text(
+                                  'OFFICIAL CUT-OFF & PERCENTILE PREDICTOR',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.5,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
+                        const SizedBox(width: 6),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                           decoration: BoxDecoration(
                             color: isCutoffCleared ? const Color(0xFF059669) : const Color(0xFFD97706),
                             borderRadius: BorderRadius.circular(6),
@@ -397,50 +404,63 @@ class _ExamSummaryScreenState extends ConsumerState<ExamSummaryScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Estimated All-India Percentile',
-                              style: TextStyle(fontSize: 11, color: Colors.grey.shade700, fontWeight: FontWeight.w600),
-                            ),
-                            Text(
-                              '${estimatedPercentile.toStringAsFixed(1)}%ile',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w900,
-                                color: isCutoffCleared ? const Color(0xFF065F46) : const Color(0xFF92400E),
-                                fontFeatures: const [FontFeature.tabularFigures()],
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Estimated All-India Percentile',
+                                style: TextStyle(fontSize: 11, color: Colors.grey.shade700, fontWeight: FontWeight.w600),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                            ),
-                          ],
+                              Text(
+                                '${estimatedPercentile.toStringAsFixed(1)}%ile',
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w900,
+                                  color: isCutoffCleared ? const Color(0xFF065F46) : const Color(0xFF92400E),
+                                  fontFeatures: const [FontFeature.tabularFigures()],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              'Target Benchmark Cut-Off',
-                              style: TextStyle(fontSize: 11, color: Colors.grey.shade700, fontWeight: FontWeight.w600),
-                            ),
-                            Text(
-                              '${benchmarkCutoffMarks.toStringAsFixed(1)} Marks (${benchmarkCutoffPercent.toStringAsFixed(0)}%)',
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w800,
-                                fontFeatures: [FontFeature.tabularFigures()],
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                'Target Benchmark Cut-Off',
+                                style: TextStyle(fontSize: 11, color: Colors.grey.shade700, fontWeight: FontWeight.w600),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                            ),
-                            Text(
-                              isCutoffCleared
-                                  ? '+${cutoffGap.toStringAsFixed(1)} Marks Surplus'
-                                  : '${cutoffGap.toStringAsFixed(1)} Marks Gap to Target',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                color: isCutoffCleared ? const Color(0xFF059669) : const Color(0xFFDC2626),
+                              Text(
+                                '${benchmarkCutoffMarks.toStringAsFixed(1)} M (${benchmarkCutoffPercent.toStringAsFixed(0)}%)',
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w800,
+                                  fontFeatures: [FontFeature.tabularFigures()],
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                            ),
-                          ],
+                              Text(
+                                isCutoffCleared
+                                    ? '+${cutoffGap.toStringAsFixed(1)} Surplus'
+                                    : '${cutoffGap.toStringAsFixed(1)} Gap',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  color: isCutoffCleared ? const Color(0xFF059669) : const Color(0xFFDC2626),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -738,10 +758,15 @@ class _ExamSummaryScreenState extends ConsumerState<ExamSummaryScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          '$topicCorrect of ${indices.length} Correct',
-                          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                        Expanded(
+                          child: Text(
+                            '$topicCorrect of ${indices.length} Correct',
+                            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
+                        const SizedBox(width: 8),
                         Text(
                           '${topicAccuracy.toStringAsFixed(1)}% Accuracy',
                           style: TextStyle(
@@ -789,14 +814,19 @@ class _ExamSummaryScreenState extends ConsumerState<ExamSummaryScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Full Solutions & Review',
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
+                const Expanded(
+                  child: Text(
+                    'Full Solutions & Review',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                const SizedBox(width: 8),
                 Text(
                   '${questions.length} Total Qs',
                   style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
@@ -806,21 +836,20 @@ class _ExamSummaryScreenState extends ConsumerState<ExamSummaryScreen> {
             const SizedBox(height: 10),
 
             // Solution Review Filter Chips
-            Row(
+            Wrap(
+              spacing: 8,
+              runSpacing: 6,
               children: ['All', 'Correct', 'Incorrect', 'Skipped'].map((filter) {
                 final isSelected = _activeFilter == filter;
-                return Container(
-                  margin: const EdgeInsets.only(right: 8),
-                  child: ChoiceChip(
-                    label: Text(filter, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-                    selected: isSelected,
-                    onSelected: (val) {
-                      if (val) setState(() => _activeFilter = filter);
-                    },
-                    selectedColor: const Color(0xFFEFF6FF),
-                    labelStyle: TextStyle(
-                      color: isSelected ? AppColors.primary : const Color(0xFF64748B),
-                    ),
+                return ChoiceChip(
+                  label: Text(filter, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                  selected: isSelected,
+                  onSelected: (val) {
+                    if (val) setState(() => _activeFilter = filter);
+                  },
+                  selectedColor: const Color(0xFFEFF6FF),
+                  labelStyle: TextStyle(
+                    color: isSelected ? AppColors.primary : const Color(0xFF64748B),
                   ),
                 );
               }).toList(),
@@ -862,17 +891,22 @@ class _ExamSummaryScreenState extends ConsumerState<ExamSummaryScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF1F5F9),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              'Q${index + 1} • ${q.displayCategory}',
-                              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF1F5F9),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                'Q${index + 1} • ${q.displayCategory}',
+                                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ),
+                          const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
@@ -967,12 +1001,16 @@ class _ExamSummaryScreenState extends ConsumerState<ExamSummaryScreen> {
                               children: [
                                 Icon(Icons.lightbulb_outline, size: 15, color: Color(0xFFD97706)),
                                 SizedBox(width: 6),
-                                Text(
-                                  'Detailed Explanation:',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w800,
-                                    color: Color(0xFF92400E),
+                                Expanded(
+                                  child: Text(
+                                    'Detailed Explanation:',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w800,
+                                      color: Color(0xFF92400E),
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                               ],
@@ -1037,23 +1075,29 @@ class _ExamSummaryScreenState extends ConsumerState<ExamSummaryScreen> {
   }
 
   Widget _buildScoreDetail({required String label, required String value, required Color color}) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: TextStyle(
-            color: color,
-            fontWeight: FontWeight.w900,
-            fontSize: 15,
-            fontFeatures: const [FontFeature.tabularFigures()],
+    return Expanded(
+      child: Column(
+        children: [
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.w900,
+              fontSize: 14,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
           ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: const TextStyle(color: Colors.white70, fontSize: 11),
-        ),
-      ],
+          const SizedBox(height: 2),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(color: Colors.white70, fontSize: 11),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1122,12 +1166,16 @@ class _ExamSummaryScreenState extends ConsumerState<ExamSummaryScreen> {
             children: [
               Icon(Icons.auto_awesome, size: 15, color: Color(0xFF7C3AED)),
               SizedBox(width: 6),
-              Text(
-                'AI Memory Shortcut / Mnemonic:',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF6D28D9),
+              Expanded(
+                child: Text(
+                  'AI Memory Shortcut / Mnemonic:',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF6D28D9),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],

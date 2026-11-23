@@ -35,54 +35,53 @@ class ProgressionHubScreen extends ConsumerWidget {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: isDark ? const Color(0xFF111827) : Colors.white,
+        titleSpacing: 12,
         title: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            const ExamArenaLogo(size: 30),
-            const SizedBox(width: 8),
-            Text(
-              'Exam Arena CBT',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: isDark ? Colors.white : AppColors.textPrimary,
-                letterSpacing: -0.3,
+            const ExamArenaLogo(size: 28),
+            const SizedBox(width: 7),
+            Flexible(
+              child: Text(
+                'Exam Arena CBT',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: isDark ? Colors.white : AppColors.textPrimary,
+                  letterSpacing: -0.3,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
-            ),
-            const Spacer(),
-            StreakBadge(streakDays: progress.streakDays),
-            const SizedBox(width: 4),
-            AccuracyBadge(accuracy: progress.averageAccuracy),
-            const SizedBox(width: 4),
-            const HeartsBadge(),
-            const SizedBox(width: 2),
-            IconButton(
-              icon: Icon(
-                Theme.of(context).brightness == Brightness.dark
-                    ? Icons.light_mode_rounded
-                    : Icons.dark_mode_rounded,
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.amber
-                    : const Color(0xFF64748B),
-                size: 20,
-              ),
-              tooltip: 'Toggle Midnight Study Theme',
-              onPressed: () {
-                HapticFeedbackHelper.selectionClick();
-                ref.read(themeModeProvider.notifier).toggleTheme();
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.history_rounded, color: AppColors.primary),
-              tooltip: 'Test History & Analytics',
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const TestHistoryScreen()),
-                );
-              },
             ),
           ],
         ),
+        actions: [
+          StreakBadge(streakDays: progress.streakDays),
+          const SizedBox(width: 4),
+          AccuracyBadge(accuracy: progress.averageAccuracy),
+          const SizedBox(width: 4),
+          const HeartsBadge(compact: true),
+          const SizedBox(width: 2),
+          IconButton(
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
+            icon: Icon(
+              Theme.of(context).brightness == Brightness.dark
+                  ? Icons.light_mode_rounded
+                  : Icons.dark_mode_rounded,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.amber
+                  : const Color(0xFF64748B),
+              size: 19,
+            ),
+            tooltip: 'Toggle Midnight Study Theme',
+            onPressed: () {
+              HapticFeedbackHelper.selectionClick();
+              ref.read(themeModeProvider.notifier).toggleTheme();
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -311,12 +310,15 @@ class ProgressionHubScreen extends ConsumerWidget {
                         children: [
                           Row(
                             children: [
-                              Text(
-                                'Past Test History & Analytics',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w800,
-                                  color: isDark ? Colors.white : AppColors.textPrimary,
+                              Flexible(
+                                child: Text(
+                                  'Past Test History & Analytics',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w800,
+                                    color: isDark ? Colors.white : AppColors.textPrimary,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                               const SizedBox(width: 6),
@@ -446,29 +448,36 @@ class ProgressionHubScreen extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '4-Tier Level Unlock Ladder',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: isDark ? Colors.white : AppColors.textPrimary,
-                        letterSpacing: -0.2,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '4-Tier Level Unlock Ladder',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: isDark ? Colors.white : AppColors.textPrimary,
+                          letterSpacing: -0.2,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '500 XP per tier progression rule',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: isDark ? const Color(0xFF94A3B8) : Colors.grey.shade600,
-                        fontWeight: FontWeight.w500,
+                      const SizedBox(height: 2),
+                      Text(
+                        '500 XP per tier progression rule',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark ? const Color(0xFF94A3B8) : Colors.grey.shade600,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
+                const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(

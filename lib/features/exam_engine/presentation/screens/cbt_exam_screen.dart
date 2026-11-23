@@ -540,6 +540,7 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
         appBar: AppBar(
           elevation: 1,
           backgroundColor: Colors.white,
+          titleSpacing: 0,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
             onPressed: () async {
@@ -552,58 +553,62 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
           ),
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 widget.examType.title,
                 style: const TextStyle(
-                  fontSize: 14,
+                  fontSize: 12,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textPrimary,
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
               Text(
-                'TCS iON CBT Console • Terminal C-04',
-                style: TextStyle(fontSize: 10, color: Colors.grey.shade600),
+                'Terminal C-04 • TCS iON CBT Console',
+                style: TextStyle(fontSize: 9.0, color: Colors.grey.shade600),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
           actions: [
             // Live Countdown Timer Badge
-            CountdownTimerBadge(remainingSeconds: sessionState.remainingSeconds),
-            const SizedBox(width: 6),
+            CountdownTimerBadge(
+              remainingSeconds: sessionState.remainingSeconds,
+              compact: true,
+            ),
+            const SizedBox(width: 2),
 
             // Instant Tamil <-> English Language Switch Chip
             LanguageToggleChip(
               isTamil: isTamil,
+              compact: true,
               onToggle: () => notifier.toggleLanguage(),
             ),
-            const SizedBox(width: 4),
-
-            // Virtual Rough Sheet Button
-            IconButton(
-              icon: const Icon(Icons.edit_note_rounded, color: Color(0xFFD97706)),
-              tooltip: 'Virtual Rough Sheet',
-              onPressed: () => _showRoughSheetModal(context),
-            ),
-            const SizedBox(width: 4),
+            const SizedBox(width: 1),
 
             // Official Question Paper Full View Button
             IconButton(
-              icon: const Icon(Icons.description_outlined, color: Color(0xFF0284C7)),
+              icon: const Icon(Icons.description_outlined, color: Color(0xFF0284C7), size: 18),
               tooltip: 'Question Paper',
+              padding: const EdgeInsets.all(3),
+              constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
               onPressed: () => _showQuestionPaperModal(context, sessionState),
             ),
-            const SizedBox(width: 4),
 
             // Open TCS iON Palette Drawer Button
             IconButton(
-              icon: const Icon(Icons.apps_rounded, color: AppColors.primary),
+              icon: const Icon(Icons.apps_rounded, color: AppColors.primary, size: 19),
               tooltip: 'Question Palette',
+              padding: const EdgeInsets.all(3),
+              constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
               onPressed: () {
                 _scaffoldKey.currentState?.openEndDrawer();
               },
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: 2),
           ],
         ),
         body: Column(
@@ -851,7 +856,7 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
 
             // Bottom Navigation and Action Bar (TCS iON Standard Layout)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
               decoration: BoxDecoration(
                 color: Colors.white,
                 boxShadow: [
@@ -869,65 +874,87 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
                   children: [
                     Row(
                       children: [
-                        // Previous Question Button
-                        OutlinedButton.icon(
+                        // Previous Question Button (Mobile Optimized)
+                        OutlinedButton(
                           style: OutlinedButton.styleFrom(
                             foregroundColor: const Color(0xFF475569),
                             side: const BorderSide(color: Color(0xFFCBD5E1)),
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           ),
-                          icon: const Icon(Icons.arrow_back_ios, size: 12),
-                          label: const Text('Prev', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
                           onPressed: sessionState.currentIndex > 0
                               ? () => notifier.jumpToQuestion(sessionState.currentIndex - 1)
                               : null,
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.arrow_back_ios, size: 9),
+                              SizedBox(width: 1),
+                              Text('Prev', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+                            ],
+                          ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 4),
 
                         // Mark for Review & Next (Violet)
                         Expanded(
                           child: OutlinedButton(
                             style: OutlinedButton.styleFrom(
                               foregroundColor: AppColors.tcsReview,
-                              side: const BorderSide(color: AppColors.tcsReview, width: 1.5),
-                              padding: const EdgeInsets.symmetric(vertical: 11),
+                              side: const BorderSide(color: AppColors.tcsReview, width: 1.2),
+                              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                             ),
                             onPressed: () => notifier.markForReviewAndNext(),
-                            child: const Text(
-                              'Mark & Next',
-                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800),
+                            child: const FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                'Mark & Next',
+                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800),
+                                maxLines: 1,
+                              ),
                             ),
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 4),
 
                         // Clear Response
                         OutlinedButton(
                           style: OutlinedButton.styleFrom(
                             foregroundColor: const Color(0xFF64748B),
                             side: const BorderSide(color: Color(0xFFCBD5E1)),
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 11),
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           ),
                           onPressed: () => notifier.clearResponse(),
-                          child: const Text('Clear', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                          child: const Text('Clear', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 4),
 
                         // Save & Next (Primary Blue)
                         Expanded(
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary,
-                              padding: const EdgeInsets.symmetric(vertical: 11),
+                              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                             ),
                             onPressed: () => notifier.saveAndNext(),
-                            child: const Text(
-                              'Save & Next',
-                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800),
+                            child: const FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                'Save & Next',
+                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800),
+                                maxLines: 1,
+                              ),
                             ),
                           ),
                         ),

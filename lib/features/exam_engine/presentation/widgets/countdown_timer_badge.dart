@@ -6,12 +6,14 @@ class CountdownTimerBadge extends StatelessWidget {
   final int remainingSeconds;
   final bool isSectionalLock;
   final String? label;
+  final bool compact;
 
   const CountdownTimerBadge({
     super.key,
     required this.remainingSeconds,
     this.isSectionalLock = false,
     this.label,
+    this.compact = false,
   });
 
   @override
@@ -30,26 +32,29 @@ class CountdownTimerBadge extends StatelessWidget {
     final color = getBadgeColor();
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 5 : 10,
+        vertical: compact ? 3 : 6,
+      ),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withValues(alpha: 0.4), width: 1.5),
+        borderRadius: BorderRadius.circular(compact ? 6 : 10),
+        border: Border.all(color: color.withValues(alpha: 0.4), width: compact ? 1.0 : 1.5),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             isSectionalLock ? Icons.lock_clock_rounded : Icons.timer_outlined,
-            size: 15,
+            size: compact ? 12 : 15,
             color: color,
           ),
-          const SizedBox(width: 5),
+          SizedBox(width: compact ? 2 : 5),
           if (label != null) ...[
             Text(
               '$label: ',
               style: TextStyle(
-                fontSize: 11,
+                fontSize: compact ? 10 : 11,
                 fontWeight: FontWeight.w700,
                 color: color,
               ),
@@ -58,7 +63,7 @@ class CountdownTimerBadge extends StatelessWidget {
           Text(
             TimerFormatter.formatSeconds(remainingSeconds),
             style: TextStyle(
-              fontSize: 13,
+              fontSize: compact ? 11.5 : 13,
               fontWeight: FontWeight.w900,
               color: color,
               fontFeatures: const [FontFeature.tabularFigures()],
