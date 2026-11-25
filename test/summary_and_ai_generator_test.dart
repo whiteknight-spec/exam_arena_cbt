@@ -348,7 +348,11 @@ class _MockLocalQuestionDatasource implements LocalQuestionDatasource {
   Future<void> seedAllExpandedQuestionsIfNeeded() async {}
 
   @override
-  Future<List<Question>> getQuestionsByExamType(String examType) async {
+  Future<List<Question>> getQuestionsByExamType(
+    String examType, {
+    String? subject,
+    String? difficulty,
+  }) async {
     return _questions;
   }
 

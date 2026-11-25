@@ -18,6 +18,8 @@ class AppDatabase {
     _database = db;
   }
 
+  bool get hasOpenDatabase => _database != null && _database!.isOpen;
+
   /// Visible for testing: initialize an isolated in-memory SQLite database instance
   static Future<Database> createInMemoryDatabase() async {
     if (_database != null && _database!.isOpen) {
@@ -133,6 +135,14 @@ class AppDatabase {
       )
     ''');
 
+    // 6. App Settings Table
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS ${AppConstants.tableAppSettings} (
+        ${AppConstants.colSettingKey} TEXT PRIMARY KEY,
+        ${AppConstants.colSettingValue} TEXT NOT NULL
+      )
+    ''');
+
     // Indices for optimal scaling and sub-millisecond query performance
     await db.execute(
       'CREATE INDEX IF NOT EXISTS idx_questions_exam_cat ON ${AppConstants.tableQuestions} (${AppConstants.colExamType}, ${AppConstants.colCategory});',
@@ -224,6 +234,15 @@ class AppDatabase {
           WHERE ${AppConstants.colXp} = 350 AND ${AppConstants.colTestsCompleted} = 12
         ''');
       } catch (_) {}
+    }
+
+    if (oldVersion < 6) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS ${AppConstants.tableAppSettings} (
+          ${AppConstants.colSettingKey} TEXT PRIMARY KEY,
+          ${AppConstants.colSettingValue} TEXT NOT NULL
+        )
+      ''');
     }
   }
 
@@ -464,9 +483,73 @@ class AppDatabase {
     );
   }
 
+  Future<void> markMistakesMastered(List<String> questionIds) async {
+    if (questionIds.isEmpty) return;
+    final db = await database;
+    final batch = db.batch();
+    for (final qid in questionIds) {
+      batch.update(
+        AppConstants.tableMistakeVault,
+        {AppConstants.colMistakeIsMastered: 1},
+        where: '${AppConstants.colMistakeQuestionId} = ?',
+        whereArgs: [qid],
+      );
+    }
+    await batch.commit(noResult: true);
+  }
+
   Future<void> clearAllMistakes() async {
     final db = await database;
     await db.delete(AppConstants.tableMistakeVault);
+  }
+
+  // =========================================================================
+  // APP SETTINGS PERSISTENCE
+  // =========================================================================
+
+  Future<void> _ensureSettingsTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS ${AppConstants.tableAppSettings} (
+        ${AppConstants.colSettingKey} TEXT PRIMARY KEY,
+        ${AppConstants.colSettingValue} TEXT NOT NULL
+      )
+    ''');
+  }
+
+  Future<void> setSetting(String key, String value) async {
+    final db = await database;
+    await _ensureSettingsTable(db);
+    await db.insert(
+      AppConstants.tableAppSettings,
+      {
+        AppConstants.colSettingKey: key,
+        AppConstants.colSettingValue: value,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<String?> getSetting(String key) async {
+    final db = await database;
+    await _ensureSettingsTable(db);
+    final results = await db.query(
+      AppConstants.tableAppSettings,
+      where: '${AppConstants.colSettingKey} = ?',
+      whereArgs: [key],
+      limit: 1,
+    );
+    if (results.isEmpty) return null;
+    return results.first[AppConstants.colSettingValue]?.toString();
+  }
+
+  Future<void> deleteSetting(String key) async {
+    final db = await database;
+    await _ensureSettingsTable(db);
+    await db.delete(
+      AppConstants.tableAppSettings,
+      where: '${AppConstants.colSettingKey} = ?',
+      whereArgs: [key],
+    );
   }
 
   Future<void> close() async {

@@ -3,6 +3,7 @@ import '../../../../core/database/app_database.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/timer_formatter.dart';
 import '../../../exam_engine/domain/models/test_attempt_analytics.dart';
+import '../../domain/models/exam_type.dart';
 
 class TestHistoryScreen extends StatefulWidget {
   final List<TestAttemptAnalytics>? initialAttempts;
@@ -29,35 +30,60 @@ class _TestHistoryScreenState extends State<TestHistoryScreen> {
         : AppDatabase.instance.getTestAttempts();
   }
 
+  ExamType? _findExamType(String examId) {
+    for (final exam in ExamType.values) {
+      if (exam.id == examId) return exam;
+    }
+    return null;
+  }
+
   String _formatExamTitle(String examId) {
-    if (examId.contains('rrb')) return 'RRB NTPC CBT 1';
-    if (examId.contains('ssc')) return 'SSC CGL Tier 1';
-    if (examId.contains('tnpsc')) return 'TNPSC Group 2 & 4';
-    if (examId.contains('ibps')) return 'IBPS / SBI Clerk';
+    if (examId == 'rrb_ntpc') return 'RRB NTPC CBT 1';
+    final match = _findExamType(examId);
+    if (match != null) return match.title;
     return examId.replaceAll('_', ' ').toUpperCase();
   }
 
   Color _getExamColor(String examId) {
-    if (examId.contains('rrb')) return const Color(0xFF2563EB);
-    if (examId.contains('ssc')) return const Color(0xFFD97706);
-    if (examId.contains('tnpsc')) return const Color(0xFF059669);
-    if (examId.contains('ibps')) return const Color(0xFF7C3AED);
+    final match = _findExamType(examId);
+    if (match != null) return Color(match.badgeColorHex);
     return AppColors.primary;
+  }
+
+  bool _matchesFilter(TestAttemptAnalytics attempt, String filterKey) {
+    final id = attempt.examType.toLowerCase();
+    switch (filterKey) {
+      case 'All':
+        return true;
+      case 'banking':
+        return id.contains('ibps') || id.contains('rbi');
+      case 'tnpsc':
+        return id.contains('tnpsc') || id.contains('tnusrb');
+      default:
+        return id.contains(filterKey.toLowerCase());
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final scaffoldBg = isDark ? const Color(0xFF090D16) : const Color(0xFFF8FAFC);
+    final cardBg = isDark ? const Color(0xFF131B2E) : Colors.white;
+    final primaryText = isDark ? Colors.white : AppColors.textPrimary;
+    final secondaryText = isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary;
+    final borderClr = isDark ? const Color(0xFF1E293B) : AppColors.border;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: scaffoldBg,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Test History & Analytics',
-          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
+          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: primaryText),
         ),
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF111827) : Colors.white,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: primaryText),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -90,21 +116,21 @@ class _TestHistoryScreenState extends State<TestHistoryScreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    const Text(
+                    Text(
                       'No Test Attempts Yet',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
+                        color: primaryText,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
+                    Text(
                       'Complete your first mock test or speed sprint in the Arena to track your analytics and score progress here.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 13,
-                        color: AppColors.textSecondary,
+                        color: secondaryText,
                         height: 1.4,
                       ),
                     ),
@@ -112,6 +138,7 @@ class _TestHistoryScreenState extends State<TestHistoryScreen> {
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                       ),
@@ -128,15 +155,20 @@ class _TestHistoryScreenState extends State<TestHistoryScreen> {
           // Calculate Aggregated Metrics
           final totalAttempts = allAttempts.length;
           final totalXp = allAttempts.fold<int>(0, (sum, a) => sum + a.earnedXp);
-          final avgAccuracy = allAttempts.fold<double>(0.0, (sum, a) => sum + a.accuracy) / totalAttempts;
-          final bestScore = allAttempts.map((a) => a.netScore).reduce((a, b) => a > b ? a : b);
+          final avgAccuracy =
+              allAttempts.fold<double>(0.0, (sum, a) => sum + a.accuracy) / totalAttempts;
+          final bestScore =
+              allAttempts.map((a) => a.netScore).reduce((a, b) => a > b ? a : b);
 
-          final filteredAttempts = _selectedFilter == 'All'
-              ? allAttempts
-              : allAttempts.where((a) => a.examType.toLowerCase().contains(_selectedFilter.toLowerCase())).toList();
+          final filteredAttempts =
+              allAttempts.where((a) => _matchesFilter(a, _selectedFilter)).toList();
 
           return RefreshIndicator(
-            onRefresh: () async => _loadHistory(),
+            onRefresh: () async {
+              setState(() {
+                _loadHistory();
+              });
+            },
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
@@ -180,8 +212,16 @@ class _TestHistoryScreenState extends State<TestHistoryScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           _buildSummaryMetric('Tests', '$totalAttempts', const Color(0xFF38BDF8)),
-                          _buildSummaryMetric('Avg Accuracy', '${avgAccuracy.toStringAsFixed(1)}%', const Color(0xFF34D399)),
-                          _buildSummaryMetric('Best Score', '+${bestScore.toStringAsFixed(1)}', const Color(0xFFFBBF24)),
+                          _buildSummaryMetric(
+                            'Avg Accuracy',
+                            '${avgAccuracy.toStringAsFixed(1)}%',
+                            const Color(0xFF34D399),
+                          ),
+                          _buildSummaryMetric(
+                            'Best Score',
+                            '${bestScore >= 0 ? '+' : ''}${bestScore.toStringAsFixed(1)}',
+                            const Color(0xFFFBBF24),
+                          ),
                           _buildSummaryMetric('Total XP', '+$totalXp', const Color(0xFFA78BFA)),
                         ],
                       ),
@@ -190,20 +230,22 @@ class _TestHistoryScreenState extends State<TestHistoryScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Filter Chips
+                // Filter Chips (Covers All 5 Exam Categories)
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
-                      _buildFilterChip('All', 'All Exams ($totalAttempts)'),
+                      _buildFilterChip('All', 'All Exams ($totalAttempts)', isDark: isDark),
                       const SizedBox(width: 8),
-                      _buildFilterChip('rrb', 'RRB NTPC'),
+                      _buildFilterChip('upsc', 'UPSC', isDark: isDark),
                       const SizedBox(width: 8),
-                      _buildFilterChip('ssc', 'SSC CGL'),
+                      _buildFilterChip('tnpsc', 'TNPSC / State', isDark: isDark),
                       const SizedBox(width: 8),
-                      _buildFilterChip('tnpsc', 'TNPSC'),
+                      _buildFilterChip('rrb', 'RRB', isDark: isDark),
                       const SizedBox(width: 8),
-                      _buildFilterChip('ibps', 'IBPS Clerk'),
+                      _buildFilterChip('ssc', 'SSC', isDark: isDark),
+                      const SizedBox(width: 8),
+                      _buildFilterChip('banking', 'Banking', isDark: isDark),
                     ],
                   ),
                 ),
@@ -215,22 +257,30 @@ class _TestHistoryScreenState extends State<TestHistoryScreen> {
                   children: [
                     Text(
                       'Past Sessions (${filteredAttempts.length})',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
+                        color: primaryText,
                       ),
                     ),
                     Text(
                       'Stored Offline in SQLite',
-                      style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                      style: TextStyle(fontSize: 11, color: secondaryText),
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
 
-                // Attempt Cards List
-                ...filteredAttempts.map((attempt) => _buildAttemptCard(attempt)),
+                ...filteredAttempts.map(
+                  (attempt) => _buildAttemptCard(
+                    attempt,
+                    isDark: isDark,
+                    cardBg: cardBg,
+                    primaryText: primaryText,
+                    secondaryText: secondaryText,
+                    borderClr: borderClr,
+                  ),
+                ),
               ],
             ),
           );
@@ -264,7 +314,7 @@ class _TestHistoryScreenState extends State<TestHistoryScreen> {
     );
   }
 
-  Widget _buildFilterChip(String key, String label) {
+  Widget _buildFilterChip(String key, String label, {bool isDark = false}) {
     final isSelected = _selectedFilter == key;
     return ChoiceChip(
       label: Text(label),
@@ -272,16 +322,29 @@ class _TestHistoryScreenState extends State<TestHistoryScreen> {
       labelStyle: TextStyle(
         fontSize: 12,
         fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-        color: isSelected ? Colors.white : AppColors.textPrimary,
+        color: isSelected
+            ? Colors.white
+            : (isDark ? const Color(0xFFE2E8F0) : AppColors.textPrimary),
       ),
       selectedColor: AppColors.primary,
-      backgroundColor: Colors.white,
-      side: BorderSide(color: isSelected ? AppColors.primary : AppColors.border),
+      backgroundColor: isDark ? const Color(0xFF131B2E) : Colors.white,
+      side: BorderSide(
+        color: isSelected
+            ? AppColors.primary
+            : (isDark ? const Color(0xFF1E293B) : AppColors.border),
+      ),
       onSelected: (_) => setState(() => _selectedFilter = key),
     );
   }
 
-  Widget _buildAttemptCard(TestAttemptAnalytics attempt) {
+  Widget _buildAttemptCard(
+    TestAttemptAnalytics attempt, {
+    required bool isDark,
+    required Color cardBg,
+    required Color primaryText,
+    required Color secondaryText,
+    required Color borderClr,
+  }) {
     final examColor = _getExamColor(attempt.examType);
     final formattedDate =
         '${attempt.timestamp.day.toString().padLeft(2, '0')}/${attempt.timestamp.month.toString().padLeft(2, '0')}/${attempt.timestamp.year} • ${attempt.timestamp.hour.toString().padLeft(2, '0')}:${attempt.timestamp.minute.toString().padLeft(2, '0')}';
@@ -290,12 +353,12 @@ class _TestHistoryScreenState extends State<TestHistoryScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardBg,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: borderClr),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -304,37 +367,41 @@ class _TestHistoryScreenState extends State<TestHistoryScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header Row: Exam Badge + Date + Earned XP
+          // Header Row: Exam Badge + Earned XP
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: examColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  _formatExamTitle(attempt.examType),
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    color: examColor,
+              Flexible(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: examColor.withValues(alpha: isDark ? 0.22 : 0.1),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    _formatExamTitle(attempt.examType),
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: isDark ? Colors.white : examColor,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFEF3C7),
+                  color: isDark ? const Color(0xFF78350F) : const Color(0xFFFEF3C7),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
                   '+${attempt.earnedXp} XP',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
-                    color: Color(0xFFB45309),
+                    color: isDark ? const Color(0xFFFDE68A) : const Color(0xFFB45309),
                   ),
                 ),
               ),
@@ -349,14 +416,14 @@ class _TestHistoryScreenState extends State<TestHistoryScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Net Score', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                  Text('Net Score', style: TextStyle(fontSize: 11, color: secondaryText)),
                   const SizedBox(height: 2),
                   Text(
                     '${attempt.netScore >= 0 ? '+' : ''}${attempt.netScore.toStringAsFixed(1)} / ${attempt.maxMarks.toStringAsFixed(0)}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w900,
-                      color: AppColors.textPrimary,
+                      color: attempt.netScore < 0 ? const Color(0xFFEF4444) : primaryText,
                     ),
                   ),
                 ],
@@ -364,7 +431,7 @@ class _TestHistoryScreenState extends State<TestHistoryScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Accuracy', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                  Text('Accuracy', style: TextStyle(fontSize: 11, color: secondaryText)),
                   const SizedBox(height: 2),
                   Text(
                     '${attempt.accuracy.toStringAsFixed(1)}%',
@@ -372,10 +439,10 @@ class _TestHistoryScreenState extends State<TestHistoryScreen> {
                       fontSize: 16,
                       fontWeight: FontWeight.w900,
                       color: attempt.accuracy >= 75
-                          ? const Color(0xFF059669)
+                          ? const Color(0xFF10B981)
                           : attempt.accuracy >= 50
-                              ? const Color(0xFFD97706)
-                              : const Color(0xFFDC2626),
+                              ? const Color(0xFFF59E0B)
+                              : const Color(0xFFEF4444),
                     ),
                   ),
                 ],
@@ -383,14 +450,14 @@ class _TestHistoryScreenState extends State<TestHistoryScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Time Spent', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                  Text('Time Spent', style: TextStyle(fontSize: 11, color: secondaryText)),
                   const SizedBox(height: 2),
                   Text(
                     TimerFormatter.formatSeconds(attempt.timeSpentSeconds),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
+                      color: primaryText,
                     ),
                   ),
                 ],
@@ -403,16 +470,16 @@ class _TestHistoryScreenState extends State<TestHistoryScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
+              color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildCountTag('Correct: ${attempt.correct}', const Color(0xFF059669)),
-                _buildCountTag('Wrong: ${attempt.incorrect}', const Color(0xFFDC2626)),
+                _buildCountTag('Correct: ${attempt.correct}', const Color(0xFF10B981)),
+                _buildCountTag('Wrong: ${attempt.incorrect}', const Color(0xFFEF4444)),
                 if (attempt.optionESelected > 0)
-                  _buildCountTag('Opt-E: ${attempt.optionESelected}', const Color(0xFF64748B)),
+                  _buildCountTag('Opt-E: ${attempt.optionESelected}', const Color(0xFF94A3B8)),
                 _buildCountTag('Skipped: ${attempt.unattempted}', const Color(0xFF94A3B8)),
               ],
             ),
@@ -424,7 +491,7 @@ class _TestHistoryScreenState extends State<TestHistoryScreen> {
             alignment: Alignment.centerRight,
             child: Text(
               formattedDate,
-              style: TextStyle(fontSize: 10, color: Colors.grey.shade500),
+              style: TextStyle(fontSize: 10, color: secondaryText),
             ),
           ),
         ],

@@ -5,18 +5,24 @@ import '../../domain/models/pyq_paper.dart';
 
 class ExamSelectorSheet extends StatefulWidget {
   final ExamType currentExam;
+  final String? currentPyqId;
   final ValueChanged<ExamType> onSelect;
+  final ValueChanged<PyqPaper>? onSelectPyq;
 
   const ExamSelectorSheet({
     super.key,
     required this.currentExam,
+    this.currentPyqId,
     required this.onSelect,
+    this.onSelectPyq,
   });
 
   static Future<void> show(
     BuildContext context, {
     required ExamType currentExam,
+    String? currentPyqId,
     required ValueChanged<ExamType> onSelect,
+    ValueChanged<PyqPaper>? onSelectPyq,
   }) {
     return showModalBottomSheet(
       context: context,
@@ -24,7 +30,9 @@ class ExamSelectorSheet extends StatefulWidget {
       backgroundColor: Colors.transparent,
       builder: (_) => ExamSelectorSheet(
         currentExam: currentExam,
+        currentPyqId: currentPyqId,
         onSelect: onSelect,
+        onSelectPyq: onSelectPyq,
       ),
     );
   }
@@ -39,6 +47,13 @@ class _ExamSelectorSheetState extends State<ExamSelectorSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final sheetBg = isDark ? const Color(0xFF111827) : Colors.white;
+    final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final primaryText = isDark ? Colors.white : AppColors.textPrimary;
+    final secondaryText = isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary;
+    final activeBlue = isDark ? const Color(0xFF38BDF8) : AppColors.primary;
+
     final filteredExams = _selectedCategory == ExamCategory.all
         ? ExamType.values
         : ExamType.values.where((e) => e.category == _selectedCategory).toList();
@@ -47,9 +62,9 @@ class _ExamSelectorSheetState extends State<ExamSelectorSheet> {
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.85,
       ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      decoration: BoxDecoration(
+        color: sheetBg,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
       child: Column(
@@ -62,7 +77,7 @@ class _ExamSelectorSheetState extends State<ExamSelectorSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: isDark ? const Color(0xFF334155) : Colors.grey.shade300,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -73,7 +88,7 @@ class _ExamSelectorSheetState extends State<ExamSelectorSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -82,20 +97,20 @@ class _ExamSelectorSheetState extends State<ExamSelectorSheet> {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                        color: primaryText,
                       ),
                     ),
-                    SizedBox(height: 2),
+                    const SizedBox(height: 2),
                     Text(
                       'Select exam syllabus or official previous year papers',
-                      style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                      style: TextStyle(fontSize: 12, color: secondaryText),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.close_rounded, size: 20),
+                icon: Icon(Icons.close_rounded, size: 20, color: primaryText),
                 onPressed: () => Navigator.pop(context),
               ),
             ],
@@ -106,7 +121,7 @@ class _ExamSelectorSheetState extends State<ExamSelectorSheet> {
           Container(
             padding: const EdgeInsets.all(3),
             decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
+              color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Row(
@@ -118,7 +133,7 @@ class _ExamSelectorSheetState extends State<ExamSelectorSheet> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 7),
                       decoration: BoxDecoration(
-                        color: !_isPyqMode ? Colors.white : Colors.transparent,
+                        color: !_isPyqMode ? cardBg : Colors.transparent,
                         borderRadius: BorderRadius.circular(8),
                         boxShadow: !_isPyqMode
                             ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4)]
@@ -130,7 +145,7 @@ class _ExamSelectorSheetState extends State<ExamSelectorSheet> {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: !_isPyqMode ? FontWeight.w800 : FontWeight.w600,
-                          color: !_isPyqMode ? AppColors.primary : AppColors.textSecondary,
+                          color: !_isPyqMode ? activeBlue : secondaryText,
                         ),
                       ),
                     ),
@@ -143,7 +158,7 @@ class _ExamSelectorSheetState extends State<ExamSelectorSheet> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 7),
                       decoration: BoxDecoration(
-                        color: _isPyqMode ? Colors.white : Colors.transparent,
+                        color: _isPyqMode ? cardBg : Colors.transparent,
                         borderRadius: BorderRadius.circular(8),
                         boxShadow: _isPyqMode
                             ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4)]
@@ -155,7 +170,9 @@ class _ExamSelectorSheetState extends State<ExamSelectorSheet> {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: _isPyqMode ? FontWeight.w800 : FontWeight.w600,
-                          color: _isPyqMode ? const Color(0xFF1E3A8A) : AppColors.textSecondary,
+                          color: _isPyqMode
+                              ? (isDark ? const Color(0xFF60A5FA) : const Color(0xFF1E3A8A))
+                              : secondaryText,
                         ),
                       ),
                     ),
@@ -171,13 +188,19 @@ class _ExamSelectorSheetState extends State<ExamSelectorSheet> {
             Expanded(
               child: ListView(
                 children: PyqPaper.standardPapers.map((paper) {
-                  final isSelected = paper.examType == widget.currentExam;
+                  final isSelected = widget.currentPyqId != null
+                      ? widget.currentPyqId == paper.id
+                      : paper.examType == widget.currentExam;
 
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: InkWell(
                       onTap: () {
-                        widget.onSelect(paper.examType);
+                        if (widget.onSelectPyq != null) {
+                          widget.onSelectPyq!(paper);
+                        } else {
+                          widget.onSelect(paper.examType);
+                        }
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -192,19 +215,16 @@ class _ExamSelectorSheetState extends State<ExamSelectorSheet> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                         decoration: BoxDecoration(
-                          color: isSelected ? const Color(0xFFEFF6FF) : Colors.white,
+                          color: isSelected
+                              ? (isDark ? const Color(0xFF1E3A8A).withValues(alpha: 0.35) : const Color(0xFFEFF6FF))
+                              : cardBg,
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: isSelected ? const Color(0xFF1E3A8A) : const Color(0x14000000),
+                            color: isSelected
+                                ? (isDark ? const Color(0xFF60A5FA) : const Color(0xFF1E3A8A))
+                                : (isDark ? const Color(0xFF334155) : const Color(0x14000000)),
                             width: isSelected ? 2 : 1,
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.02),
-                              blurRadius: 6,
-                              offset: const Offset(0, 1),
-                            ),
-                          ],
                         ),
                         child: Row(
                           children: [
@@ -212,25 +232,25 @@ class _ExamSelectorSheetState extends State<ExamSelectorSheet> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF1E3A8A).withValues(alpha: 0.12),
+                                color: const Color(0xFF1E3A8A).withValues(alpha: isDark ? 0.45 : 0.12),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Column(
                                 children: [
                                   Text(
                                     '${paper.year}',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w900,
-                                      color: Color(0xFF1E3A8A),
+                                      color: isDark ? const Color(0xFF93C5FD) : const Color(0xFF1E3A8A),
                                     ),
                                   ),
-                                  const Text(
+                                  Text(
                                     'PYQ',
                                     style: TextStyle(
                                       fontSize: 9,
                                       fontWeight: FontWeight.w800,
-                                      color: Color(0xFF1E3A8A),
+                                      color: isDark ? const Color(0xFF93C5FD) : const Color(0xFF1E3A8A),
                                     ),
                                   ),
                                 ],
@@ -249,7 +269,7 @@ class _ExamSelectorSheetState extends State<ExamSelectorSheet> {
                                           style: TextStyle(
                                             fontSize: 13,
                                             fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
-                                            color: AppColors.textPrimary,
+                                            color: primaryText,
                                           ),
                                         ),
                                       ),
@@ -276,21 +296,21 @@ class _ExamSelectorSheetState extends State<ExamSelectorSheet> {
                                   const SizedBox(height: 2),
                                   Text(
                                     paper.shiftOrPaper,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
-                                      color: Color(0xFF0284C7),
+                                      color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
                                     ),
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
                                     '${paper.totalQuestions} Questions • ${paper.durationMinutes} Minutes • Official Historical Paper',
-                                    style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
+                                    style: TextStyle(fontSize: 10, color: secondaryText),
                                   ),
                                 ],
                               ),
                             ),
-                            const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Color(0xFF64748B)),
+                            Icon(Icons.arrow_forward_ios_rounded, size: 14, color: secondaryText),
                           ],
                         ),
                       ),
@@ -319,9 +339,9 @@ class _ExamSelectorSheetState extends State<ExamSelectorSheet> {
                       labelStyle: TextStyle(
                         fontSize: 11,
                         fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                        color: isSelected ? Colors.white : AppColors.textPrimary,
+                        color: isSelected ? Colors.white : primaryText,
                       ),
-                      backgroundColor: const Color(0xFFF1F5F9),
+                      backgroundColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
                       selectedColor: AppColors.primary,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                       side: BorderSide(
@@ -339,7 +359,7 @@ class _ExamSelectorSheetState extends State<ExamSelectorSheet> {
             Expanded(
               child: ListView(
                 children: filteredExams.map((exam) {
-                  final isSelected = exam == widget.currentExam;
+                  final isSelected = exam == widget.currentExam && widget.currentPyqId == null;
 
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 8),
@@ -360,19 +380,16 @@ class _ExamSelectorSheetState extends State<ExamSelectorSheet> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         decoration: BoxDecoration(
-                          color: isSelected ? const Color(0xFFF8F9FF) : Colors.white,
+                          color: isSelected
+                              ? (isDark ? const Color(0xFF0C4A6E).withValues(alpha: 0.35) : const Color(0xFFF8F9FF))
+                              : cardBg,
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: isSelected ? AppColors.primary : const Color(0x14000000),
+                            color: isSelected
+                                ? activeBlue
+                                : (isDark ? const Color(0xFF334155) : const Color(0x14000000)),
                             width: isSelected ? 2 : 1,
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.02),
-                              blurRadius: 6,
-                              offset: const Offset(0, 1),
-                            ),
-                          ],
                         ),
                         child: Row(
                           children: [
@@ -405,7 +422,7 @@ class _ExamSelectorSheetState extends State<ExamSelectorSheet> {
                                           style: TextStyle(
                                             fontSize: 13,
                                             fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
-                                            color: AppColors.textPrimary,
+                                            color: primaryText,
                                           ),
                                         ),
                                       ),
@@ -432,9 +449,9 @@ class _ExamSelectorSheetState extends State<ExamSelectorSheet> {
                                   const SizedBox(height: 2),
                                   Text(
                                     '${exam.totalQuestions} Qs • ${exam.totalDurationMinutes} mins • ${exam.hasOptionE ? "5 Options (A–E)" : "4 Options"}${exam.negativeMark > 0 ? " • -${exam.negativeMark} neg" : " • 0 neg"}${exam.hasSectionalLock ? " • 🔒 ${exam.sectionalLockDurationMinutes}m lock" : ""}',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 11,
-                                      color: AppColors.textSecondary,
+                                      color: secondaryText,
                                     ),
                                   ),
                                 ],
@@ -446,7 +463,7 @@ class _ExamSelectorSheetState extends State<ExamSelectorSheet> {
                               padding: const EdgeInsets.only(left: 6),
                               child: Icon(
                                 isSelected ? Icons.check_circle_rounded : Icons.radio_button_unchecked,
-                                color: isSelected ? AppColors.primary : Colors.grey.shade400,
+                                color: isSelected ? activeBlue : Colors.grey.shade400,
                                 size: 20,
                               ),
                             ),
@@ -481,4 +498,3 @@ class _ExamSelectorSheetState extends State<ExamSelectorSheet> {
     }
   }
 }
-

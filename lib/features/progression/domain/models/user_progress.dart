@@ -12,6 +12,7 @@ class UserProgress {
   final List<int>? customUnlockedLevels;
   final int hearts;
   final DateTime? lastHeartRefillTime;
+  final String? selectedPyqId;
 
   const UserProgress({
     this.xp = 0,
@@ -23,6 +24,7 @@ class UserProgress {
     this.customUnlockedLevels,
     this.hearts = 5,
     this.lastHeartRefillTime,
+    this.selectedPyqId,
   });
 
   // 500-XP per level unlock progression rule
@@ -313,6 +315,8 @@ class UserProgress {
     List<int>? customUnlockedLevels,
     int? hearts,
     DateTime? lastHeartRefillTime,
+    String? selectedPyqId,
+    bool clearSelectedPyq = false,
   }) {
     return UserProgress(
       xp: xp ?? this.xp,
@@ -324,6 +328,7 @@ class UserProgress {
       customUnlockedLevels: customUnlockedLevels ?? this.customUnlockedLevels,
       hearts: hearts ?? this.hearts,
       lastHeartRefillTime: lastHeartRefillTime ?? this.lastHeartRefillTime,
+      selectedPyqId: clearSelectedPyq ? null : (selectedPyqId ?? this.selectedPyqId),
     );
   }
 }

@@ -34,7 +34,9 @@ class LocalQuestionDatasource {
   Future<void> seedUpscQuestionsIfNeeded() async {
     final db = await appDatabase.database;
     final upscCount = Sqflite.firstIntValue(
-      await db.rawQuery("SELECT COUNT(*) FROM ${AppConstants.tableQuestions} WHERE ${AppConstants.colExamType} LIKE 'upsc%'"),
+      await db.rawQuery(
+        "SELECT COUNT(*) FROM ${AppConstants.tableQuestions} WHERE ${AppConstants.colExamType} LIKE 'upsc%'",
+      ),
     );
     if (upscCount == null || upscCount == 0) {
       final upscQuestions = SeedQuestions.getUpscQuestions();
@@ -70,59 +72,111 @@ class LocalQuestionDatasource {
     }
   }
 
-  Future<List<Question>> getQuestionsByExamType(String examType) async {
+  Future<List<Question>> getQuestionsByExamType(
+    String examType, {
+    String? subject,
+    String? difficulty,
+  }) async {
     await seedIfEmpty();
     await seedAllExpandedQuestionsIfNeeded();
     if (examType.toLowerCase().contains('upsc')) {
       await seedUpscQuestionsIfNeeded();
     }
+
     final db = await appDatabase.database;
-    final maps = await db.query(
+    final lower = examType.toLowerCase();
+    var maps = await db.query(
       AppConstants.tableQuestions,
       where: '${AppConstants.colExamType} = ?',
       whereArgs: [examType],
     );
 
     if (maps.isEmpty) {
-      // Fallback: If a Railways paper has no exact sub-id match, return all Railways questions
-      if (examType.toLowerCase().contains('rrb')) {
-        final rrbMaps = await db.query(
+      String? familyPrefix;
+      if (lower.contains('rrb')) {
+        familyPrefix = 'rrb%';
+      } else if (lower.contains('upsc')) {
+        familyPrefix = 'upsc%';
+      } else if (lower.contains('ssc')) {
+        familyPrefix = 'ssc%';
+      } else if (lower.contains('tnpsc') || lower.contains('tnusrb')) {
+        familyPrefix = 'tnpsc%';
+      } else if (lower.contains('ibps') || lower.contains('rbi')) {
+        familyPrefix = 'ibps%';
+      }
+
+      if (familyPrefix != null) {
+        final familyMaps = await db.query(
           AppConstants.tableQuestions,
-          where: "${AppConstants.colExamType} LIKE 'rrb%'",
+          where: '${AppConstants.colExamType} LIKE ?',
+          whereArgs: [familyPrefix],
         );
-        if (rrbMaps.isNotEmpty) {
-          return rrbMaps.map((m) => Question.fromMap(m)).toList();
+        if (familyMaps.isNotEmpty) {
+          maps = familyMaps;
         }
       }
 
-      // Fallback: If a UPSC paper has no exact sub-id match, return all UPSC paper questions
-      if (examType.toLowerCase().contains('upsc')) {
-        final upscMaps = await db.query(
-          AppConstants.tableQuestions,
-          where: "${AppConstants.colExamType} LIKE 'upsc%'",
-        );
-        if (upscMaps.isNotEmpty) {
-          return upscMaps.map((m) => Question.fromMap(m)).toList();
-        }
+      if (maps.isEmpty) {
+        maps = await db.query(AppConstants.tableQuestions);
       }
-
-      // Fallback: If an SSC paper has no exact sub-id match, return all SSC questions
-      if (examType.toLowerCase().contains('ssc')) {
-        final sscMaps = await db.query(
-          AppConstants.tableQuestions,
-          where: "${AppConstants.colExamType} LIKE 'ssc%'",
-        );
-        if (sscMaps.isNotEmpty) {
-          return sscMaps.map((m) => Question.fromMap(m)).toList();
-        }
-      }
-
-      // Fallback: return all available questions if specific exam has no subset
-      final allMaps = await db.query(AppConstants.tableQuestions);
-      return allMaps.map((m) => Question.fromMap(m)).toList();
     }
 
-    return maps.map((m) => Question.fromMap(m)).toList();
+    var questions = maps.map((m) => Question.fromMap(m)).toList();
+
+    // Prioritize matching subject & difficulty when requested (e.g. AI Gauntlet offline bank)
+    if ((subject != null && subject.trim().isNotEmpty) ||
+        (difficulty != null && difficulty.trim().isNotEmpty)) {
+      questions = _prioritizeByFilters(
+        questions,
+        subject: subject,
+        difficulty: difficulty,
+      );
+    }
+
+    return questions;
+  }
+
+  List<Question> _prioritizeByFilters(
+    List<Question> source, {
+    String? subject,
+    String? difficulty,
+  }) {
+    final subLower = subject?.toLowerCase() ?? '';
+    final diffLower = difficulty?.toLowerCase() ?? '';
+
+    int scoreQuestion(Question q) {
+      int score = 0;
+      if (subLower.isNotEmpty) {
+        final qSub = '${q.subject} ${q.category}'.toLowerCase();
+        if (subLower.contains('quant') && qSub.contains('quant')) {
+          score += 2;
+        } else if (subLower.contains('reason') && qSub.contains('reason')) {
+          score += 2;
+        } else if ((subLower.contains('awareness') ||
+                subLower.contains('polity') ||
+                subLower.contains('science')) &&
+            (qSub.contains('awareness') ||
+                qSub.contains('polity') ||
+                qSub.contains('science') ||
+                qSub.contains('history') ||
+                qSub.contains('economy'))) {
+          score += 2;
+        } else if ((subLower.contains('tamil') ||
+                subLower.contains('thirukkural') ||
+                subLower.contains('english')) &&
+            (qSub.contains('tamil') || qSub.contains('english'))) {
+          score += 2;
+        }
+      }
+      if (diffLower.isNotEmpty && q.difficulty.toLowerCase() == diffLower) {
+        score += 1;
+      }
+      return score;
+    }
+
+    final sorted = List<Question>.from(source);
+    sorted.sort((a, b) => scoreQuestion(b).compareTo(scoreQuestion(a)));
+    return sorted;
   }
 
   Future<List<Question>> getQuestionsByCategory(String category) async {

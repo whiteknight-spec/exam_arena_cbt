@@ -3,6 +3,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/haptic_feedback_helper.dart';
 import '../../../progression/domain/models/arena_level.dart';
 import '../../../progression/domain/models/exam_type.dart';
+import '../../domain/services/exam_analytics_service.dart';
 
 /// Authentic TCS iON CBT Virtual Hall Ticket / Admit Card modal.
 /// Creates a high-immersion transition from casual dashboard browsing to real exam hall mindset.
@@ -218,7 +219,7 @@ class VirtualHallTicketSheet extends StatelessWidget {
                                 const Icon(Icons.timer_outlined, size: 14, color: AppColors.primary),
                                 const SizedBox(width: 4),
                                 Text(
-                                  '${level == ArenaLevel.level1 ? 15 : (level == ArenaLevel.level2 ? 25 : examType.totalDurationMinutes)} Mins',
+                                  '${ExamAnalyticsService.durationMinutesFor(level, examType)} Mins',
                                   style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800),
                                 ),
                               ],
@@ -242,7 +243,7 @@ class VirtualHallTicketSheet extends StatelessWidget {
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                'Negative Marking: ${examType.hasOptionE ? "Option E protects against wrong answer penalty" : "-0.33 Marks per wrong response"}. Exiting early deducts 1 Heart (❤️).',
+                                'Negative Marking: ${ExamAnalyticsService.negativeMarkingSummary(examType)}. Exiting early deducts 1 Heart (❤️).',
                                 style: const TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,

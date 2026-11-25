@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/models/question.dart';
 import '../../domain/models/question_status.dart';
@@ -45,6 +46,43 @@ class ExamSessionState {
 
   QuestionStatus get currentStatus =>
       statuses[currentIndex] ?? QuestionStatus.notVisited;
+
+  ExamSection? get currentSection =>
+      (sections.isNotEmpty &&
+              currentSectionIndex >= 0 &&
+              currentSectionIndex < sections.length)
+          ? sections[currentSectionIndex]
+          : null;
+
+  bool get isMultiSectionLocked => hasSectionalLock && sections.length > 1;
+
+  bool isQuestionAccessible(int index) {
+    if (index < 0 || index >= questions.length) return false;
+    if (!isMultiSectionLocked) return true;
+    final sec = currentSection;
+    if (sec == null) return true;
+    return sec.questionIndices.contains(index);
+  }
+
+  int? get previousQuestionInSection {
+    if (!isMultiSectionLocked) {
+      return currentIndex > 0 ? currentIndex - 1 : null;
+    }
+    final indices = currentSection?.questionIndices ?? const [];
+    final pos = indices.indexOf(currentIndex);
+    if (pos > 0) return indices[pos - 1];
+    return null;
+  }
+
+  int? get nextQuestionInSection {
+    if (!isMultiSectionLocked) {
+      return currentIndex + 1 < questions.length ? currentIndex + 1 : null;
+    }
+    final indices = currentSection?.questionIndices ?? const [];
+    final pos = indices.indexOf(currentIndex);
+    if (pos >= 0 && pos + 1 < indices.length) return indices[pos + 1];
+    return null;
+  }
 
   ExamSessionState copyWith({
     List<Question>? questions,
@@ -98,28 +136,74 @@ class ExamSessionNotifier extends Notifier<ExamSessionState?> {
     state = initialState;
     _markCurrentAsVisited();
 
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      final current = state;
-      if (current == null) {
-        timer.cancel();
-        return;
-      }
-
-      final nextOverallSeconds = current.remainingSeconds - 1;
-      final nextSectionalSeconds = current.hasSectionalLock && current.sectionalRemainingSeconds > 0
-          ? current.sectionalRemainingSeconds - 1
-          : current.sectionalRemainingSeconds;
-
-      if (nextOverallSeconds <= 0) {
-        timer.cancel();
-        submitExam();
-      } else {
-        state = current.copyWith(
-          remainingSeconds: nextOverallSeconds,
-          sectionalRemainingSeconds: nextSectionalSeconds,
-        );
-      }
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      tickOneSecond();
     });
+  }
+
+  @visibleForTesting
+  void tickOneSecond() {
+    final current = state;
+    if (current == null || current.isSubmitted) {
+      _timer?.cancel();
+      return;
+    }
+
+    final nextOverallSeconds = current.remainingSeconds - 1;
+    if (nextOverallSeconds <= 0) {
+      state = current.copyWith(remainingSeconds: 0);
+      submitExam();
+      return;
+    }
+
+    if (current.hasSectionalLock) {
+      final nextSectionalSeconds = current.sectionalRemainingSeconds - 1;
+      if (nextSectionalSeconds <= 0) {
+        // Lock current section and auto-advance to next section, or submit on final section expiry
+        if (current.currentSectionIndex + 1 < current.sections.length) {
+          final updatedSections = List<ExamSection>.from(current.sections);
+          updatedSections[current.currentSectionIndex] =
+              updatedSections[current.currentSectionIndex].copyWith(isLocked: true);
+
+          final nextSectionIndex = current.currentSectionIndex + 1;
+          final nextSection = updatedSections[nextSectionIndex].copyWith(isLocked: false);
+          updatedSections[nextSectionIndex] = nextSection;
+
+          final nextQuestionIndex = nextSection.questionIndices.isNotEmpty
+              ? nextSection.questionIndices.first
+              : current.currentIndex;
+          final nextSectionTimer = nextSection.allottedSeconds <= nextOverallSeconds
+              ? nextSection.allottedSeconds
+              : nextOverallSeconds;
+
+          state = current.copyWith(
+            remainingSeconds: nextOverallSeconds,
+            sectionalRemainingSeconds: nextSectionTimer,
+            sections: updatedSections,
+            currentSectionIndex: nextSectionIndex,
+            currentIndex: nextQuestionIndex,
+          );
+          _markCurrentAsVisited();
+          return;
+        } else {
+          // Final section expired -> auto-submit exam
+          state = current.copyWith(
+            remainingSeconds: nextOverallSeconds,
+            sectionalRemainingSeconds: 0,
+          );
+          submitExam();
+          return;
+        }
+      }
+
+      state = current.copyWith(
+        remainingSeconds: nextOverallSeconds,
+        sectionalRemainingSeconds: nextSectionalSeconds,
+      );
+      return;
+    }
+
+    state = current.copyWith(remainingSeconds: nextOverallSeconds);
   }
 
   void _markCurrentAsVisited() {
@@ -142,7 +226,11 @@ class ExamSessionNotifier extends Notifier<ExamSessionState?> {
 
   void selectOption(int optionIndex) {
     final cur = state;
-    if (cur == null) return;
+    if (cur == null || cur.isSubmitted) return;
+    final optionsCount = cur.currentQuestion.optionsEn.length;
+    if (optionIndex < 0 || (optionsCount > 0 && optionIndex >= optionsCount)) {
+      return;
+    }
 
     final updated = Map<int, int?>.from(cur.userSelections);
     updated[cur.currentIndex] = optionIndex;
@@ -151,7 +239,7 @@ class ExamSessionNotifier extends Notifier<ExamSessionState?> {
 
   void clearResponse() {
     final cur = state;
-    if (cur == null) return;
+    if (cur == null || cur.isSubmitted) return;
 
     final updatedSelections = Map<int, int?>.from(cur.userSelections);
     updatedSelections.remove(cur.currentIndex);
@@ -167,17 +255,14 @@ class ExamSessionNotifier extends Notifier<ExamSessionState?> {
 
   void saveAndNext() {
     final cur = state;
-    if (cur == null) return;
+    if (cur == null || cur.isSubmitted) return;
 
     final hasSelected = cur.userSelections[cur.currentIndex] != null;
     final updatedStatuses = Map<int, QuestionStatus>.from(cur.statuses);
     updatedStatuses[cur.currentIndex] =
         hasSelected ? QuestionStatus.answered : QuestionStatus.notAnswered;
 
-    int nextIndex = cur.currentIndex + 1;
-    if (nextIndex >= cur.questions.length) {
-      nextIndex = cur.currentIndex;
-    }
+    final nextIndex = cur.nextQuestionInSection ?? cur.currentIndex;
 
     state = cur.copyWith(
       statuses: updatedStatuses,
@@ -188,17 +273,14 @@ class ExamSessionNotifier extends Notifier<ExamSessionState?> {
 
   void markForReviewAndNext() {
     final cur = state;
-    if (cur == null) return;
+    if (cur == null || cur.isSubmitted) return;
 
     final hasSelected = cur.userSelections[cur.currentIndex] != null;
     final updatedStatuses = Map<int, QuestionStatus>.from(cur.statuses);
     updatedStatuses[cur.currentIndex] =
         hasSelected ? QuestionStatus.answeredReview : QuestionStatus.review;
 
-    int nextIndex = cur.currentIndex + 1;
-    if (nextIndex >= cur.questions.length) {
-      nextIndex = cur.currentIndex;
-    }
+    final nextIndex = cur.nextQuestionInSection ?? cur.currentIndex;
 
     state = cur.copyWith(
       statuses: updatedStatuses,
@@ -209,9 +291,9 @@ class ExamSessionNotifier extends Notifier<ExamSessionState?> {
 
   void jumpToQuestion(int index) {
     final cur = state;
-    if (cur == null) return;
+    if (cur == null || cur.isSubmitted) return;
 
-    if (index >= 0 && index < cur.questions.length) {
+    if (cur.isQuestionAccessible(index)) {
       state = cur.copyWith(currentIndex: index);
       _markCurrentAsVisited();
     }
@@ -220,7 +302,7 @@ class ExamSessionNotifier extends Notifier<ExamSessionState?> {
   void submitExam() {
     _timer?.cancel();
     final cur = state;
-    if (cur == null) return;
+    if (cur == null || cur.isSubmitted) return;
 
     int correct = 0;
     int incorrect = 0;
@@ -247,9 +329,11 @@ class ExamSessionNotifier extends Notifier<ExamSessionState?> {
     final unattempted = cur.questions.length - attempted;
     final positiveEarned = correct * cur.examType.positiveMark;
     final negativeDeducted = incorrect * cur.examType.negativeMark;
-    final netScore = positiveEarned - negativeDeducted;
+    final netScore =
+        double.parse((positiveEarned - negativeDeducted).toStringAsFixed(2));
     final maxMarks = cur.questions.length * cur.examType.positiveMark;
-    final timeSpent = cur.totalDurationSeconds - cur.remainingSeconds;
+    final timeSpent =
+        (cur.totalDurationSeconds - cur.remainingSeconds).clamp(0, cur.totalDurationSeconds);
 
     final result = ExamResult(
       totalQuestions: cur.questions.length,
@@ -260,7 +344,7 @@ class ExamSessionNotifier extends Notifier<ExamSessionState?> {
       unattempted: unattempted,
       positiveMarksEarned: positiveEarned,
       negativeMarksDeducted: negativeDeducted,
-      netScore: netScore < 0 ? 0 : netScore,
+      netScore: netScore,
       maximumMarks: maxMarks,
       timeSpentSeconds: timeSpent,
     );

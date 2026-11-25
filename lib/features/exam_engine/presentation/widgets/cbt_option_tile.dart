@@ -42,16 +42,30 @@ class CbtOptionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final activePrimary = isDark ? const Color(0xFF38BDF8) : AppColors.primary;
+
     Color getTileBorderColor() {
       if (isSelected) {
-        return isOptionE ? const Color(0xFFD97706) : AppColors.primary;
+        return isOptionE ? const Color(0xFFD97706) : activePrimary;
+      }
+      if (isDark) {
+        return isOptionE ? const Color(0xFF92400E) : const Color(0xFF1E293B);
       }
       return isOptionE ? const Color(0xFFFDE68A) : const Color(0xFFE2E8F0);
     }
 
     Color getTileBgColor() {
       if (isSelected) {
+        if (isDark) {
+          return isOptionE
+              ? const Color(0xFF78350F).withValues(alpha: 0.35)
+              : const Color(0xFF0C4A6E).withValues(alpha: 0.4);
+        }
         return isOptionE ? const Color(0xFFFFFBEB) : const Color(0xFFEFF6FF);
+      }
+      if (isDark) {
+        return isOptionE ? const Color(0xFF1E1B18) : const Color(0xFF131B2E);
       }
       return isOptionE ? const Color(0xFFFAFAF9) : Colors.white;
     }
@@ -68,7 +82,7 @@ class CbtOptionTile extends StatelessWidget {
         boxShadow: isSelected
             ? [
                 BoxShadow(
-                  color: (isOptionE ? const Color(0xFFD97706) : AppColors.primary)
+                  color: (isOptionE ? const Color(0xFFD97706) : activePrimary)
                       .withValues(alpha: 0.15),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
@@ -76,7 +90,7 @@ class CbtOptionTile extends StatelessWidget {
               ]
             : [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.02),
+                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
                   blurRadius: 4,
                   offset: const Offset(0, 1),
                 ),
@@ -101,13 +115,13 @@ class CbtOptionTile extends StatelessWidget {
                   height: 34,
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? (isOptionE ? const Color(0xFFD97706) : AppColors.primary)
-                        : Colors.white,
+                        ? (isOptionE ? const Color(0xFFD97706) : activePrimary)
+                        : (isDark ? const Color(0xFF0F172A) : Colors.white),
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: isSelected
-                          ? (isOptionE ? const Color(0xFFD97706) : AppColors.primary)
-                          : const Color(0xFF94A3B8),
+                          ? (isOptionE ? const Color(0xFFD97706) : activePrimary)
+                          : (isDark ? const Color(0xFF475569) : const Color(0xFF94A3B8)),
                       width: isSelected ? 2.0 : 1.5,
                     ),
                   ),
@@ -117,7 +131,9 @@ class CbtOptionTile extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w900,
-                        color: isSelected ? Colors.white : const Color(0xFF475569),
+                        color: isSelected
+                            ? (isDark && !isOptionE ? const Color(0xFF090D16) : Colors.white)
+                            : (isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569)),
                       ),
                     ),
                   ),
@@ -134,16 +150,20 @@ class CbtOptionTile extends StatelessWidget {
                           margin: const EdgeInsets.only(bottom: 4),
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFEF3C7),
+                            color: isDark
+                                ? const Color(0xFF78350F).withValues(alpha: 0.5)
+                                : const Color(0xFFFEF3C7),
                             borderRadius: BorderRadius.circular(4),
-                            border: Border.all(color: const Color(0xFFFDE68A)),
+                            border: Border.all(
+                              color: isDark ? const Color(0xFFD97706) : const Color(0xFFFDE68A),
+                            ),
                           ),
-                          child: const Text(
+                          child: Text(
                             'TNPSC Option E: Answer Not Known (விடை தெரியவில்லை)',
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w800,
-                              color: Color(0xFF92400E),
+                              color: isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E),
                             ),
                           ),
                         ),
@@ -154,8 +174,10 @@ class CbtOptionTile extends StatelessWidget {
                           fontSize: 14 * fontScale,
                           fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                           color: isSelected
-                              ? (isOptionE ? const Color(0xFF92400E) : AppColors.primary)
-                              : AppColors.textPrimary,
+                              ? (isOptionE
+                                  ? (isDark ? const Color(0xFFFBBF24) : const Color(0xFF92400E))
+                                  : activePrimary)
+                              : (isDark ? const Color(0xFFF1F5F9) : AppColors.textPrimary),
                         ),
                       ),
                     ],
@@ -167,7 +189,7 @@ class CbtOptionTile extends StatelessWidget {
                   Icon(
                     Icons.check_circle_rounded,
                     size: 20,
-                    color: isOptionE ? const Color(0xFFD97706) : AppColors.primary,
+                    color: isOptionE ? const Color(0xFFD97706) : activePrimary,
                   ),
               ],
             ),

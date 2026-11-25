@@ -128,15 +128,23 @@ class AiGauntletNotifier extends Notifier<AiGauntletState> {
 
   Future<void> loadOfflineQuestions({
     String? examType,
+    String? subject,
+    String? difficulty,
     int? count,
   }) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
       final localDatasource = ref.read(localDatasourceProvider);
       final effectiveExam = examType ?? state.selectedExamType;
+      final effectiveSubject = subject ?? state.selectedSubject;
+      final effectiveDifficulty = difficulty ?? state.selectedDifficulty;
       final effectiveCount = count ?? state.selectedCount;
 
-      final questions = await localDatasource.getQuestionsByExamType(effectiveExam);
+      final questions = await localDatasource.getQuestionsByExamType(
+        effectiveExam,
+        subject: effectiveSubject,
+        difficulty: effectiveDifficulty,
+      );
       state = state.copyWith(
         isLoading: false,
         generatedQuestions: questions.take(effectiveCount).toList(),

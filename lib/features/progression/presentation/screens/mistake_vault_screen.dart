@@ -142,6 +142,7 @@ class _MistakeVaultScreenState extends ConsumerState<MistakeVaultScreen> {
                                 level: ArenaLevel.level1,
                                 examType: userProgress.selectedExam,
                                 customQuestions: questions,
+                                isMistakeDrill: true,
                               ),
                             ),
                           ).then((_) {
@@ -166,8 +167,14 @@ class _MistakeVaultScreenState extends ConsumerState<MistakeVaultScreen> {
                 final q = entry.value;
 
                 return Card(
+                  color: isDark ? const Color(0xFF131B2E) : Colors.white,
                   margin: const EdgeInsets.only(bottom: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(
+                      color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                    ),
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.all(14),
                     child: Column(
@@ -227,7 +234,7 @@ class _MistakeVaultScreenState extends ConsumerState<MistakeVaultScreen> {
                         ),
                         const Divider(height: 16),
                         Text(
-                          'Correct Answer: Option ${String.fromCharCode(65 + q.correctIndex)} • ${q.optionsEn.isNotEmpty ? q.optionsEn[q.correctIndex] : ""}',
+                          'Correct Answer: Option ${String.fromCharCode(65 + q.correctIndex)} • ${q.safeCorrectOptionEn}',
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w800,

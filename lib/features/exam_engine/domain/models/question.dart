@@ -39,6 +39,23 @@ class Question {
 
   String getExplanation(bool isTamil) => isTamil ? explanationTa : explanationEn;
 
+  String getSafeOption(int index, bool isTamil) {
+    final primary = isTamil ? optionsTa : optionsEn;
+    if (index >= 0 && index < primary.length) {
+      return primary[index];
+    }
+    if (index >= 0 && index < optionsEn.length) {
+      return optionsEn[index];
+    }
+    return '';
+  }
+
+  String get safeCorrectOptionEn => getSafeOption(correctIndex, false);
+
+  String get safeCorrectOptionTa => getSafeOption(correctIndex, true);
+
+  String getSafeCorrectOption(bool isTamil) => getSafeOption(correctIndex, isTamil);
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -69,6 +86,19 @@ class Question {
       return [];
     }
 
+    final parsedOptionsEn = parseList(map['options_en']);
+    final parsedOptionsTa = parseList(map['options_ta']);
+    final rawCorrect = (map['correct_index'] as num?)?.toInt() ?? 0;
+    final maxIdx = parsedOptionsEn.isNotEmpty
+        ? parsedOptionsEn.length - 1
+        : (parsedOptionsTa.isNotEmpty ? parsedOptionsTa.length - 1 : 0);
+    final safeCorrectIndex = rawCorrect.clamp(0, maxIdx);
+
+    final rawHasOptionE = map['has_option_e'];
+    final parsedHasOptionE = rawHasOptionE is bool
+        ? rawHasOptionE
+        : (rawHasOptionE as num?)?.toInt() == 1;
+
     return Question(
       id: map['id']?.toString() ?? '',
       subject: map['subject']?.toString() ?? '',
@@ -76,12 +106,12 @@ class Question {
       category: map['category']?.toString() ?? map['subject']?.toString() ?? '',
       questionEn: map['question_en']?.toString() ?? '',
       questionTa: map['question_ta']?.toString() ?? '',
-      optionsEn: parseList(map['options_en']),
-      optionsTa: parseList(map['options_ta']),
-      correctIndex: map['correct_index'] as int? ?? 0,
+      optionsEn: parsedOptionsEn,
+      optionsTa: parsedOptionsTa,
+      correctIndex: safeCorrectIndex,
       explanationEn: map['explanation_en']?.toString() ?? '',
       explanationTa: map['explanation_ta']?.toString() ?? '',
-      hasOptionE: (map['has_option_e'] as int? ?? 0) == 1,
+      hasOptionE: parsedHasOptionE,
       difficulty: map['difficulty']?.toString() ?? 'medium',
     );
   }

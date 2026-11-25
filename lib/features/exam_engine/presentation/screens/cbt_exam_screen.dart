@@ -7,7 +7,7 @@ import '../../../progression/domain/models/arena_level.dart';
 import '../../../progression/domain/models/exam_type.dart';
 import '../../domain/models/question.dart';
 import '../../domain/models/question_status.dart';
-import '../../domain/models/section.dart';
+import '../../domain/services/exam_analytics_service.dart';
 import '../providers/exam_session_provider.dart';
 import '../widgets/countdown_timer_badge.dart';
 import '../widgets/language_toggle_chip.dart';
@@ -22,12 +22,16 @@ class CbtExamScreen extends ConsumerStatefulWidget {
   final ArenaLevel level;
   final ExamType examType;
   final List<Question>? customQuestions;
+  final bool isMistakeDrill;
+  final bool isRecoveryDrill;
 
   const CbtExamScreen({
     super.key,
     required this.level,
     required this.examType,
     this.customQuestions,
+    this.isMistakeDrill = false,
+    this.isRecoveryDrill = false,
   });
 
   @override
@@ -48,6 +52,11 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
   }
 
   void _showQuestionPaperModal(BuildContext context, ExamSessionState sessionState) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final sheetBg = isDark ? const Color(0xFF131B2E) : Colors.white;
+    final primaryText = isDark ? Colors.white : AppColors.textPrimary;
+    final secondaryText = isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -56,9 +65,9 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
         constraints: BoxConstraints(
           maxHeight: MediaQuery.of(ctx).size.height * 0.88,
         ),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        decoration: BoxDecoration(
+          color: sheetBg,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
         child: Column(
@@ -69,7 +78,7 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: isDark ? const Color(0xFF334155) : Colors.grey.shade300,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -85,17 +94,17 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
                     children: [
                       Text(
                         'Official Question Paper: ${widget.examType.title}',
-                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                        style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: primaryText),
                       ),
                       Text(
                         'Full Paper Overview • ${sessionState.questions.length} Total Questions',
-                        style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                        style: TextStyle(fontSize: 11, color: secondaryText),
                       ),
                     ],
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close_rounded, size: 20),
+                  icon: Icon(Icons.close_rounded, size: 20, color: primaryText),
                   onPressed: () => Navigator.pop(ctx),
                 ),
               ],
@@ -109,81 +118,96 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
                   final q = sessionState.questions[idx];
                   final status = sessionState.statuses[idx] ?? QuestionStatus.notVisited;
                   final userSel = sessionState.userSelections[idx];
+                  final accessible = sessionState.isQuestionAccessible(idx);
                   final isAnswered = status == QuestionStatus.answered || status == QuestionStatus.answeredReview;
                   final statusColor = status.backgroundColor == AppColors.tcsNotVisited
-                      ? AppColors.textPrimary
+                      ? primaryText
                       : status.backgroundColor;
 
                   return InkWell(
-                    onTap: () {
-                      Navigator.pop(ctx);
-                      ref.read(examSessionProvider.notifier).jumpToQuestion(idx);
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: status.backgroundColor.withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(color: status.borderColor.withValues(alpha: 0.4)),
+                    onTap: accessible
+                        ? () {
+                            Navigator.pop(ctx);
+                            ref.read(examSessionProvider.notifier).jumpToQuestion(idx);
+                          }
+                        : null,
+                    child: Opacity(
+                      opacity: accessible ? 1.0 : 0.45,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: status.backgroundColor.withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(color: status.borderColor.withValues(alpha: 0.4)),
+                                  ),
+                                  child: Text(
+                                    'Q${idx + 1}',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 11,
+                                      color: statusColor,
+                                    ),
+                                  ),
                                 ),
-                                child: Text(
-                                  'Q${idx + 1}',
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    q.subject,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      color: secondaryText,
+                                    ),
+                                  ),
+                                ),
+                                if (!accessible)
+                                  const Padding(
+                                    padding: EdgeInsets.only(right: 6),
+                                    child: Icon(Icons.lock_rounded, size: 12, color: Color(0xFFD97706)),
+                                  ),
+                                Text(
+                                  accessible
+                                      ? (isAnswered ? 'Marked' : status.label)
+                                      : 'Section Locked',
                                   style: TextStyle(
-                                    fontWeight: FontWeight.w900,
-                                    fontSize: 11,
-                                    color: statusColor,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  q.subject,
-                                  style: const TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 10,
                                     fontWeight: FontWeight.w700,
-                                    color: AppColors.textSecondary,
+                                    color: accessible ? statusColor : const Color(0xFFD97706),
                                   ),
                                 ),
-                              ),
-                              Text(
-                                isAnswered ? 'Marked' : status.label,
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                  color: statusColor,
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              sessionState.isTamil ? q.questionTa : q.questionEn,
+                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, height: 1.3, color: primaryText),
+                            ),
+                            const SizedBox(height: 6),
+                            ...q.getOptions(sessionState.isTamil).asMap().entries.map((opt) {
+                              final isUserChoice = userSel == opt.key;
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 2),
+                                child: Text(
+                                  '${String.fromCharCode(65 + opt.key)}) ${opt.value}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: isUserChoice ? FontWeight.w800 : FontWeight.w400,
+                                    color: isUserChoice
+                                        ? (isDark ? const Color(0xFF38BDF8) : AppColors.primary)
+                                        : primaryText,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            sessionState.isTamil ? q.questionTa : q.questionEn,
-                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, height: 1.3),
-                          ),
-                          const SizedBox(height: 6),
-                          ...q.getOptions(sessionState.isTamil).asMap().entries.map((opt) {
-                            final isUserChoice = userSel == opt.key;
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 2),
-                              child: Text(
-                                '${String.fromCharCode(65 + opt.key)}) ${opt.value}',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: isUserChoice ? FontWeight.w800 : FontWeight.w400,
-                                  color: isUserChoice ? AppColors.primary : AppColors.textPrimary,
-                                ),
-                              ),
-                            );
-                          }),
-                        ],
+                              );
+                            }),
+                          ],
+                        ),
                       ),
                     ),
                   );
@@ -197,6 +221,11 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
   }
 
   void _showRoughSheetModal(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final sheetBg = isDark ? const Color(0xFF131B2E) : Colors.white;
+    final primaryText = isDark ? Colors.white : AppColors.textPrimary;
+    final secondaryText = isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -204,9 +233,9 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
         child: Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          decoration: BoxDecoration(
+            color: sheetBg,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           padding: const EdgeInsets.all(20),
           child: Column(
@@ -217,10 +246,10 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
                 children: [
                   const Icon(Icons.edit_note_rounded, color: AppColors.primary, size: 24),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Virtual Rough Sheet',
-                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: primaryText),
                     ),
                   ),
                   TextButton.icon(
@@ -231,25 +260,28 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
                 ],
               ),
               const SizedBox(height: 6),
-              const Text(
+              Text(
                 'Use this scratchpad for math calculations, formulas & rough work. Your notes are kept active during the exam.',
-                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 12, color: secondaryText),
               ),
               const SizedBox(height: 12),
               Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8FAFC),
+                  color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                  ),
                 ),
                 child: TextField(
                   controller: _roughSheetController,
                   maxLines: 8,
-                  style: const TextStyle(fontSize: 14, fontFamily: 'monospace'),
-                  decoration: const InputDecoration(
+                  style: TextStyle(fontSize: 14, fontFamily: 'monospace', color: primaryText),
+                  decoration: InputDecoration(
                     hintText: 'e.g. Speed = Dist / Time = 300 / 15 = 20 m/s...',
+                    hintStyle: TextStyle(color: secondaryText),
                     border: InputBorder.none,
-                    contentPadding: EdgeInsets.all(12),
+                    contentPadding: const EdgeInsets.all(12),
                   ),
                 ),
               ),
@@ -259,6 +291,7 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                   onPressed: () => Navigator.of(ctx).pop(),
@@ -295,69 +328,60 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
     }
 
     // Level-specific authentic sizing & replay variety:
-    // If custom questions are passed (e.g. from tests or AI gauntlet), respect them
+    // If custom questions are passed (e.g. from tests, Mistake Vault, or AI gauntlet), respect them
     if (widget.customQuestions == null && questions.isNotEmpty) {
       final shuffled = List<Question>.from(questions)..shuffle();
       if (widget.level == ArenaLevel.level1) {
-        // Level 1: 15-min Topic Speed Sprint -> 10 Questions
         questions = shuffled.take(10).toList();
       } else if (widget.level == ArenaLevel.level2) {
-        // Level 2: Sectional Timed Drill -> 20 Questions
         questions = shuffled.take(20).toList();
       } else if (widget.level == ArenaLevel.level3) {
-        // Level 3: Full-Length CBT Mock -> All available authentic questions
         questions = shuffled;
       } else if (widget.level == ArenaLevel.level4) {
-        // Level 4: AI Adaptive Boss Gauntlet -> 10 Questions
         questions = shuffled.take(10).toList();
       }
     }
 
-    // Set duration based on level and exam specifications
-    int durationSecs = 900; // 15 mins for Level 1 Topic Speed Sprint
-    if (widget.level == ArenaLevel.level1) {
-      durationSecs = 900; // 15-min Topic Speed Sprint
-    } else if (widget.level == ArenaLevel.level2) {
-      durationSecs = widget.examType.hasSectionalLock && widget.examType.sectionalLockDurationMinutes > 0
-          ? widget.examType.sectionalLockDurationSeconds
-          : 900; // 15 mins sectional drill
-    } else if (widget.level == ArenaLevel.level3) {
-      durationSecs = widget.examType.totalDurationSeconds; // Full CBT Mock
-    } else if (widget.level == ArenaLevel.level4) {
-      durationSecs = 600; // 10 mins AI gauntlet
-    }
+    final durationSecs = ExamAnalyticsService.durationSecondsFor(widget.level, widget.examType);
+    final hasSectionLock =
+        !widget.isMistakeDrill && !widget.isRecoveryDrill &&
+        (widget.level == ArenaLevel.level2 || widget.examType.hasSectionalLock);
 
-    final hasSectionLock = widget.level == ArenaLevel.level2 || widget.examType.hasSectionalLock;
-    final sectionLockSecs = widget.examType.sectionalLockDurationMinutes > 0
-        ? widget.examType.sectionalLockDurationSeconds
-        : 900;
-
-    final initialStatuses = <int, QuestionStatus>{};
-    for (int i = 0; i < questions.length; i++) {
-      initialStatuses[i] = QuestionStatus.notVisited;
-    }
-    initialStatuses[0] = QuestionStatus.notAnswered;
-
-    final dummySection = ExamSection(
-      id: 'sec_1',
-      name: widget.level.title,
-      tamilName: widget.level.tamilTitle,
-      questionIndices: List.generate(questions.length, (i) => i),
-      allottedSeconds: durationSecs,
-      isLocked: hasSectionLock,
+    final sectionSetup = ExamAnalyticsService.buildSectionsForExam(
+      questions: questions,
+      examType: widget.examType,
+      level: widget.level,
+      hasSectionLock: hasSectionLock,
+      totalDurationSeconds: durationSecs,
+      preserveOrder: widget.customQuestions != null,
     );
 
+    final orderedQuestions = sectionSetup.orderedQuestions;
+    final sections = sectionSetup.sections;
+    final effectiveTotalSeconds = sectionSetup.totalDurationSeconds;
+    final initialSectionSeconds =
+        hasSectionLock && sections.isNotEmpty ? sections.first.allottedSeconds : 0;
+
+    final initialStatuses = <int, QuestionStatus>{};
+    for (int i = 0; i < orderedQuestions.length; i++) {
+      initialStatuses[i] = QuestionStatus.notVisited;
+    }
+    if (orderedQuestions.isNotEmpty) {
+      initialStatuses[0] = QuestionStatus.notAnswered;
+    }
+
     final initialState = ExamSessionState(
-      questions: questions,
+      questions: orderedQuestions,
       currentIndex: 0,
       userSelections: {},
       statuses: initialStatuses,
       isTamil: false,
-      remainingSeconds: durationSecs,
-      totalDurationSeconds: durationSecs,
-      sectionalRemainingSeconds: hasSectionLock ? sectionLockSecs : 0,
+      remainingSeconds: effectiveTotalSeconds,
+      totalDurationSeconds: effectiveTotalSeconds,
+      sectionalRemainingSeconds: initialSectionSeconds,
       hasSectionalLock: hasSectionLock,
-      sections: [dummySection],
+      sections: sections,
+      currentSectionIndex: 0,
       examType: widget.examType,
     );
 
@@ -370,6 +394,7 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
   }
 
   void _showSubmitConfirmationDialog(BuildContext context, ExamSessionState sessionState) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     int answeredCount = 0;
     int reviewCount = 0;
     int unattemptedCount = 0;
@@ -388,39 +413,54 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
+        backgroundColor: isDark ? const Color(0xFF131B2E) : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.assignment_turned_in_rounded, color: Color(0xFF10B981)),
-            SizedBox(width: 8),
-            Text('Submit Examination?', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17)),
+            const Icon(Icons.assignment_turned_in_rounded, color: Color(0xFF10B981)),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Submit Examination?',
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 17,
+                  color: isDark ? Colors.white : AppColors.textPrimary,
+                ),
+              ),
+            ),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Are you sure you want to finalize and submit your CBT session?',
-              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              style: TextStyle(
+                fontSize: 13,
+                color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
+              ),
             ),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
+                color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                ),
               ),
               child: Column(
                 children: [
-                  _buildSummaryRow('Total Questions:', '${sessionState.questions.length}'),
+                  _buildSummaryRow('Total Questions:', '${sessionState.questions.length}', isDark: isDark),
                   const SizedBox(height: 6),
-                  _buildSummaryRow('Answered:', '$answeredCount', color: const Color(0xFF10B981)),
+                  _buildSummaryRow('Answered:', '$answeredCount', color: const Color(0xFF10B981), isDark: isDark),
                   const SizedBox(height: 6),
-                  _buildSummaryRow('Marked for Review:', '$reviewCount', color: const Color(0xFF7C3AED)),
+                  _buildSummaryRow('Marked for Review:', '$reviewCount', color: const Color(0xFF7C3AED), isDark: isDark),
                   const SizedBox(height: 6),
-                  _buildSummaryRow('Unattempted:', '$unattemptedCount', color: const Color(0xFFEF4444)),
+                  _buildSummaryRow('Unattempted:', '$unattemptedCount', color: const Color(0xFFEF4444), isDark: isDark),
                 ],
               ),
             ),
@@ -432,7 +472,10 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
             child: const Text('Return to Exam'),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF10B981)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF10B981),
+              foregroundColor: Colors.white,
+            ),
             onPressed: () {
               Navigator.pop(ctx);
               ref.read(examSessionProvider.notifier).submitExam();
@@ -444,24 +487,30 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
     );
   }
 
-  Widget _buildSummaryRow(String label, String value, {Color? color}) {
+  Widget _buildSummaryRow(String label, String value, {Color? color, bool isDark = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary,
+          ),
+        ),
         Text(
           value,
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w800,
-            color: color ?? AppColors.textPrimary,
+            color: color ?? (isDark ? Colors.white : AppColors.textPrimary),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildFontZoomBtn(String label, double scale, String tooltip) {
+  Widget _buildFontZoomBtn(String label, double scale, String tooltip, {bool isDark = false}) {
     final isSelected = (_fontScale - scale).abs() < 0.05;
     return InkWell(
       onTap: () => setState(() => _fontScale = scale),
@@ -478,7 +527,9 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w900,
-              color: isSelected ? Colors.white : const Color(0xFF334155),
+              color: isSelected
+                  ? Colors.white
+                  : (isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155)),
             ),
           ),
         ),
@@ -490,11 +541,27 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
   Widget build(BuildContext context) {
     final sessionState = ref.watch(examSessionProvider);
     final notifier = ref.read(examSessionProvider.notifier);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final scaffoldBg = isDark ? const Color(0xFF090D16) : const Color(0xFFF8FAFC);
+    final surfaceBg = isDark ? const Color(0xFF111827) : Colors.white;
+    final primaryText = isDark ? Colors.white : AppColors.textPrimary;
+    final borderClr = isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0);
 
     // Listen for exam submission and 5-minute threshold
     ref.listen<ExamSessionState?>(examSessionProvider, (prev, next) {
       if (next != null) {
-        if (next.isSubmitted && next.result != null) {
+        if (next.isSubmitted && next.result != null && (prev == null || !prev.isSubmitted)) {
+          final preXp = ref.read(progressionProvider).xp;
+          ExamSummaryScreen.persistSession(
+            ref: ref,
+            result: next.result!,
+            questions: next.questions,
+            userSelections: next.userSelections,
+            examType: next.examType,
+            isMistakeDrill: widget.isMistakeDrill,
+            isRecoveryDrill: widget.isRecoveryDrill,
+            preSessionXp: preXp,
+          );
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -502,6 +569,12 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
                 result: next.result!,
                 questions: next.questions,
                 userSelections: next.userSelections,
+                examType: next.examType,
+                isMistakeDrill: widget.isMistakeDrill,
+                isRecoveryDrill: widget.isRecoveryDrill,
+                isTamil: next.isTamil,
+                preSessionXp: preXp,
+                sessionAlreadyPersisted: true,
               ),
             ),
           );
@@ -513,16 +586,17 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
     });
 
     if (_isInitializing || sessionState == null) {
-      return const Scaffold(
+      return Scaffold(
+        backgroundColor: scaffoldBg,
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
               Text(
                 'Initializing TCS iON CBT Exam Hall Environment...',
-                style: TextStyle(fontWeight: FontWeight.w600),
+                style: TextStyle(fontWeight: FontWeight.w600, color: primaryText),
               ),
             ],
           ),
@@ -533,39 +607,58 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
     final currentQ = sessionState.currentQuestion;
     final isTamil = sessionState.isTamil;
     final options = currentQ.getOptions(isTamil);
+    final prevIndex = sessionState.previousQuestionInSection;
+    final activeSec = sessionState.currentSection;
 
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
-        final shouldExit = await ExitGuardDialog.show(context);
+        final shouldExit = await ExitGuardDialog.show(
+          context,
+          deductsHeart: !widget.isRecoveryDrill,
+        );
         if (shouldExit && context.mounted) {
-          ref.read(progressionProvider.notifier).deductHeart(reason: 'Exited active CBT session midway');
+          if (!widget.isRecoveryDrill) {
+            ref
+                .read(progressionProvider.notifier)
+                .deductHeart(reason: 'Exited active CBT session midway');
+          }
           Navigator.of(context).pop();
         }
       },
       child: Scaffold(
         key: _scaffoldKey,
-        backgroundColor: const Color(0xFFF8FAFC),
+        backgroundColor: scaffoldBg,
         // Authentic TCS iON Question Palette EndDrawer
         endDrawer: TcsQuestionPalette(
           totalQuestions: sessionState.questions.length,
           currentIndex: sessionState.currentIndex,
           statuses: sessionState.statuses,
           isDrawer: true,
+          sections: sessionState.sections,
+          currentSectionIndex: sessionState.currentSectionIndex,
+          hasSectionalLock: sessionState.hasSectionalLock,
           onQuestionSelected: (idx) => notifier.jumpToQuestion(idx),
           onSubmit: () => _showSubmitConfirmationDialog(context, sessionState),
         ),
         appBar: AppBar(
           elevation: 1,
-          backgroundColor: Colors.white,
+          backgroundColor: surfaceBg,
           titleSpacing: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+            icon: Icon(Icons.arrow_back, color: primaryText),
             onPressed: () async {
-              final shouldExit = await ExitGuardDialog.show(context);
+              final shouldExit = await ExitGuardDialog.show(
+                context,
+                deductsHeart: !widget.isRecoveryDrill,
+              );
               if (shouldExit && context.mounted) {
-                ref.read(progressionProvider.notifier).deductHeart(reason: 'Exited active CBT session midway');
+                if (!widget.isRecoveryDrill) {
+                  ref
+                      .read(progressionProvider.notifier)
+                      .deductHeart(reason: 'Exited active CBT session midway');
+                }
                 Navigator.of(context).pop();
               }
             },
@@ -576,17 +669,24 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
             children: [
               Text(
                 widget.examType.title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
+                  color: primaryText,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
               Text(
-                'Terminal C-04 • TCS iON CBT Console',
-                style: TextStyle(fontSize: 9.0, color: Colors.grey.shade600),
+                widget.isMistakeDrill
+                    ? 'Mistake Revision Drill • Terminal C-04'
+                    : (widget.isRecoveryDrill
+                        ? 'Stamina Recovery Drill • Terminal C-04'
+                        : 'Terminal C-04 • TCS iON CBT Console'),
+                style: TextStyle(
+                  fontSize: 9.0,
+                  color: isDark ? const Color(0xFF94A3B8) : Colors.grey.shade600,
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -619,7 +719,11 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
 
             // Open TCS iON Palette Drawer Button
             IconButton(
-              icon: const Icon(Icons.apps_rounded, color: AppColors.primary, size: 19),
+              icon: Icon(
+                Icons.apps_rounded,
+                color: isDark ? const Color(0xFF38BDF8) : AppColors.primary,
+                size: 19,
+              ),
               tooltip: 'Question Palette',
               padding: const EdgeInsets.all(3),
               constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
@@ -637,21 +741,25 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                decoration: const BoxDecoration(
-                  color: Color(0xFFFEF2F2),
-                  border: Border(bottom: BorderSide(color: Color(0xFFFECDD3))),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF450A0A) : const Color(0xFFFEF2F2),
+                  border: Border(
+                    bottom: BorderSide(
+                      color: isDark ? const Color(0xFF991B1B) : const Color(0xFFFECDD3),
+                    ),
+                  ),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(Icons.warning_amber_rounded, size: 16, color: Color(0xFFDC2626)),
-                    SizedBox(width: 8),
+                    const Icon(Icons.warning_amber_rounded, size: 16, color: Color(0xFFDC2626)),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         '⚠️ 5-Minute Warning: Exam auto-submits at 00:00! Review flagged and unattempted answers.',
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w800,
-                          color: Color(0xFF991B1B),
+                          color: isDark ? const Color(0xFFFECACA) : const Color(0xFF991B1B),
                         ),
                       ),
                     ),
@@ -659,26 +767,32 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
                 ),
               ),
 
-            // Sectional Lock Banner (for SSC CGL & IBPS Clerk)
+            // Sectional Lock Banner (for SSC CGL, IBPS Clerk, Level 2, etc.)
             if (sessionState.hasSectionalLock)
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                decoration: const BoxDecoration(
-                  color: Color(0xFFFEF3C7),
-                  border: Border(bottom: BorderSide(color: Color(0xFFFDE68A))),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF451A03) : const Color(0xFFFEF3C7),
+                  border: Border(
+                    bottom: BorderSide(
+                      color: isDark ? const Color(0xFF92400E) : const Color(0xFFFDE68A),
+                    ),
+                  ),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.lock_clock, size: 16, color: Color(0xFFB45309)),
+                    const Icon(Icons.lock_clock, size: 16, color: Color(0xFFD97706)),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Automatic Sectional Lock Active (${widget.examType.title}) • Switching sections is disabled until timer expires.',
-                        style: const TextStyle(
+                        sessionState.isMultiSectionLocked && activeSec != null
+                            ? 'Automatic Sectional Lock Active • Sec ${sessionState.currentSectionIndex + 1}/${sessionState.sections.length}: ${activeSec.name}'
+                            : 'Automatic Sectional Lock Active (${widget.examType.title}) • Switching sections is disabled until timer expires.',
+                        style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF92400E),
+                          color: isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E),
                         ),
                       ),
                     ),
@@ -695,9 +809,9 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
             // Top Status Bar: Q Index & Marking Scheme
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+              decoration: BoxDecoration(
+                color: surfaceBg,
+                border: Border(bottom: BorderSide(color: borderClr)),
               ),
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
@@ -706,16 +820,18 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFEFF6FF),
+                        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
                         borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: const Color(0xFFBFDBFE)),
+                        border: Border.all(
+                          color: isDark ? const Color(0xFF334155) : const Color(0xFFBFDBFE),
+                        ),
                       ),
                       child: Text(
                         'Question ${sessionState.currentIndex + 1} of ${sessionState.questions.length}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w800,
                           fontSize: 12,
-                          color: AppColors.primary,
+                          color: isDark ? const Color(0xFF38BDF8) : AppColors.primary,
                         ),
                       ),
                     ),
@@ -723,15 +839,15 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
+                        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
                         currentQ.displayCategory,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF475569),
+                          color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
                         ),
                       ),
                     ),
@@ -741,16 +857,20 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFECFDF5),
+                        color: isDark
+                            ? const Color(0xFF064E3B).withValues(alpha: 0.4)
+                            : const Color(0xFFECFDF5),
                         borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: const Color(0xFFA7F3D0)),
+                        border: Border.all(
+                          color: isDark ? const Color(0xFF059669) : const Color(0xFFA7F3D0),
+                        ),
                       ),
                       child: Text(
                         '+${widget.examType.positiveMark} / -${widget.examType.negativeMark} Marks',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w800,
-                          color: Color(0xFF065F46),
+                          color: isDark ? const Color(0xFF6EE7B7) : const Color(0xFF065F46),
                         ),
                       ),
                     ),
@@ -759,16 +879,18 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
                     // TCS iON Font Zoom Controls (A- / A / A+)
                     Container(
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
+                        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
                         borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: const Color(0xFFCBD5E1)),
+                        border: Border.all(
+                          color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
+                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          _buildFontZoomBtn('A-', 0.9, 'Small Font'),
-                          _buildFontZoomBtn('1x', 1.0, 'Default Font'),
-                          _buildFontZoomBtn('A+', 1.25, 'Large Font'),
+                          _buildFontZoomBtn('A-', 0.9, 'Small Font', isDark: isDark),
+                          _buildFontZoomBtn('1x', 1.0, 'Default Font', isDark: isDark),
+                          _buildFontZoomBtn('A+', 1.25, 'Large Font', isDark: isDark),
                         ],
                       ),
                     ),
@@ -781,21 +903,25 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFFFBEB),
+                          color: isDark
+                              ? const Color(0xFF78350F).withValues(alpha: 0.4)
+                              : const Color(0xFFFFFBEB),
                           borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: const Color(0xFFFDE68A)),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFFD97706) : const Color(0xFFFDE68A),
+                          ),
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.edit_note_rounded, size: 14, color: Color(0xFFB45309)),
-                            SizedBox(width: 3),
+                            const Icon(Icons.edit_note_rounded, size: 14, color: Color(0xFFD97706)),
+                            const SizedBox(width: 3),
                             Text(
                               'Rough Sheet',
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
-                                color: Color(0xFF92400E),
+                                color: isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E),
                               ),
                             ),
                           ],
@@ -821,7 +947,7 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
                         isTamil: isTamil,
                         fontSize: 16 * _fontScale,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                        color: primaryText,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -830,13 +956,17 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
+                        color: isDark ? const Color(0xFF131B2E) : const Color(0xFFF1F5F9),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(Icons.translate, size: 14, color: Colors.grey.shade600),
+                          Icon(
+                            Icons.translate,
+                            size: 14,
+                            color: isDark ? const Color(0xFF94A3B8) : Colors.grey.shade600,
+                          ),
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
@@ -844,7 +974,7 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
                               style: AppTheme.bilingualTextStyle(
                                 isTamil: !isTamil,
                                 fontSize: 13 * _fontScale,
-                                color: const Color(0xFF64748B),
+                                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                               ),
                             ),
                           ),
@@ -877,10 +1007,10 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: surfaceBg,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
+                    color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
                     blurRadius: 10,
                     offset: const Offset(0, -3),
                   ),
@@ -893,18 +1023,18 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
                   children: [
                     Row(
                       children: [
-                        // Previous Question Button (Mobile Optimized)
+                        // Previous Question Button (Mobile Optimized, section-aware)
                         OutlinedButton(
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: const Color(0xFF475569),
-                            side: const BorderSide(color: Color(0xFFCBD5E1)),
+                            foregroundColor: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+                            side: BorderSide(color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1)),
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
                             minimumSize: Size.zero,
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           ),
-                          onPressed: sessionState.currentIndex > 0
-                              ? () => notifier.jumpToQuestion(sessionState.currentIndex - 1)
+                          onPressed: prevIndex != null
+                              ? () => notifier.jumpToQuestion(prevIndex)
                               : null,
                           child: const Row(
                             mainAxisSize: MainAxisSize.min,
@@ -921,8 +1051,11 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
                         Expanded(
                           child: OutlinedButton(
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: AppColors.tcsReview,
-                              side: const BorderSide(color: AppColors.tcsReview, width: 1.2),
+                              foregroundColor: isDark ? const Color(0xFFA78BFA) : AppColors.tcsReview,
+                              side: BorderSide(
+                                color: isDark ? const Color(0xFF8B5CF6) : AppColors.tcsReview,
+                                width: 1.2,
+                              ),
                               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
                               minimumSize: Size.zero,
                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -944,8 +1077,8 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
                         // Clear Response
                         OutlinedButton(
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: const Color(0xFF64748B),
-                            side: const BorderSide(color: Color(0xFFCBD5E1)),
+                            foregroundColor: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                            side: BorderSide(color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1)),
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
                             minimumSize: Size.zero,
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -961,6 +1094,7 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
                               minimumSize: Size.zero,
                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -988,6 +1122,7 @@ class _CbtExamScreenState extends ConsumerState<CbtExamScreen> {
                       child: ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF10B981),
+                          foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
                         icon: const Icon(Icons.send_rounded, size: 16),

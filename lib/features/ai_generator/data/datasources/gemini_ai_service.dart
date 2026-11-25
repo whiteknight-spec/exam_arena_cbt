@@ -27,13 +27,15 @@ class GeminiAiService {
         .replaceAll(RegExp(r'[\r\n\t]'), ' ')
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
-    final sanitizedSubject = cleanSubject.length > 100 ? cleanSubject.substring(0, 100) : cleanSubject;
+    final sanitizedSubject =
+        cleanSubject.length > 100 ? cleanSubject.substring(0, 100) : cleanSubject;
 
     final cleanExamType = examType
         .replaceAll(RegExp(r'[\r\n\t]'), ' ')
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
-    final sanitizedExamType = cleanExamType.length > 50 ? cleanExamType.substring(0, 50) : cleanExamType;
+    final sanitizedExamType =
+        cleanExamType.length > 50 ? cleanExamType.substring(0, 50) : cleanExamType;
 
     final cleanDifficulty = difficulty.trim().toLowerCase();
     final sanitizedDifficulty = ['easy', 'medium', 'hard'].contains(cleanDifficulty)
@@ -96,14 +98,57 @@ Return ONLY a valid JSON array matching this structure:
       throw Exception('Empty response received from Gemini 2.5 Flash.');
     }
 
+    return parseGeneratedQuestionsJson(responseText, fallbackExamType: sanitizedExamType);
+  }
+
+  /// Parses raw Gemini output, safely stripping optional markdown fences and validating fields.
+  static List<Question> parseGeneratedQuestionsJson(
+    String rawText, {
+    String fallbackExamType = 'rrb_ntpc',
+  }) {
+    var cleaned = rawText.trim();
+    if (cleaned.startsWith('```')) {
+      cleaned = cleaned
+          .replaceFirst(RegExp(r'^```(?:json)?\s*', caseSensitive: false), '')
+          .replaceFirst(RegExp(r'\s*```$'), '')
+          .trim();
+    }
+
     try {
-      final List<dynamic> decoded = jsonDecode(responseText);
-      return decoded.map((item) {
-        final map = item as Map<String, dynamic>;
-        return Question.fromMap(map);
-      }).toList();
+      final dynamic decoded = jsonDecode(cleaned);
+      final List<dynamic> rawList;
+      if (decoded is List) {
+        rawList = decoded;
+      } else if (decoded is Map<String, dynamic> && decoded['questions'] is List) {
+        rawList = decoded['questions'] as List<dynamic>;
+      } else {
+        throw const FormatException('Expected JSON array of questions');
+      }
+
+      final nowMs = DateTime.now().millisecondsSinceEpoch;
+      final parsed = <Question>[];
+      for (int i = 0; i < rawList.length; i++) {
+        final item = rawList[i];
+        if (item is! Map<String, dynamic>) continue;
+        final map = Map<String, dynamic>.from(item);
+        if ((map['id']?.toString().trim() ?? '').isEmpty) {
+          map['id'] = 'gemini_${nowMs}_$i';
+        }
+        if ((map['exam_type']?.toString().trim() ?? '').isEmpty) {
+          map['exam_type'] = fallbackExamType;
+        }
+        final q = Question.fromMap(map);
+        if (q.questionEn.trim().isNotEmpty && q.optionsEn.length >= 2) {
+          parsed.add(q);
+        }
+      }
+
+      if (parsed.isEmpty) {
+        throw const FormatException('No valid questions found in JSON output');
+      }
+      return parsed;
     } catch (e) {
-      throw Exception('Failed to parse Gemini output: $e\nResponse was: $responseText');
+      throw Exception('Failed to parse Gemini output: $e');
     }
   }
 }

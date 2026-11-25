@@ -46,9 +46,15 @@ class _AiGauntletScreenState extends ConsumerState<AiGauntletScreen> {
   Widget build(BuildContext context) {
     final aiState = ref.watch(aiGauntletProvider);
     final notifier = ref.read(aiGauntletProvider.notifier);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final scaffoldBg = isDark ? const Color(0xFF090D16) : const Color(0xFFF8FAFC);
+    final cardBg = isDark ? const Color(0xFF131B2E) : Colors.white;
+    final primaryText = isDark ? Colors.white : AppColors.textPrimary;
+    final secondaryText = isDark ? const Color(0xFF94A3B8) : AppColors.textSecondary;
+    final borderClr = isDark ? const Color(0xFF1E293B) : AppColors.border;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: scaffoldBg,
       appBar: AppBar(
         title: const Text(
           'Level 4: AI Gauntlet 🤖',
@@ -78,26 +84,28 @@ class _AiGauntletScreenState extends ConsumerState<AiGauntletScreen> {
                   ),
                 ],
               ),
-              child: Column(
+              child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
+                  Row(
                     children: [
                       Icon(Icons.auto_awesome, color: Colors.white, size: 22),
                       SizedBox(width: 8),
-                      Text(
-                        'Gemini 2.5 Flash Bilingual Engine',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 16,
-                          letterSpacing: 0.3,
+                      Expanded(
+                        child: Text(
+                          'Gemini 2.5 Flash Bilingual Engine',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 16,
+                            letterSpacing: 0.3,
+                          ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 6),
-                  const Text(
+                  SizedBox(height: 6),
+                  Text(
                     'Generates fresh, syllabus-aligned bilingual MCQs (Tamil & English) dynamically and persists them into your local SQLite database (exam_arena_cbt.db) for permanent offline practice.',
                     style: TextStyle(
                       color: Colors.white70,
@@ -111,21 +119,22 @@ class _AiGauntletScreenState extends ConsumerState<AiGauntletScreen> {
             const SizedBox(height: 20),
 
             // Form Section: Target Exam Selector
-            const Text(
+            Text(
               'Target Competitive Exam',
-              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: AppColors.textPrimary),
+              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: primaryText),
             ),
             const SizedBox(height: 6),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.border),
-                color: Colors.white,
+                border: Border.all(color: borderClr),
+                color: cardBg,
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
                   isExpanded: true,
+                  dropdownColor: cardBg,
                   value: aiState.selectedExamType,
                   items: ExamType.values.map((exam) {
                     return DropdownMenuItem(
@@ -141,7 +150,17 @@ class _AiGauntletScreenState extends ConsumerState<AiGauntletScreen> {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          Text(exam.title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                          Expanded(
+                            child: Text(
+                              exam.title,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: primaryText,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ],
                       ),
                     );
@@ -155,28 +174,37 @@ class _AiGauntletScreenState extends ConsumerState<AiGauntletScreen> {
             const SizedBox(height: 16),
 
             // Subject / Topic Selector
-            const Text(
+            Text(
               'Subject & Topic Area',
-              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: AppColors.textPrimary),
+              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: primaryText),
             ),
             const SizedBox(height: 6),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.border),
-                color: Colors.white,
+                border: Border.all(color: borderClr),
+                color: cardBg,
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
                   isExpanded: true,
+                  dropdownColor: cardBg,
                   value: subjects.contains(aiState.selectedSubject)
                       ? aiState.selectedSubject
                       : subjects.first,
                   items: subjects.map((sub) {
                     return DropdownMenuItem(
                       value: sub,
-                      child: Text(sub, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                      child: Text(
+                        sub,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: primaryText,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     );
                   }).toList(),
                   onChanged: (val) {
@@ -188,9 +216,9 @@ class _AiGauntletScreenState extends ConsumerState<AiGauntletScreen> {
             const SizedBox(height: 16),
 
             // Difficulty Level Selector (Easy, Medium, Hard)
-            const Text(
+            Text(
               'Difficulty Level',
-              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: AppColors.textPrimary),
+              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: primaryText),
             ),
             const SizedBox(height: 8),
             Row(
@@ -214,10 +242,10 @@ class _AiGauntletScreenState extends ConsumerState<AiGauntletScreen> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         decoration: BoxDecoration(
-                          color: isSelected ? chipColor.withValues(alpha: 0.15) : Colors.white,
+                          color: isSelected ? chipColor.withValues(alpha: 0.15) : cardBg,
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                            color: isSelected ? chipColor : AppColors.border,
+                            color: isSelected ? chipColor : borderClr,
                             width: isSelected ? 2 : 1,
                           ),
                         ),
@@ -227,7 +255,9 @@ class _AiGauntletScreenState extends ConsumerState<AiGauntletScreen> {
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                              color: isSelected ? chipColor : const Color(0xFF64748B),
+                              color: isSelected
+                                  ? chipColor
+                                  : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
                             ),
                           ),
                         ),
@@ -240,14 +270,15 @@ class _AiGauntletScreenState extends ConsumerState<AiGauntletScreen> {
             const SizedBox(height: 16),
 
             // Question Count Selector (5, 10, or 20 Questions)
-            const Text(
+            Text(
               'Number of Questions (5, 10, or 20 Qs)',
-              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: AppColors.textPrimary),
+              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: primaryText),
             ),
             const SizedBox(height: 8),
             Row(
               children: questionCounts.map((count) {
                 final isSelected = aiState.selectedCount == count;
+                final activeColor = isDark ? const Color(0xFF38BDF8) : AppColors.primary;
                 return Expanded(
                   child: Container(
                     margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -257,10 +288,12 @@ class _AiGauntletScreenState extends ConsumerState<AiGauntletScreen> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         decoration: BoxDecoration(
-                          color: isSelected ? const Color(0xFFEFF6FF) : Colors.white,
+                          color: isSelected
+                              ? (isDark ? const Color(0xFF0C4A6E).withValues(alpha: 0.4) : const Color(0xFFEFF6FF))
+                              : cardBg,
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                            color: isSelected ? AppColors.primary : AppColors.border,
+                            color: isSelected ? activeColor : borderClr,
                             width: isSelected ? 2 : 1,
                           ),
                         ),
@@ -270,7 +303,9 @@ class _AiGauntletScreenState extends ConsumerState<AiGauntletScreen> {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                              color: isSelected ? AppColors.primary : const Color(0xFF64748B),
+                              color: isSelected
+                                  ? activeColor
+                                  : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
                             ),
                           ),
                         ),
@@ -286,12 +321,12 @@ class _AiGauntletScreenState extends ConsumerState<AiGauntletScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Gemini API Key (gemini-2.5-flash)',
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 13,
-                    color: AppColors.textPrimary,
+                    color: primaryText,
                   ),
                 ),
                 Text(
@@ -299,7 +334,9 @@ class _AiGauntletScreenState extends ConsumerState<AiGauntletScreen> {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: aiState.apiKey.isNotEmpty ? const Color(0xFF10B981) : const Color(0xFF64748B),
+                    color: aiState.apiKey.isNotEmpty
+                        ? const Color(0xFF10B981)
+                        : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
                   ),
                 ),
               ],
@@ -308,9 +345,12 @@ class _AiGauntletScreenState extends ConsumerState<AiGauntletScreen> {
             TextField(
               controller: _apiKeyController,
               obscureText: _obscureApiKey,
+              style: TextStyle(color: primaryText),
               decoration: InputDecoration(
+                filled: true,
+                fillColor: cardBg,
                 hintText: 'Enter your Google Gemini API key (AIzaSy...)',
-                hintStyle: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                hintStyle: TextStyle(fontSize: 12, color: secondaryText),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 suffixIcon: Row(
@@ -345,21 +385,23 @@ class _AiGauntletScreenState extends ConsumerState<AiGauntletScreen> {
                 margin: const EdgeInsets.only(bottom: 16),
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFEE2E2),
+                  color: isDark ? const Color(0xFF450A0A) : const Color(0xFFFEE2E2),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: const Color(0xFFFCA5A5)),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF991B1B) : const Color(0xFFFCA5A5),
+                  ),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.info_outline, color: Color(0xFFB91C1C), size: 20),
+                    const Icon(Icons.info_outline, color: Color(0xFFEF4444), size: 20),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         aiState.errorMessage!,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: Color(0xFF991B1B),
+                          color: isDark ? const Color(0xFFFECACA) : const Color(0xFF991B1B),
                           height: 1.3,
                         ),
                       ),
@@ -375,6 +417,7 @@ class _AiGauntletScreenState extends ConsumerState<AiGauntletScreen> {
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.level4Gauntlet,
+                  foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 icon: aiState.isLoading
@@ -413,16 +456,20 @@ class _AiGauntletScreenState extends ConsumerState<AiGauntletScreen> {
               height: 44,
               child: OutlinedButton.icon(
                 style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Color(0xFF94A3B8)),
+                  side: BorderSide(color: isDark ? const Color(0xFF475569) : const Color(0xFF94A3B8)),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                icon: const Icon(Icons.offline_bolt_rounded, size: 18, color: Color(0xFF475569)),
+                icon: Icon(
+                  Icons.offline_bolt_rounded,
+                  size: 18,
+                  color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+                ),
                 label: Text(
                   'Load ${aiState.selectedCount} Questions from SQLite Bank (100% Offline)',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF334155),
+                    color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF334155),
                   ),
                 ),
                 onPressed: aiState.isLoading
@@ -430,6 +477,8 @@ class _AiGauntletScreenState extends ConsumerState<AiGauntletScreen> {
                     : () {
                         notifier.loadOfflineQuestions(
                           examType: aiState.selectedExamType,
+                          subject: aiState.selectedSubject,
+                          difficulty: aiState.selectedDifficulty,
                           count: aiState.selectedCount,
                         );
                       },
@@ -442,17 +491,22 @@ class _AiGauntletScreenState extends ConsumerState<AiGauntletScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Available MCQs (${aiState.generatedQuestions.length} Questions)',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
+                  Expanded(
+                    child: Text(
+                      'Available MCQs (${aiState.generatedQuestions.length} Questions)',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: primaryText,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
+                  const SizedBox(width: 8),
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF10B981),
+                      foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
@@ -487,8 +541,12 @@ class _AiGauntletScreenState extends ConsumerState<AiGauntletScreen> {
                 final q = entry.value;
 
                 return Card(
+                  color: cardBg,
                   margin: const EdgeInsets.only(bottom: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(color: borderClr),
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.all(14),
                     child: Column(
@@ -499,15 +557,34 @@ class _AiGauntletScreenState extends ConsumerState<AiGauntletScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFEFF6FF),
+                                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
                                 'Q${idx + 1}',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontWeight: FontWeight.w800,
                                   fontSize: 11,
-                                  color: AppColors.primary,
+                                  color: isDark ? const Color(0xFF38BDF8) : AppColors.primary,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  q.subject,
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                    color: primaryText,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ),
@@ -515,27 +592,15 @@ class _AiGauntletScreenState extends ConsumerState<AiGauntletScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF1F5F9),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                q.subject,
-                                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
-                              ),
-                            ),
-                            const Spacer(),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFEF3C7),
+                                color: isDark ? const Color(0xFF78350F) : const Color(0xFFFEF3C7),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
                                 q.difficulty.toUpperCase(),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w800,
-                                  color: Color(0xFF92400E),
+                                  color: isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E),
                                 ),
                               ),
                             ),
@@ -544,26 +609,33 @@ class _AiGauntletScreenState extends ConsumerState<AiGauntletScreen> {
                         const SizedBox(height: 10),
                         Text(
                           q.questionEn,
-                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                            color: primaryText,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           q.questionTa,
-                          style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                          style: TextStyle(fontSize: 13, color: secondaryText),
                         ),
                         const Divider(height: 18),
                         Text(
-                          'Correct: Option ${String.fromCharCode(65 + q.correctIndex)} • ${q.optionsEn.isNotEmpty ? q.optionsEn[q.correctIndex] : ""}',
+                          'Correct: Option ${String.fromCharCode(65 + q.correctIndex)} • ${q.safeCorrectOptionEn}',
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w800,
-                            color: Color(0xFF059669),
+                            color: Color(0xFF10B981),
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           'Explanation: ${q.explanationEn}',
-                          style: const TextStyle(fontSize: 11, color: Color(0xFF475569)),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+                          ),
                         ),
                       ],
                     ),

@@ -1,24 +1,23 @@
 # Project: ExamArena CBT (Tamil & English Gamified Mock Test App)
 
 ## Tech Stack & Architecture
-- Framework: Flutter (Material 3), clean modular folder structure (`models/`, `data/`, `state/`, `screens/`, `widgets/`).
-- Local Storage: `sqflite` + `path_provider` for offline question banks, XP, and level progression.
-- Cloud & Auth: `supabase_flutter` (optional sync & leaderboard).
-- AI Engine: `google_generative_ai` (Gemini API) to generate structured JSON bilingual (`ta` & `en`) MCQs with step-by-step Tamil & English explanations.
-- State Management: `provider` or `ChangeNotifier`.
+- Framework: Flutter (Material 3), feature-first modular folder structure (`lib/core/`, `lib/features/{ai_generator, exam_engine, progression}/` split into `data/`, `domain/`, `presentation/`).
+- Local Storage: `sqflite` (`exam_arena_cbt.db`, v6) for offline question banks, XP, level progression, streak history, test attempt analytics, mistake vault, and app settings.
+- Typography: Bundled `Inter` & `Noto Sans Tamil` fonts under `assets/google_fonts/` (`GoogleFonts.config.allowRuntimeFetching = false`) for true offline rendering.
+- AI Engine: `google_generative_ai` (`gemini-2.5-flash`) to generate structured JSON bilingual (`ta` & `en`) MCQs with step-by-step Tamil & English explanations.
+- State Management: `flutter_riverpod` (`Notifier`, `NotifierProvider`, `FutureProvider`).
 
 ## Core Exam Rules (Strict)
 1. **SSC CGL Tier 1:** 100 Qs, 60 mins total with **15-min auto-locking sections** (4 sections), +2.0 / -0.50 marking, 4 options.
-2. **RRB NTPC / JE:** 100 Qs (90 mins), +1.0 / -0.33 marking, instant Tamil <-> English toggle per question, 4 options.
-3. **TNPSC Group 2 / CTS:** 200 Qs (180 mins), +1.5 / 0.0 negative marking, **5 options (A, B, C, D, E = Answer Not Known)**, Tamil + English bilingual view.
+2. **RRB NTPC:** 100 Qs (90 mins), +1.0 / -0.33 marking, instant Tamil <-> English toggle per question, 4 options.
+3. **TNPSC Group 1 / Group 2 & 4:** 200 Qs (180 mins), +1.5 / 0.0 negative marking, **5 options (A, B, C, D, E = Answer Not Known)**, Tamil + English bilingual view.
 4. **TCS iON Palette States:** `notVisited` (Grey), `notAnswered` (Red), `answered` (Green), `review` (Purple), `answeredReview` (Purple with green badge).
 
 ## Gamification & Level-Up Rules
 - Every 500 XP = +1 Level unlock.
 - Level 1: Topic Speed Sprints (15 mins) -> Level 2: Sectional Timed Drills -> Level 3: Full CBT Mock Arena -> Level 4+: AI Adaptive Boss Gauntlet.
-- XP Formula: `(correct * 10) + accuracyBonus (100 if >=75%, 50 if >=60%)`.
+- XP Formula: `(correct * 10) + accuracyBonus` (`+50` if ≥90%, `+35` if ≥80%, `+20` if ≥70%, `+10` if ≥50%).
 
 ## Coding & Verification Standards
-- Always enable Dart & Flutter MCP tools for widget inspection and hot reload.
-- Use `PopScope` during active exams to prevent accidental back-button exits.
-- Run `flutter analyze` and fix all lint warnings before marking any task complete.
+- Use `PopScope` during active exams to prevent accidental back-button exits and on summary screen to return cleanly without losing persisted results.
+- Run `flutter analyze` and `flutter test` and verify zero issues before committing or pushing changes.

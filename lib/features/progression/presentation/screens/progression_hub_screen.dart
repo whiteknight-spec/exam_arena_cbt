@@ -5,6 +5,7 @@ import '../../../../core/theme/theme_provider.dart';
 import '../../../../core/utils/haptic_feedback_helper.dart';
 import '../providers/progression_provider.dart';
 import '../../domain/models/arena_level.dart';
+import '../../domain/models/pyq_paper.dart';
 import '../widgets/xp_bar.dart';
 import '../widgets/streak_badge.dart';
 import '../widgets/accuracy_badge.dart';
@@ -94,7 +95,9 @@ class ProgressionHubScreen extends ConsumerWidget {
                 ExamSelectorSheet.show(
                   context,
                   currentExam: progress.selectedExam,
+                  currentPyqId: progress.selectedPyqId,
                   onSelect: (newExam) => notifier.selectExam(newExam),
+                  onSelectPyq: (paper) => notifier.selectPyqPaper(paper),
                 );
               },
               borderRadius: BorderRadius.circular(14),
@@ -138,7 +141,17 @@ class ProgressionHubScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            progress.selectedExam.title,
+                            () {
+                              if (progress.selectedPyqId != null) {
+                                final match = PyqPaper.standardPapers.where(
+                                  (p) => p.id == progress.selectedPyqId,
+                                );
+                                if (match.isNotEmpty) {
+                                  return 'PYQ: ${match.first.title}';
+                                }
+                              }
+                              return progress.selectedExam.title;
+                            }(),
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w800,

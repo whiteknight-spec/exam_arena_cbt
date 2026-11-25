@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:exam_arena_cbt/core/database/app_database.dart';
+import 'package:exam_arena_cbt/features/exam_engine/presentation/screens/cbt_exam_screen.dart';
 import 'package:exam_arena_cbt/features/exam_engine/presentation/widgets/exit_guard_dialog.dart';
 import 'package:exam_arena_cbt/features/progression/domain/models/user_progress.dart';
 import 'package:exam_arena_cbt/features/progression/presentation/providers/progression_provider.dart';
@@ -169,7 +170,7 @@ void main() {
       expect(find.byIcon(Icons.favorite_border_rounded), findsNWidgets(2));
     });
 
-    testWidgets('HeartsRefillModal allows healing +1 heart via practice revision drill', (tester) async {
+    testWidgets('HeartsRefillModal launches recovery drill without granting free unearned heart', (tester) async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
@@ -195,19 +196,25 @@ void main() {
 
       expect(find.textContaining('Next Life (+1 ❤️) in'), findsOneWidget);
 
-      // Tap Mistake Revision Drill (+1 Heart Heal) button
+      // Tap Mistake Revision Drill (+1 Heart Heal) button -> should open drill/vault, NOT grant a free instant heart
       final drillButton = find.textContaining('Mistake Revision Drill (+1 Heart Heal)');
       expect(drillButton, findsOneWidget);
       await tester.ensureVisible(drillButton);
       await tester.pumpAndSettle();
       await tester.runAsync(() async {
         await tester.tap(drillButton);
-        await Future.delayed(const Duration(milliseconds: 500));
+        await Future.delayed(const Duration(milliseconds: 300));
       });
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
 
-      // Verify heart was healed
-      expect(container.read(progressionProvider).currentHearts, 4);
+      // Launches CbtExamScreen recovery drill without granting a free instant heart
+      expect(find.byType(CbtExamScreen), findsOneWidget);
+      expect(container.read(progressionProvider).currentHearts, 3);
+
+      // Cleanly unmount & dispose container before invariant check cancels periodic timer
+      await tester.pumpWidget(const SizedBox());
+      container.dispose();
     });
 
     testWidgets('ExitGuardDialog displays Discipline Penalty warning about losing 1 Life', (tester) async {

@@ -1,9 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/database/app_database.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../ai_generator/presentation/providers/ai_generator_provider.dart';
+import '../../../exam_engine/presentation/screens/cbt_exam_screen.dart';
+import '../../domain/models/arena_level.dart';
 import '../../domain/models/user_progress.dart';
 import '../providers/progression_provider.dart';
+import '../screens/mistake_vault_screen.dart';
 import 'hearts_badge.dart';
 
 class HeartsRefillModal extends ConsumerStatefulWidget {
@@ -356,17 +361,35 @@ class _HeartsRefillModalState extends ConsumerState<HeartsRefillModal> {
                   onPressed: hearts >= UserProgress.maxHearts
                       ? null
                       : () async {
-                          await notifier.healOneHeart();
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('+1 Life Restored! ❤️ Practice makes perfect.'),
-                                backgroundColor: Color(0xFFE11D48),
+                          final navigator = Navigator.of(context);
+                          final mistakes = await AppDatabase.instance.getActiveMistakes();
+                          if (!context.mounted) return;
+                          if (navigator.canPop()) {
+                            navigator.pop();
+                          }
+
+                          if (mistakes.isNotEmpty) {
+                            navigator.push(
+                              MaterialPageRoute(
+                                builder: (_) => const MistakeVaultScreen(),
                               ),
                             );
-                            if (Navigator.canPop(context)) {
-                              Navigator.pop(context);
-                            }
+                          } else {
+                            final ds = ref.read(localDatasourceProvider);
+                            final allForExam =
+                                await ds.getQuestionsByExamType(progress.selectedExam.id);
+                            final drillQuestions =
+                                (List.of(allForExam)..shuffle()).take(5).toList();
+                            navigator.push(
+                              MaterialPageRoute(
+                                builder: (_) => CbtExamScreen(
+                                  level: ArenaLevel.level1,
+                                  examType: progress.selectedExam,
+                                  customQuestions: drillQuestions,
+                                  isRecoveryDrill: true,
+                                ),
+                              ),
+                            );
                           }
                         },
                 ),

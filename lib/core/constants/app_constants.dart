@@ -2,7 +2,14 @@ class AppConstants {
   static const String appTitle = 'Exam Arena CBT';
   static const String geminiModel = 'gemini-2.5-flash';
   static const String dbName = 'exam_arena_cbt.db';
-  static const int dbVersion = 5;
+  static const int dbVersion = 6;
+
+  // App Settings Table (theme, selected PYQ paper, etc.)
+  static const String tableAppSettings = 'app_settings';
+  static const String colSettingKey = 'key';
+  static const String colSettingValue = 'value';
+  static const String settingThemeMode = 'theme_mode';
+  static const String settingSelectedPyqId = 'selected_pyq_id';
 
   // Question Table
   static const String tableQuestions = 'questions';

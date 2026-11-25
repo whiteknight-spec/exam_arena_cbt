@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/models/question_status.dart';
+import '../../domain/models/section.dart';
 
 class TcsQuestionPalette extends StatelessWidget {
   final int totalQuestions;
@@ -9,6 +10,9 @@ class TcsQuestionPalette extends StatelessWidget {
   final ValueChanged<int> onQuestionSelected;
   final VoidCallback? onSubmit;
   final bool isDrawer;
+  final List<ExamSection> sections;
+  final int currentSectionIndex;
+  final bool hasSectionalLock;
 
   const TcsQuestionPalette({
     super.key,
@@ -18,10 +22,27 @@ class TcsQuestionPalette extends StatelessWidget {
     required this.onQuestionSelected,
     this.onSubmit,
     this.isDrawer = false,
+    this.sections = const [],
+    this.currentSectionIndex = 0,
+    this.hasSectionalLock = false,
   });
+
+  bool _isAccessible(int index) {
+    if (!hasSectionalLock || sections.length <= 1) return true;
+    if (currentSectionIndex < 0 || currentSectionIndex >= sections.length) {
+      return true;
+    }
+    return sections[currentSectionIndex].questionIndices.contains(index);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceBg = isDark ? const Color(0xFF111827) : Colors.white;
+    final cardBg = isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC);
+    final borderClr = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+    final primaryText = isDark ? Colors.white : AppColors.textPrimary;
+
     // Live counts for all 5 official TCS iON statuses
     int answeredCount = 0;
     int notAnsweredCount = 0;
@@ -49,6 +70,13 @@ class TcsQuestionPalette extends StatelessWidget {
           break;
       }
     }
+
+    final isMultiSectionLocked = hasSectionalLock && sections.length > 1;
+    final activeSection = isMultiSectionLocked &&
+            currentSectionIndex >= 0 &&
+            currentSectionIndex < sections.length
+        ? sections[currentSectionIndex]
+        : null;
 
     final content = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -104,12 +132,12 @@ class TcsQuestionPalette extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Question Palette Legend',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
+                    color: primaryText,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -118,9 +146,9 @@ class TcsQuestionPalette extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF8FAFC),
+                    color: cardBg,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                    border: Border.all(color: borderClr),
                   ),
                   child: Column(
                     children: [
@@ -132,6 +160,7 @@ class TcsQuestionPalette extends StatelessWidget {
                               label: 'Answered',
                               color: AppColors.tcsAnswered,
                               shape: BoxShape.rectangle,
+                              isDark: isDark,
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -141,6 +170,7 @@ class TcsQuestionPalette extends StatelessWidget {
                               label: 'Not Answered',
                               color: AppColors.tcsNotAnswered,
                               shape: BoxShape.rectangle,
+                              isDark: isDark,
                             ),
                           ),
                         ],
@@ -154,6 +184,7 @@ class TcsQuestionPalette extends StatelessWidget {
                               label: 'Marked Review',
                               color: AppColors.tcsReview,
                               shape: BoxShape.circle,
+                              isDark: isDark,
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -164,6 +195,7 @@ class TcsQuestionPalette extends StatelessWidget {
                               color: AppColors.tcsAnsweredReview,
                               shape: BoxShape.circle,
                               isEvaluated: true,
+                              isDark: isDark,
                             ),
                           ),
                         ],
@@ -176,30 +208,65 @@ class TcsQuestionPalette extends StatelessWidget {
                         textColor: Colors.black87,
                         shape: BoxShape.rectangle,
                         border: Border.all(color: const Color(0xFFCBD5E1)),
+                        isDark: isDark,
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 16),
 
+                if (activeSection != null) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? const Color(0xFF78350F).withValues(alpha: 0.3)
+                          : const Color(0xFFFEF3C7),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: isDark
+                            ? const Color(0xFFD97706).withValues(alpha: 0.5)
+                            : const Color(0xFFFDE68A),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.lock_clock, size: 15, color: Color(0xFFD97706)),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            'Active Section (${currentSectionIndex + 1}/${sections.length}): ${activeSection.name}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              color: isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
                 // Section Label
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'Choose a Question',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
+                        color: primaryText,
                       ),
                     ),
                     Text(
                       '$answeredCount / $totalQuestions Attempted',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.primary,
+                        color: isDark ? const Color(0xFF38BDF8) : AppColors.primary,
                       ),
                     ),
                   ],
@@ -220,57 +287,69 @@ class TcsQuestionPalette extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final status = statuses[index] ?? QuestionStatus.notVisited;
                     final isCurrent = index == currentIndex;
+                    final accessible = _isAccessible(index);
 
                     return InkWell(
-                      onTap: () {
-                        onQuestionSelected(index);
-                        if (isDrawer) {
-                          Navigator.pop(context);
-                        } else {
-                          Navigator.pop(context);
-                        }
-                      },
+                      onTap: accessible
+                          ? () {
+                              onQuestionSelected(index);
+                              Navigator.pop(context);
+                            }
+                          : null,
                       borderRadius: BorderRadius.circular(8),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: status.backgroundColor,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: isCurrent ? const Color(0xFFFBBF24) : status.borderColor,
-                            width: isCurrent ? 2.5 : 1.0,
-                          ),
-                          boxShadow: isCurrent
-                              ? [
-                                  BoxShadow(
-                                    color: const Color(0xFFFBBF24).withValues(alpha: 0.5),
-                                    blurRadius: 6,
-                                    spreadRadius: 1,
-                                  ),
-                                ]
-                              : null,
-                        ),
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            Text(
-                              '${index + 1}',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w800,
-                                color: status.textColor,
-                              ),
+                      child: Opacity(
+                        opacity: accessible ? 1.0 : 0.42,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: status.backgroundColor,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: isCurrent ? const Color(0xFFFBBF24) : status.borderColor,
+                              width: isCurrent ? 2.5 : 1.0,
                             ),
-                            if (status == QuestionStatus.answeredReview)
-                              const Positioned(
-                                top: 2,
-                                right: 3,
-                                child: Icon(
-                                  Icons.check_circle,
-                                  size: 10,
-                                  color: Color(0xFF4ADE80),
+                            boxShadow: isCurrent
+                                ? [
+                                    BoxShadow(
+                                      color: const Color(0xFFFBBF24).withValues(alpha: 0.5),
+                                      blurRadius: 6,
+                                      spreadRadius: 1,
+                                    ),
+                                  ]
+                                : null,
+                          ),
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Text(
+                                '${index + 1}',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w800,
+                                  color: status.textColor,
                                 ),
                               ),
-                          ],
+                              if (!accessible)
+                                const Positioned(
+                                  top: 2,
+                                  right: 2,
+                                  child: Icon(
+                                    Icons.lock_rounded,
+                                    size: 9,
+                                    color: Color(0xFF475569),
+                                  ),
+                                )
+                              else if (status == QuestionStatus.answeredReview)
+                                const Positioned(
+                                  top: 2,
+                                  right: 3,
+                                  child: Icon(
+                                    Icons.check_circle,
+                                    size: 10,
+                                    color: Color(0xFF4ADE80),
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
                       ),
                     );
@@ -282,20 +361,26 @@ class TcsQuestionPalette extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFEF3C7),
+                    color: isDark
+                        ? const Color(0xFF78350F).withValues(alpha: 0.25)
+                        : const Color(0xFFFEF3C7),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFFFDE68A)),
+                    border: Border.all(
+                      color: isDark
+                          ? const Color(0xFFD97706).withValues(alpha: 0.4)
+                          : const Color(0xFFFDE68A),
+                    ),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      Icon(Icons.info_outline, size: 16, color: Color(0xFFB45309)),
-                      SizedBox(width: 8),
+                      const Icon(Icons.info_outline, size: 16, color: Color(0xFFB45309)),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           '*Questions marked "Ans & Marked" WILL be evaluated in standard TCS iON scoring.',
                           style: TextStyle(
                             fontSize: 11,
-                            color: Color(0xFF92400E),
+                            color: isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -312,9 +397,9 @@ class TcsQuestionPalette extends StatelessWidget {
         if (onSubmit != null)
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
+            decoration: BoxDecoration(
+              color: surfaceBg,
+              border: Border(top: BorderSide(color: borderClr)),
             ),
             child: SizedBox(
               width: double.infinity,
@@ -322,6 +407,7 @@ class TcsQuestionPalette extends StatelessWidget {
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF10B981),
+                  foregroundColor: Colors.white,
                 ),
                 icon: const Icon(Icons.check_circle_outline, size: 18),
                 label: const Text(
@@ -341,15 +427,15 @@ class TcsQuestionPalette extends StatelessWidget {
     if (isDrawer) {
       return Drawer(
         width: 320,
-        backgroundColor: Colors.white,
+        backgroundColor: surfaceBg,
         child: SafeArea(child: content),
       );
     }
 
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: surfaceBg,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.85,
@@ -366,13 +452,14 @@ class TcsQuestionPalette extends StatelessWidget {
     BoxShape shape = BoxShape.rectangle,
     BoxBorder? border,
     bool isEvaluated = false,
+    bool isDark = false,
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF0F172A) : Colors.white,
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
       ),
       child: Row(
         children: [
@@ -409,10 +496,10 @@ class TcsQuestionPalette extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                color: isDark ? const Color(0xFFE2E8F0) : AppColors.textPrimary,
               ),
               overflow: TextOverflow.ellipsis,
             ),
